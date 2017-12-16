@@ -8,6 +8,14 @@
                 <div class="panel-heading">Login</div>
 
                 <div class="panel-body">
+                    <div class="social text-center">
+                        <a href="/auth/facebook" class="btn btn-primary">Login with Facebook</a>
+                        <br>
+                        <a href="/auth/google" class="btn btn-primary">Login with Google+</a>
+                        <br>
+                        <a href="/auth/twitter" class="btn btn-primary">Login with Twitter</a>
+                    </div>
+                    <hr>
                     <form class="form-horizontal" method="POST" action="{{ route('login') }}">
                         {{ csrf_field() }}
 

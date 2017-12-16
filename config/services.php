@@ -35,4 +35,23 @@ return [
         'secret' => env('STRIPE_SECRET'),
     ],
 
+
+    'google' => [
+        'client_id' => env('GG_CLIENT_ID'),         // Your Google Client ID
+        'client_secret' => env('GG_CLIENT_SECRET'), // Your Google Client Secret
+        'redirect' => env('APP_URL') . '/auth/google/callback',
+    ],
+
+    'facebook' => [
+        'client_id' => env('FB_CLIENT_ID'),         // Your Google Client ID
+        'client_secret' => env('FB_CLIEND_SECRET'), // Your Google Client Secret
+        'redirect' => env('APP_URL') . '/auth/facebook/callback',
+    ],
+
+    'twitter' => [
+        'client_id' => env('TT_CLIENT_ID'),         // Your Google Client ID
+        'client_secret' => env('TT_CLIENT_SECRET'), // Your Google Client Secret
+        'redirect' => env('APP_URL') . '/auth/twitter/callback',
+    ],
+
 ];

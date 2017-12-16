@@ -1,0 +1,18 @@
+composer require predis/predis
+
+npm install --save-dev vue-timeago vuex socket.io laravel-echo laravel-echo-server
+
+npm install babel-cli babel-preset-es2015 babel-preset-es2017
+
+composer require intervention/image
+
+make .babelrc
+
+add to .babelrc
+
+{
+    "presets": ["es2015", "es2017"]
+}
+
+composer require laravel/socialite
+
