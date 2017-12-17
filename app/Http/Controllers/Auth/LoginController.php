@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
+use Auth;
 
 class LoginController extends Controller
 {
@@ -36,4 +38,36 @@ class LoginController extends Controller
     {
         $this->middleware('guest')->except('logout');
     }
+
+    protected function authenticated(\Illuminate\Http\Request $request, $user) {
+        if($request->ajax()) {
+            return response()->json([
+                'user' => $user,
+                'intended' => $this->redirectPath()
+            ]);
+        }
+    }
+    // protected function sendLoginResponse(Request $request)
+    // {
+    //     $request->session()->regenerate();
+    //     $this->clearLoginAttempts($request);
+    //     if ($request->ajax()) {
+    //         return response()->json($this->guard()->user(), 200);
+    //     }
+    //     return $this->authenticated($request, $this->guard()->user())
+    //             ?: redirect()->intended($this->redirectPath());
+    // }
+    // protected function sendFailedLoginResponse(Request $request)
+    // {
+    //     if ($request->ajax()) {
+    //         return response()->json([
+    //             'error' => 'Errors'
+    //         ], 401);
+    //     }
+    //     return redirect()->back()
+    //         ->withInput($request->only($this->username(), 'remember'))
+    //         ->withErrors([
+    //             $this->username() => 'Errors',
+    //         ]);
+    // }
 }

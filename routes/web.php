@@ -11,9 +11,7 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', 'HomeController@index')->name('home');
 
 Auth::routes();
 
@@ -21,3 +19,6 @@ Route::get('/home', 'HomeController@index')->name('home');
 
 Route::get('auth/{provider}', 'SocialController@redirectToProvider');
 Route::get('auth/{provider}/callback', 'SocialController@handleProviderCallback');
+
+Route::get('/profile/edit', 'ProfileController@get_edit')->name('profile.edit');
+Route::get('/{slug}', 'ProfileController@index')->name('profile.index')->where('slug', '[0-9a-zA-Z-_]+');

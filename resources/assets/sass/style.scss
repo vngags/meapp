@@ -1,0 +1,61 @@
+
+
+.border-outline {
+    position: relative;
+    &::before {
+        content: "";
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+    &.outline-circle {
+        &::before {
+            border-radius: 50%;
+        }
+    }
+}
+
+._ib {display: inline-block;}
+._ibi {display: inline-block !important;}
+._flex {display: flex;}
+.no-shadow {box-shadow: none !important;}
+
+//Simple Modal
+.simple-modal {
+    &.modal {        
+        height: auto;        
+        min-height: 100%;
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        & .modal-dialog { 
+            width: 600px;
+            position: relative;
+            margin: 0 auto 40px;
+            margin-top: 40px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.1s linear, visibility 0.1s linear;
+            & .modal-content {
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                & .modal-body {
+                    padding: 30px;
+                }
+            }
+        }
+        &.in {
+            & .modal-dialog {
+                opacity: 1;
+                visibility: visible;
+                transition: opacity 0.1s linear, visibility 0.1s linear;    
+            }
+        }
+    }
+}

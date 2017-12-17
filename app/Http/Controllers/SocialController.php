@@ -7,6 +7,7 @@ use Socialite;
 use Auth;
 use App\Social;
 use App\User;
+use App\Profile;
 
 class SocialController extends Controller
 {
@@ -25,28 +26,16 @@ class SocialController extends Controller
         if($user_email) {
 
             //Check provider name in socials
-
-            $social = Social::where('user_id', $user_email->id)->where('provider', $provider)->first();
-            
-            if($social) {
-                //update provider_id and login
-                $social->update([
-                    'provider_id' => $user->id
-                ]);
-
-                //Login by user                
-                Auth::loginUsingId($user_email->id);                
-            }else{
-                //create new socials
-                Social::create([
-                    'user_id' => $user_email->id,
-                    'provider_id' => $user->id,
-                    'provider' => $provider
-                ]);
-                //Login by user                
-                Auth::loginUsingId($user_email->id);    
-            }
-            return redirect()->back();
+            $profile = Profile::firstOrCreate(
+                ['user_id' => $user_email->id]
+            );           
+            $social = Social::firstOrCreate([
+                'user_id' => $user_email->id,
+                'provider_id' => $user->id,
+                'provider' => $provider
+            ]);
+            Auth::loginUsingId($user_email->id); 
+            return redirect('/');     
         }else{
             //create new user
             $user_code = mt_rand(1111111111, 9999999999);
@@ -65,7 +54,7 @@ class SocialController extends Controller
                 'provider' => $provider
             ]);
             Auth::loginUsingId($u->id);    
-            return redirect()->back();
+            return redirect('/');
         }
     }
 

@@ -1631,7 +1631,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ "./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}],\"es2015\",\"es2017\"],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0&bustCache!./resources/assets/js/components/ExampleComponent.vue":
+/***/ "./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}],\"es2015\",\"es2017\"],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0&bustCache!./resources/assets/js/components/Init.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1640,6 +1640,45 @@ module.exports = {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+
+var _api = __webpack_require__("./resources/assets/js/api/index.js");
+
+exports.default = {
+    mounted: function mounted() {
+        var _this = this;
+
+        (0, _api.get)('/api/user').then(function (resp) {
+            _this.$store.commit('add_auth_user_data', resp.data);
+        });
+    }
+}; //
+//
+//
+//
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}],\"es2015\",\"es2017\"],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0&bustCache!./resources/assets/js/components/views/profiles/Profile.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _api = __webpack_require__("./resources/assets/js/api/index.js");
+
+var _QRcode = __webpack_require__("./resources/assets/js/components/views/profiles/QRcode.vue");
+
+var _QRcode2 = _interopRequireDefault(_QRcode);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+//
+//
+//
 //
 //
 //
@@ -1658,10 +1697,158 @@ Object.defineProperty(exports, "__esModule", {
 //
 
 exports.default = {
+    props: ['uid'],
+    components: {
+        QrCode: _QRcode2.default
+    },
     mounted: function mounted() {
-        console.log('Component mounted.');
+        this.get_user_data();
+    },
+
+    methods: {
+        get_user_data: function get_user_data() {
+            var _this = this;
+
+            (0, _api.get)('/api/v1/' + this.uid).then(function (resp) {
+                // console.log(resp);
+                _this.$store.commit('add_profile_user_data', resp.data);
+            });
+        }
+    },
+    computed: {
+        user: function user() {
+            return this.$store.getters.get_auth_user_data;
+        },
+        profile_user: function profile_user() {
+            return this.$store.getters.get_profile_user_data;
+        }
     }
 };
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}],\"es2015\",\"es2017\"],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0&bustCache!./resources/assets/js/components/views/profiles/QRcode.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _regenerator = __webpack_require__("./node_modules/babel-runtime/regenerator/index.js");
+
+var _regenerator2 = _interopRequireDefault(_regenerator);
+
+var _api = __webpack_require__("./resources/assets/js/api/index.js");
+
+var _jqueryQrcode = __webpack_require__("./public/plugins/qrcode/jquery-qrcode.js");
+
+var _jqueryQrcode2 = _interopRequireDefault(_jqueryQrcode);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; } //
+//
+//
+//
+//
+//
+//
+
+exports.default = {
+    props: ['avatar', 'url'],
+    data: function data() {
+        return {};
+    },
+    mounted: function mounted() {
+        this.set_QRCode();
+    },
+
+    methods: {
+        // get_user_data() {
+        //     return new Promise((res, rej) => {
+        //         get(`/api/v1/${this.uid}`)
+        //         .then(resp => {        
+        //             if(resp.status != 200) return rej(new Error('Errors'))
+        //             res(resp.data)
+        //             console.log(1);
+
+        //         })
+        //     })
+
+        // },
+        set_QRCode: function set_QRCode() {
+            var _this = this;
+
+            return _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee() {
+                return _regenerator2.default.wrap(function _callee$(_context) {
+                    while (1) {
+                        switch (_context.prev = _context.next) {
+                            case 0:
+                                $('.qr-code').qrcode({
+                                    // render method: 'canvas', 'image' or 'div'
+                                    render: 'image',
+                                    // version range somewhere in 1 .. 40
+                                    minVersion: 1,
+                                    maxVersion: 40,
+                                    // error correction level: 'L', 'M', 'Q' or 'H'
+                                    ecLevel: 'L',
+                                    // offset in pixel if drawn onto existing canvas
+                                    left: 0,
+                                    top: 0,
+                                    // size in pixel
+                                    size: 200,
+                                    // code color or image element
+                                    fill: '#000',
+                                    // background color or image element, null for transparent background
+                                    background: null,
+                                    // content
+                                    text: '' + _this.url,
+                                    // corner radius relative to module width: 0.0 .. 0.5
+                                    radius: 0,
+                                    // quiet zone in modules
+                                    quiet: 3,
+                                    // modes
+                                    // 0: normal
+                                    // 1: label strip
+                                    // 2: label box
+                                    // 3: image strip
+                                    // 4: image box
+                                    mode: 4,
+                                    mSize: 0.25,
+                                    mPosX: 0.5,
+                                    mPosY: 0.5,
+                                    label: 'qrcode',
+                                    fontname: 'sans',
+                                    fontcolor: '#000',
+                                    image: $('#qrcode-logo')[0]
+                                });
+
+                            case 1:
+                            case 'end':
+                                return _context.stop();
+                        }
+                    }
+                }, _callee, _this);
+            }))();
+        }
+    },
+    computed: {
+        user: function user() {
+            return this.$store.getters.get_auth_user_data;
+        }
+    }
+};
+
+/***/ }),
+
+/***/ "./node_modules/babel-runtime/regenerator/index.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__("./node_modules/regenerator-runtime/runtime-module.js");
+
 
 /***/ }),
 
@@ -4045,6 +4232,104 @@ if (typeof jQuery === 'undefined') {
   })
 
 }(jQuery);
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-4b2f723c\",\"scoped\":false,\"hasInlineConfig\":true}!./node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./resources/assets/js/components/views/profiles/Profile.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/css-base.js")(undefined);
+// imports
+
+
+// module
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/lib/css-base.js":
+/***/ (function(module, exports) {
+
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+// css base code, injected by the css-loader
+module.exports = function(useSourceMap) {
+	var list = [];
+
+	// return the list of modules as css string
+	list.toString = function toString() {
+		return this.map(function (item) {
+			var content = cssWithMappingToString(item, useSourceMap);
+			if(item[2]) {
+				return "@media " + item[2] + "{" + content + "}";
+			} else {
+				return content;
+			}
+		}).join("");
+	};
+
+	// import a list of modules into the list
+	list.i = function(modules, mediaQuery) {
+		if(typeof modules === "string")
+			modules = [[null, modules, ""]];
+		var alreadyImportedModules = {};
+		for(var i = 0; i < this.length; i++) {
+			var id = this[i][0];
+			if(typeof id === "number")
+				alreadyImportedModules[id] = true;
+		}
+		for(i = 0; i < modules.length; i++) {
+			var item = modules[i];
+			// skip already imported module
+			// this implementation is not 100% perfect for weird media query combinations
+			//  when a module is imported multiple times with different media queries.
+			//  I hope this will never occur (Hey this way we have smaller bundles)
+			if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
+				if(mediaQuery && !item[2]) {
+					item[2] = mediaQuery;
+				} else if(mediaQuery) {
+					item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
+				}
+				list.push(item);
+			}
+		}
+	};
+	return list;
+};
+
+function cssWithMappingToString(item, useSourceMap) {
+	var content = item[1] || '';
+	var cssMapping = item[3];
+	if (!cssMapping) {
+		return content;
+	}
+
+	if (useSourceMap && typeof btoa === 'function') {
+		var sourceMapping = toComment(cssMapping);
+		var sourceURLs = cssMapping.sources.map(function (source) {
+			return '/*# sourceURL=' + cssMapping.sourceRoot + source + ' */'
+		});
+
+		return [content].concat(sourceURLs).concat([sourceMapping]).join('\n');
+	}
+
+	return [content].join('\n');
+}
+
+// Adapted from convert-source-map (MIT)
+function toComment(sourceMap) {
+	// eslint-disable-next-line no-undef
+	var base64 = btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap))));
+	var data = 'sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64;
+
+	return '/*# ' + data + ' */';
+}
 
 
 /***/ }),
@@ -31622,6 +31907,782 @@ process.umask = function() { return 0; };
 
 /***/ }),
 
+/***/ "./node_modules/regenerator-runtime/runtime-module.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+/**
+ * Copyright (c) 2014-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+// This method of obtaining a reference to the global object needs to be
+// kept identical to the way it is obtained in runtime.js
+var g = (function() { return this })() || Function("return this")();
+
+// Use `getOwnPropertyNames` because not all browsers support calling
+// `hasOwnProperty` on the global `self` object in a worker. See #183.
+var hadRuntime = g.regeneratorRuntime &&
+  Object.getOwnPropertyNames(g).indexOf("regeneratorRuntime") >= 0;
+
+// Save the old regeneratorRuntime in case it needs to be restored later.
+var oldRuntime = hadRuntime && g.regeneratorRuntime;
+
+// Force reevalutation of runtime.js.
+g.regeneratorRuntime = undefined;
+
+module.exports = __webpack_require__("./node_modules/regenerator-runtime/runtime.js");
+
+if (hadRuntime) {
+  // Restore the original runtime.
+  g.regeneratorRuntime = oldRuntime;
+} else {
+  // Remove the global property added by runtime.js.
+  try {
+    delete g.regeneratorRuntime;
+  } catch(e) {
+    g.regeneratorRuntime = undefined;
+  }
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/regenerator-runtime/runtime.js":
+/***/ (function(module, exports) {
+
+/**
+ * Copyright (c) 2014-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+!(function(global) {
+  "use strict";
+
+  var Op = Object.prototype;
+  var hasOwn = Op.hasOwnProperty;
+  var undefined; // More compressible than void 0.
+  var $Symbol = typeof Symbol === "function" ? Symbol : {};
+  var iteratorSymbol = $Symbol.iterator || "@@iterator";
+  var asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator";
+  var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+
+  var inModule = typeof module === "object";
+  var runtime = global.regeneratorRuntime;
+  if (runtime) {
+    if (inModule) {
+      // If regeneratorRuntime is defined globally and we're in a module,
+      // make the exports object identical to regeneratorRuntime.
+      module.exports = runtime;
+    }
+    // Don't bother evaluating the rest of this file if the runtime was
+    // already defined globally.
+    return;
+  }
+
+  // Define the runtime globally (as expected by generated code) as either
+  // module.exports (if we're in a module) or a new, empty object.
+  runtime = global.regeneratorRuntime = inModule ? module.exports : {};
+
+  function wrap(innerFn, outerFn, self, tryLocsList) {
+    // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
+    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator;
+    var generator = Object.create(protoGenerator.prototype);
+    var context = new Context(tryLocsList || []);
+
+    // The ._invoke method unifies the implementations of the .next,
+    // .throw, and .return methods.
+    generator._invoke = makeInvokeMethod(innerFn, self, context);
+
+    return generator;
+  }
+  runtime.wrap = wrap;
+
+  // Try/catch helper to minimize deoptimizations. Returns a completion
+  // record like context.tryEntries[i].completion. This interface could
+  // have been (and was previously) designed to take a closure to be
+  // invoked without arguments, but in all the cases we care about we
+  // already have an existing method we want to call, so there's no need
+  // to create a new function object. We can even get away with assuming
+  // the method takes exactly one argument, since that happens to be true
+  // in every case, so we don't have to touch the arguments object. The
+  // only additional allocation required is the completion record, which
+  // has a stable shape and so hopefully should be cheap to allocate.
+  function tryCatch(fn, obj, arg) {
+    try {
+      return { type: "normal", arg: fn.call(obj, arg) };
+    } catch (err) {
+      return { type: "throw", arg: err };
+    }
+  }
+
+  var GenStateSuspendedStart = "suspendedStart";
+  var GenStateSuspendedYield = "suspendedYield";
+  var GenStateExecuting = "executing";
+  var GenStateCompleted = "completed";
+
+  // Returning this object from the innerFn has the same effect as
+  // breaking out of the dispatch switch statement.
+  var ContinueSentinel = {};
+
+  // Dummy constructor functions that we use as the .constructor and
+  // .constructor.prototype properties for functions that return Generator
+  // objects. For full spec compliance, you may wish to configure your
+  // minifier not to mangle the names of these two functions.
+  function Generator() {}
+  function GeneratorFunction() {}
+  function GeneratorFunctionPrototype() {}
+
+  // This is a polyfill for %IteratorPrototype% for environments that
+  // don't natively support it.
+  var IteratorPrototype = {};
+  IteratorPrototype[iteratorSymbol] = function () {
+    return this;
+  };
+
+  var getProto = Object.getPrototypeOf;
+  var NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+  if (NativeIteratorPrototype &&
+      NativeIteratorPrototype !== Op &&
+      hasOwn.call(NativeIteratorPrototype, iteratorSymbol)) {
+    // This environment has a native %IteratorPrototype%; use it instead
+    // of the polyfill.
+    IteratorPrototype = NativeIteratorPrototype;
+  }
+
+  var Gp = GeneratorFunctionPrototype.prototype =
+    Generator.prototype = Object.create(IteratorPrototype);
+  GeneratorFunction.prototype = Gp.constructor = GeneratorFunctionPrototype;
+  GeneratorFunctionPrototype.constructor = GeneratorFunction;
+  GeneratorFunctionPrototype[toStringTagSymbol] =
+    GeneratorFunction.displayName = "GeneratorFunction";
+
+  // Helper for defining the .next, .throw, and .return methods of the
+  // Iterator interface in terms of a single ._invoke method.
+  function defineIteratorMethods(prototype) {
+    ["next", "throw", "return"].forEach(function(method) {
+      prototype[method] = function(arg) {
+        return this._invoke(method, arg);
+      };
+    });
+  }
+
+  runtime.isGeneratorFunction = function(genFun) {
+    var ctor = typeof genFun === "function" && genFun.constructor;
+    return ctor
+      ? ctor === GeneratorFunction ||
+        // For the native GeneratorFunction constructor, the best we can
+        // do is to check its .name property.
+        (ctor.displayName || ctor.name) === "GeneratorFunction"
+      : false;
+  };
+
+  runtime.mark = function(genFun) {
+    if (Object.setPrototypeOf) {
+      Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
+    } else {
+      genFun.__proto__ = GeneratorFunctionPrototype;
+      if (!(toStringTagSymbol in genFun)) {
+        genFun[toStringTagSymbol] = "GeneratorFunction";
+      }
+    }
+    genFun.prototype = Object.create(Gp);
+    return genFun;
+  };
+
+  // Within the body of any async function, `await x` is transformed to
+  // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
+  // `hasOwn.call(value, "__await")` to determine if the yielded value is
+  // meant to be awaited.
+  runtime.awrap = function(arg) {
+    return { __await: arg };
+  };
+
+  function AsyncIterator(generator) {
+    function invoke(method, arg, resolve, reject) {
+      var record = tryCatch(generator[method], generator, arg);
+      if (record.type === "throw") {
+        reject(record.arg);
+      } else {
+        var result = record.arg;
+        var value = result.value;
+        if (value &&
+            typeof value === "object" &&
+            hasOwn.call(value, "__await")) {
+          return Promise.resolve(value.__await).then(function(value) {
+            invoke("next", value, resolve, reject);
+          }, function(err) {
+            invoke("throw", err, resolve, reject);
+          });
+        }
+
+        return Promise.resolve(value).then(function(unwrapped) {
+          // When a yielded Promise is resolved, its final value becomes
+          // the .value of the Promise<{value,done}> result for the
+          // current iteration. If the Promise is rejected, however, the
+          // result for this iteration will be rejected with the same
+          // reason. Note that rejections of yielded Promises are not
+          // thrown back into the generator function, as is the case
+          // when an awaited Promise is rejected. This difference in
+          // behavior between yield and await is important, because it
+          // allows the consumer to decide what to do with the yielded
+          // rejection (swallow it and continue, manually .throw it back
+          // into the generator, abandon iteration, whatever). With
+          // await, by contrast, there is no opportunity to examine the
+          // rejection reason outside the generator function, so the
+          // only option is to throw it from the await expression, and
+          // let the generator function handle the exception.
+          result.value = unwrapped;
+          resolve(result);
+        }, reject);
+      }
+    }
+
+    var previousPromise;
+
+    function enqueue(method, arg) {
+      function callInvokeWithMethodAndArg() {
+        return new Promise(function(resolve, reject) {
+          invoke(method, arg, resolve, reject);
+        });
+      }
+
+      return previousPromise =
+        // If enqueue has been called before, then we want to wait until
+        // all previous Promises have been resolved before calling invoke,
+        // so that results are always delivered in the correct order. If
+        // enqueue has not been called before, then it is important to
+        // call invoke immediately, without waiting on a callback to fire,
+        // so that the async generator function has the opportunity to do
+        // any necessary setup in a predictable way. This predictability
+        // is why the Promise constructor synchronously invokes its
+        // executor callback, and why async functions synchronously
+        // execute code before the first await. Since we implement simple
+        // async functions in terms of async generators, it is especially
+        // important to get this right, even though it requires care.
+        previousPromise ? previousPromise.then(
+          callInvokeWithMethodAndArg,
+          // Avoid propagating failures to Promises returned by later
+          // invocations of the iterator.
+          callInvokeWithMethodAndArg
+        ) : callInvokeWithMethodAndArg();
+    }
+
+    // Define the unified helper method that is used to implement .next,
+    // .throw, and .return (see defineIteratorMethods).
+    this._invoke = enqueue;
+  }
+
+  defineIteratorMethods(AsyncIterator.prototype);
+  AsyncIterator.prototype[asyncIteratorSymbol] = function () {
+    return this;
+  };
+  runtime.AsyncIterator = AsyncIterator;
+
+  // Note that simple async functions are implemented on top of
+  // AsyncIterator objects; they just return a Promise for the value of
+  // the final result produced by the iterator.
+  runtime.async = function(innerFn, outerFn, self, tryLocsList) {
+    var iter = new AsyncIterator(
+      wrap(innerFn, outerFn, self, tryLocsList)
+    );
+
+    return runtime.isGeneratorFunction(outerFn)
+      ? iter // If outerFn is a generator, return the full iterator.
+      : iter.next().then(function(result) {
+          return result.done ? result.value : iter.next();
+        });
+  };
+
+  function makeInvokeMethod(innerFn, self, context) {
+    var state = GenStateSuspendedStart;
+
+    return function invoke(method, arg) {
+      if (state === GenStateExecuting) {
+        throw new Error("Generator is already running");
+      }
+
+      if (state === GenStateCompleted) {
+        if (method === "throw") {
+          throw arg;
+        }
+
+        // Be forgiving, per 25.3.3.3.3 of the spec:
+        // https://people.mozilla.org/~jorendorff/es6-draft.html#sec-generatorresume
+        return doneResult();
+      }
+
+      context.method = method;
+      context.arg = arg;
+
+      while (true) {
+        var delegate = context.delegate;
+        if (delegate) {
+          var delegateResult = maybeInvokeDelegate(delegate, context);
+          if (delegateResult) {
+            if (delegateResult === ContinueSentinel) continue;
+            return delegateResult;
+          }
+        }
+
+        if (context.method === "next") {
+          // Setting context._sent for legacy support of Babel's
+          // function.sent implementation.
+          context.sent = context._sent = context.arg;
+
+        } else if (context.method === "throw") {
+          if (state === GenStateSuspendedStart) {
+            state = GenStateCompleted;
+            throw context.arg;
+          }
+
+          context.dispatchException(context.arg);
+
+        } else if (context.method === "return") {
+          context.abrupt("return", context.arg);
+        }
+
+        state = GenStateExecuting;
+
+        var record = tryCatch(innerFn, self, context);
+        if (record.type === "normal") {
+          // If an exception is thrown from innerFn, we leave state ===
+          // GenStateExecuting and loop back for another invocation.
+          state = context.done
+            ? GenStateCompleted
+            : GenStateSuspendedYield;
+
+          if (record.arg === ContinueSentinel) {
+            continue;
+          }
+
+          return {
+            value: record.arg,
+            done: context.done
+          };
+
+        } else if (record.type === "throw") {
+          state = GenStateCompleted;
+          // Dispatch the exception by looping back around to the
+          // context.dispatchException(context.arg) call above.
+          context.method = "throw";
+          context.arg = record.arg;
+        }
+      }
+    };
+  }
+
+  // Call delegate.iterator[context.method](context.arg) and handle the
+  // result, either by returning a { value, done } result from the
+  // delegate iterator, or by modifying context.method and context.arg,
+  // setting context.delegate to null, and returning the ContinueSentinel.
+  function maybeInvokeDelegate(delegate, context) {
+    var method = delegate.iterator[context.method];
+    if (method === undefined) {
+      // A .throw or .return when the delegate iterator has no .throw
+      // method always terminates the yield* loop.
+      context.delegate = null;
+
+      if (context.method === "throw") {
+        if (delegate.iterator.return) {
+          // If the delegate iterator has a return method, give it a
+          // chance to clean up.
+          context.method = "return";
+          context.arg = undefined;
+          maybeInvokeDelegate(delegate, context);
+
+          if (context.method === "throw") {
+            // If maybeInvokeDelegate(context) changed context.method from
+            // "return" to "throw", let that override the TypeError below.
+            return ContinueSentinel;
+          }
+        }
+
+        context.method = "throw";
+        context.arg = new TypeError(
+          "The iterator does not provide a 'throw' method");
+      }
+
+      return ContinueSentinel;
+    }
+
+    var record = tryCatch(method, delegate.iterator, context.arg);
+
+    if (record.type === "throw") {
+      context.method = "throw";
+      context.arg = record.arg;
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    var info = record.arg;
+
+    if (! info) {
+      context.method = "throw";
+      context.arg = new TypeError("iterator result is not an object");
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    if (info.done) {
+      // Assign the result of the finished delegate to the temporary
+      // variable specified by delegate.resultName (see delegateYield).
+      context[delegate.resultName] = info.value;
+
+      // Resume execution at the desired location (see delegateYield).
+      context.next = delegate.nextLoc;
+
+      // If context.method was "throw" but the delegate handled the
+      // exception, let the outer generator proceed normally. If
+      // context.method was "next", forget context.arg since it has been
+      // "consumed" by the delegate iterator. If context.method was
+      // "return", allow the original .return call to continue in the
+      // outer generator.
+      if (context.method !== "return") {
+        context.method = "next";
+        context.arg = undefined;
+      }
+
+    } else {
+      // Re-yield the result returned by the delegate method.
+      return info;
+    }
+
+    // The delegate iterator is finished, so forget it and continue with
+    // the outer generator.
+    context.delegate = null;
+    return ContinueSentinel;
+  }
+
+  // Define Generator.prototype.{next,throw,return} in terms of the
+  // unified ._invoke helper method.
+  defineIteratorMethods(Gp);
+
+  Gp[toStringTagSymbol] = "Generator";
+
+  // A Generator should always return itself as the iterator object when the
+  // @@iterator function is called on it. Some browsers' implementations of the
+  // iterator prototype chain incorrectly implement this, causing the Generator
+  // object to not be returned from this call. This ensures that doesn't happen.
+  // See https://github.com/facebook/regenerator/issues/274 for more details.
+  Gp[iteratorSymbol] = function() {
+    return this;
+  };
+
+  Gp.toString = function() {
+    return "[object Generator]";
+  };
+
+  function pushTryEntry(locs) {
+    var entry = { tryLoc: locs[0] };
+
+    if (1 in locs) {
+      entry.catchLoc = locs[1];
+    }
+
+    if (2 in locs) {
+      entry.finallyLoc = locs[2];
+      entry.afterLoc = locs[3];
+    }
+
+    this.tryEntries.push(entry);
+  }
+
+  function resetTryEntry(entry) {
+    var record = entry.completion || {};
+    record.type = "normal";
+    delete record.arg;
+    entry.completion = record;
+  }
+
+  function Context(tryLocsList) {
+    // The root entry object (effectively a try statement without a catch
+    // or a finally block) gives us a place to store values thrown from
+    // locations where there is no enclosing try statement.
+    this.tryEntries = [{ tryLoc: "root" }];
+    tryLocsList.forEach(pushTryEntry, this);
+    this.reset(true);
+  }
+
+  runtime.keys = function(object) {
+    var keys = [];
+    for (var key in object) {
+      keys.push(key);
+    }
+    keys.reverse();
+
+    // Rather than returning an object with a next method, we keep
+    // things simple and return the next function itself.
+    return function next() {
+      while (keys.length) {
+        var key = keys.pop();
+        if (key in object) {
+          next.value = key;
+          next.done = false;
+          return next;
+        }
+      }
+
+      // To avoid creating an additional object, we just hang the .value
+      // and .done properties off the next function object itself. This
+      // also ensures that the minifier will not anonymize the function.
+      next.done = true;
+      return next;
+    };
+  };
+
+  function values(iterable) {
+    if (iterable) {
+      var iteratorMethod = iterable[iteratorSymbol];
+      if (iteratorMethod) {
+        return iteratorMethod.call(iterable);
+      }
+
+      if (typeof iterable.next === "function") {
+        return iterable;
+      }
+
+      if (!isNaN(iterable.length)) {
+        var i = -1, next = function next() {
+          while (++i < iterable.length) {
+            if (hasOwn.call(iterable, i)) {
+              next.value = iterable[i];
+              next.done = false;
+              return next;
+            }
+          }
+
+          next.value = undefined;
+          next.done = true;
+
+          return next;
+        };
+
+        return next.next = next;
+      }
+    }
+
+    // Return an iterator with no values.
+    return { next: doneResult };
+  }
+  runtime.values = values;
+
+  function doneResult() {
+    return { value: undefined, done: true };
+  }
+
+  Context.prototype = {
+    constructor: Context,
+
+    reset: function(skipTempReset) {
+      this.prev = 0;
+      this.next = 0;
+      // Resetting context._sent for legacy support of Babel's
+      // function.sent implementation.
+      this.sent = this._sent = undefined;
+      this.done = false;
+      this.delegate = null;
+
+      this.method = "next";
+      this.arg = undefined;
+
+      this.tryEntries.forEach(resetTryEntry);
+
+      if (!skipTempReset) {
+        for (var name in this) {
+          // Not sure about the optimal order of these conditions:
+          if (name.charAt(0) === "t" &&
+              hasOwn.call(this, name) &&
+              !isNaN(+name.slice(1))) {
+            this[name] = undefined;
+          }
+        }
+      }
+    },
+
+    stop: function() {
+      this.done = true;
+
+      var rootEntry = this.tryEntries[0];
+      var rootRecord = rootEntry.completion;
+      if (rootRecord.type === "throw") {
+        throw rootRecord.arg;
+      }
+
+      return this.rval;
+    },
+
+    dispatchException: function(exception) {
+      if (this.done) {
+        throw exception;
+      }
+
+      var context = this;
+      function handle(loc, caught) {
+        record.type = "throw";
+        record.arg = exception;
+        context.next = loc;
+
+        if (caught) {
+          // If the dispatched exception was caught by a catch block,
+          // then let that catch block handle the exception normally.
+          context.method = "next";
+          context.arg = undefined;
+        }
+
+        return !! caught;
+      }
+
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        var record = entry.completion;
+
+        if (entry.tryLoc === "root") {
+          // Exception thrown outside of any try block that could handle
+          // it, so set the completion value of the entire function to
+          // throw the exception.
+          return handle("end");
+        }
+
+        if (entry.tryLoc <= this.prev) {
+          var hasCatch = hasOwn.call(entry, "catchLoc");
+          var hasFinally = hasOwn.call(entry, "finallyLoc");
+
+          if (hasCatch && hasFinally) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            } else if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else if (hasCatch) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            }
+
+          } else if (hasFinally) {
+            if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else {
+            throw new Error("try statement without catch or finally");
+          }
+        }
+      }
+    },
+
+    abrupt: function(type, arg) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc <= this.prev &&
+            hasOwn.call(entry, "finallyLoc") &&
+            this.prev < entry.finallyLoc) {
+          var finallyEntry = entry;
+          break;
+        }
+      }
+
+      if (finallyEntry &&
+          (type === "break" ||
+           type === "continue") &&
+          finallyEntry.tryLoc <= arg &&
+          arg <= finallyEntry.finallyLoc) {
+        // Ignore the finally entry if control is not jumping to a
+        // location outside the try/catch block.
+        finallyEntry = null;
+      }
+
+      var record = finallyEntry ? finallyEntry.completion : {};
+      record.type = type;
+      record.arg = arg;
+
+      if (finallyEntry) {
+        this.method = "next";
+        this.next = finallyEntry.finallyLoc;
+        return ContinueSentinel;
+      }
+
+      return this.complete(record);
+    },
+
+    complete: function(record, afterLoc) {
+      if (record.type === "throw") {
+        throw record.arg;
+      }
+
+      if (record.type === "break" ||
+          record.type === "continue") {
+        this.next = record.arg;
+      } else if (record.type === "return") {
+        this.rval = this.arg = record.arg;
+        this.method = "return";
+        this.next = "end";
+      } else if (record.type === "normal" && afterLoc) {
+        this.next = afterLoc;
+      }
+
+      return ContinueSentinel;
+    },
+
+    finish: function(finallyLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.finallyLoc === finallyLoc) {
+          this.complete(entry.completion, entry.afterLoc);
+          resetTryEntry(entry);
+          return ContinueSentinel;
+        }
+      }
+    },
+
+    "catch": function(tryLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc === tryLoc) {
+          var record = entry.completion;
+          if (record.type === "throw") {
+            var thrown = record.arg;
+            resetTryEntry(entry);
+          }
+          return thrown;
+        }
+      }
+
+      // The context.catch method must only be called with a location
+      // argument that corresponds to a known catch block.
+      throw new Error("illegal catch attempt");
+    },
+
+    delegateYield: function(iterable, resultName, nextLoc) {
+      this.delegate = {
+        iterator: values(iterable),
+        resultName: resultName,
+        nextLoc: nextLoc
+      };
+
+      if (this.method === "next") {
+        // Deliberately forget the last sent value so that we don't
+        // accidentally pass it on to the delegate.
+        this.arg = undefined;
+      }
+
+      return ContinueSentinel;
+    }
+  };
+})(
+  // In sloppy mode, unbound `this` refers to the global object, fallback to
+  // Function constructor if we're in global strict mode. That is sadly a form
+  // of indirect eval which violates Content Security Policy.
+  (function() { return this })() || Function("return this")()
+);
+
+
+/***/ }),
+
 /***/ "./node_modules/setimmediate/setImmediate.js":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -31986,47 +33047,391 @@ module.exports = function normalizeComponent (
 
 /***/ }),
 
-/***/ "./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-7168fb6a\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0&bustCache!./resources/assets/js/components/ExampleComponent.vue":
+/***/ "./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-0d120472\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0&bustCache!./resources/assets/js/components/Init.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
 var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _vm._m(0)
+  return _c("div")
 }
-var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "container" }, [
-      _c("div", { staticClass: "row" }, [
-        _c("div", { staticClass: "col-md-8 col-md-offset-2" }, [
-          _c("div", { staticClass: "panel panel-default" }, [
-            _c("div", { staticClass: "panel-heading" }, [
-              _vm._v("Example Component")
-            ]),
-            _vm._v(" "),
-            _c("div", { staticClass: "panel-body" }, [
-              _vm._v(
-                "\n                    I'm an example component!\n                "
-              )
-            ])
-          ])
-        ])
-      ])
-    ])
-  }
-]
+var staticRenderFns = []
 render._withStripped = true
 module.exports = { render: render, staticRenderFns: staticRenderFns }
 if (false) {
   module.hot.accept()
   if (module.hot.data) {
-    require("vue-hot-reload-api")      .rerender("data-v-7168fb6a", module.exports)
+    require("vue-hot-reload-api")      .rerender("data-v-0d120472", module.exports)
   }
 }
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-4b2f723c\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0&bustCache!./resources/assets/js/components/views/profiles/Profile.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", { staticClass: "profile" }, [
+    _vm.profile_user
+      ? _c(
+          "div",
+          { staticClass: "profile-avatar" },
+          [
+            _c("div", { staticClass: "border-outline outline-circle _ibi" }, [
+              _c("img", {
+                staticClass: "img-circle",
+                attrs: { src: _vm.profile_user.avatar, width: "96" }
+              })
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "profile-info" }, [
+              _c("ul", [
+                _c("li", [_vm._v("Name: " + _vm._s(_vm.profile_user.name))]),
+                _vm._v(" "),
+                _c("li", [_vm._v("Slug: " + _vm._s(_vm.profile_user.slug))]),
+                _vm._v(" "),
+                _c("li", [_vm._v("Email: " + _vm._s(_vm.profile_user.email))])
+              ])
+            ]),
+            _vm._v(" "),
+            _vm.profile_user.uid
+              ? _c("qr-code", {
+                  attrs: {
+                    avatar: _vm.profile_user.avatar,
+                    url: "http://coccoc.me/" + _vm.profile_user.slug
+                  }
+                })
+              : _vm._e()
+          ],
+          1
+        )
+      : _vm._e()
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-4b2f723c", module.exports)
+  }
+}
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-a5fb9daa\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0&bustCache!./resources/assets/js/components/views/profiles/QRcode.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", { staticClass: "qrcode" }, [
+    _c("img", {
+      staticStyle: { display: "none" },
+      attrs: { id: "qrcode-logo", src: _vm.avatar }
+    }),
+    _vm._v(" "),
+    _c("div", { staticClass: "qr-code" })
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-a5fb9daa", module.exports)
+  }
+}
+
+/***/ }),
+
+/***/ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-4b2f723c\",\"scoped\":false,\"hasInlineConfig\":true}!./node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./resources/assets/js/components/views/profiles/Profile.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__("./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-4b2f723c\",\"scoped\":false,\"hasInlineConfig\":true}!./node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./resources/assets/js/components/views/profiles/Profile.vue");
+if(typeof content === 'string') content = [[module.i, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var update = __webpack_require__("./node_modules/vue-style-loader/lib/addStylesClient.js")("1afa3d30", content, false);
+// Hot Module Replacement
+if(false) {
+ // When the styles change, update the <style> tags
+ if(!content.locals) {
+   module.hot.accept("!!../../../../../../node_modules/css-loader/index.js!../../../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-4b2f723c\",\"scoped\":false,\"hasInlineConfig\":true}!../../../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./Profile.vue", function() {
+     var newContent = require("!!../../../../../../node_modules/css-loader/index.js!../../../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-4b2f723c\",\"scoped\":false,\"hasInlineConfig\":true}!../../../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./Profile.vue");
+     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+     update(newContent);
+   });
+ }
+ // When the module is disposed, remove the <style> tags
+ module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+
+/***/ "./node_modules/vue-style-loader/lib/addStylesClient.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+/*
+  MIT License http://www.opensource.org/licenses/mit-license.php
+  Author Tobias Koppers @sokra
+  Modified by Evan You @yyx990803
+*/
+
+var hasDocument = typeof document !== 'undefined'
+
+if (typeof DEBUG !== 'undefined' && DEBUG) {
+  if (!hasDocument) {
+    throw new Error(
+    'vue-style-loader cannot be used in a non-browser environment. ' +
+    "Use { target: 'node' } in your Webpack config to indicate a server-rendering environment."
+  ) }
+}
+
+var listToStyles = __webpack_require__("./node_modules/vue-style-loader/lib/listToStyles.js")
+
+/*
+type StyleObject = {
+  id: number;
+  parts: Array<StyleObjectPart>
+}
+
+type StyleObjectPart = {
+  css: string;
+  media: string;
+  sourceMap: ?string
+}
+*/
+
+var stylesInDom = {/*
+  [id: number]: {
+    id: number,
+    refs: number,
+    parts: Array<(obj?: StyleObjectPart) => void>
+  }
+*/}
+
+var head = hasDocument && (document.head || document.getElementsByTagName('head')[0])
+var singletonElement = null
+var singletonCounter = 0
+var isProduction = false
+var noop = function () {}
+
+// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
+// tags it will allow on a page
+var isOldIE = typeof navigator !== 'undefined' && /msie [6-9]\b/.test(navigator.userAgent.toLowerCase())
+
+module.exports = function (parentId, list, _isProduction) {
+  isProduction = _isProduction
+
+  var styles = listToStyles(parentId, list)
+  addStylesToDom(styles)
+
+  return function update (newList) {
+    var mayRemove = []
+    for (var i = 0; i < styles.length; i++) {
+      var item = styles[i]
+      var domStyle = stylesInDom[item.id]
+      domStyle.refs--
+      mayRemove.push(domStyle)
+    }
+    if (newList) {
+      styles = listToStyles(parentId, newList)
+      addStylesToDom(styles)
+    } else {
+      styles = []
+    }
+    for (var i = 0; i < mayRemove.length; i++) {
+      var domStyle = mayRemove[i]
+      if (domStyle.refs === 0) {
+        for (var j = 0; j < domStyle.parts.length; j++) {
+          domStyle.parts[j]()
+        }
+        delete stylesInDom[domStyle.id]
+      }
+    }
+  }
+}
+
+function addStylesToDom (styles /* Array<StyleObject> */) {
+  for (var i = 0; i < styles.length; i++) {
+    var item = styles[i]
+    var domStyle = stylesInDom[item.id]
+    if (domStyle) {
+      domStyle.refs++
+      for (var j = 0; j < domStyle.parts.length; j++) {
+        domStyle.parts[j](item.parts[j])
+      }
+      for (; j < item.parts.length; j++) {
+        domStyle.parts.push(addStyle(item.parts[j]))
+      }
+      if (domStyle.parts.length > item.parts.length) {
+        domStyle.parts.length = item.parts.length
+      }
+    } else {
+      var parts = []
+      for (var j = 0; j < item.parts.length; j++) {
+        parts.push(addStyle(item.parts[j]))
+      }
+      stylesInDom[item.id] = { id: item.id, refs: 1, parts: parts }
+    }
+  }
+}
+
+function createStyleElement () {
+  var styleElement = document.createElement('style')
+  styleElement.type = 'text/css'
+  head.appendChild(styleElement)
+  return styleElement
+}
+
+function addStyle (obj /* StyleObjectPart */) {
+  var update, remove
+  var styleElement = document.querySelector('style[data-vue-ssr-id~="' + obj.id + '"]')
+
+  if (styleElement) {
+    if (isProduction) {
+      // has SSR styles and in production mode.
+      // simply do nothing.
+      return noop
+    } else {
+      // has SSR styles but in dev mode.
+      // for some reason Chrome can't handle source map in server-rendered
+      // style tags - source maps in <style> only works if the style tag is
+      // created and inserted dynamically. So we remove the server rendered
+      // styles and inject new ones.
+      styleElement.parentNode.removeChild(styleElement)
+    }
+  }
+
+  if (isOldIE) {
+    // use singleton mode for IE9.
+    var styleIndex = singletonCounter++
+    styleElement = singletonElement || (singletonElement = createStyleElement())
+    update = applyToSingletonTag.bind(null, styleElement, styleIndex, false)
+    remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true)
+  } else {
+    // use multi-style-tag mode in all other cases
+    styleElement = createStyleElement()
+    update = applyToTag.bind(null, styleElement)
+    remove = function () {
+      styleElement.parentNode.removeChild(styleElement)
+    }
+  }
+
+  update(obj)
+
+  return function updateStyle (newObj /* StyleObjectPart */) {
+    if (newObj) {
+      if (newObj.css === obj.css &&
+          newObj.media === obj.media &&
+          newObj.sourceMap === obj.sourceMap) {
+        return
+      }
+      update(obj = newObj)
+    } else {
+      remove()
+    }
+  }
+}
+
+var replaceText = (function () {
+  var textStore = []
+
+  return function (index, replacement) {
+    textStore[index] = replacement
+    return textStore.filter(Boolean).join('\n')
+  }
+})()
+
+function applyToSingletonTag (styleElement, index, remove, obj) {
+  var css = remove ? '' : obj.css
+
+  if (styleElement.styleSheet) {
+    styleElement.styleSheet.cssText = replaceText(index, css)
+  } else {
+    var cssNode = document.createTextNode(css)
+    var childNodes = styleElement.childNodes
+    if (childNodes[index]) styleElement.removeChild(childNodes[index])
+    if (childNodes.length) {
+      styleElement.insertBefore(cssNode, childNodes[index])
+    } else {
+      styleElement.appendChild(cssNode)
+    }
+  }
+}
+
+function applyToTag (styleElement, obj) {
+  var css = obj.css
+  var media = obj.media
+  var sourceMap = obj.sourceMap
+
+  if (media) {
+    styleElement.setAttribute('media', media)
+  }
+
+  if (sourceMap) {
+    // https://developer.chrome.com/devtools/docs/javascript-debugging
+    // this makes source maps inside style tags work properly in Chrome
+    css += '\n/*# sourceURL=' + sourceMap.sources[0] + ' */'
+    // http://stackoverflow.com/a/26603875
+    css += '\n/*# sourceMappingURL=data:application/json;base64,' + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + ' */'
+  }
+
+  if (styleElement.styleSheet) {
+    styleElement.styleSheet.cssText = css
+  } else {
+    while (styleElement.firstChild) {
+      styleElement.removeChild(styleElement.firstChild)
+    }
+    styleElement.appendChild(document.createTextNode(css))
+  }
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-style-loader/lib/listToStyles.js":
+/***/ (function(module, exports) {
+
+/**
+ * Translates the list format produced by css-loader into something
+ * easier to manipulate.
+ */
+module.exports = function listToStyles (parentId, list) {
+  var styles = []
+  var newStyles = {}
+  for (var i = 0; i < list.length; i++) {
+    var item = list[i]
+    var id = item[0]
+    var css = item[1]
+    var media = item[2]
+    var sourceMap = item[3]
+    var part = {
+      id: parentId + ':' + i,
+      css: css,
+      media: media,
+      sourceMap: sourceMap
+    }
+    if (!newStyles[id]) {
+      styles.push(newStyles[id] = { id: id, parts: [part] })
+    } else {
+      newStyles[id].parts.push(part)
+    }
+  }
+  return styles
+}
+
 
 /***/ }),
 
@@ -42807,6 +44212,953 @@ module.exports = Vue$3;
 
 /***/ }),
 
+/***/ "./node_modules/vuex/dist/vuex.esm.js":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Store", function() { return Store; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "install", function() { return install; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "mapState", function() { return mapState; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "mapMutations", function() { return mapMutations; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "mapGetters", function() { return mapGetters; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "mapActions", function() { return mapActions; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createNamespacedHelpers", function() { return createNamespacedHelpers; });
+/**
+ * vuex v3.0.1
+ * (c) 2017 Evan You
+ * @license MIT
+ */
+var applyMixin = function (Vue) {
+  var version = Number(Vue.version.split('.')[0]);
+
+  if (version >= 2) {
+    Vue.mixin({ beforeCreate: vuexInit });
+  } else {
+    // override init and inject vuex init procedure
+    // for 1.x backwards compatibility.
+    var _init = Vue.prototype._init;
+    Vue.prototype._init = function (options) {
+      if ( options === void 0 ) options = {};
+
+      options.init = options.init
+        ? [vuexInit].concat(options.init)
+        : vuexInit;
+      _init.call(this, options);
+    };
+  }
+
+  /**
+   * Vuex init hook, injected into each instances init hooks list.
+   */
+
+  function vuexInit () {
+    var options = this.$options;
+    // store injection
+    if (options.store) {
+      this.$store = typeof options.store === 'function'
+        ? options.store()
+        : options.store;
+    } else if (options.parent && options.parent.$store) {
+      this.$store = options.parent.$store;
+    }
+  }
+};
+
+var devtoolHook =
+  typeof window !== 'undefined' &&
+  window.__VUE_DEVTOOLS_GLOBAL_HOOK__;
+
+function devtoolPlugin (store) {
+  if (!devtoolHook) { return }
+
+  store._devtoolHook = devtoolHook;
+
+  devtoolHook.emit('vuex:init', store);
+
+  devtoolHook.on('vuex:travel-to-state', function (targetState) {
+    store.replaceState(targetState);
+  });
+
+  store.subscribe(function (mutation, state) {
+    devtoolHook.emit('vuex:mutation', mutation, state);
+  });
+}
+
+/**
+ * Get the first item that pass the test
+ * by second argument function
+ *
+ * @param {Array} list
+ * @param {Function} f
+ * @return {*}
+ */
+/**
+ * Deep copy the given object considering circular structure.
+ * This function caches all nested objects and its copies.
+ * If it detects circular structure, use cached copy to avoid infinite loop.
+ *
+ * @param {*} obj
+ * @param {Array<Object>} cache
+ * @return {*}
+ */
+
+
+/**
+ * forEach for object
+ */
+function forEachValue (obj, fn) {
+  Object.keys(obj).forEach(function (key) { return fn(obj[key], key); });
+}
+
+function isObject (obj) {
+  return obj !== null && typeof obj === 'object'
+}
+
+function isPromise (val) {
+  return val && typeof val.then === 'function'
+}
+
+function assert (condition, msg) {
+  if (!condition) { throw new Error(("[vuex] " + msg)) }
+}
+
+var Module = function Module (rawModule, runtime) {
+  this.runtime = runtime;
+  this._children = Object.create(null);
+  this._rawModule = rawModule;
+  var rawState = rawModule.state;
+  this.state = (typeof rawState === 'function' ? rawState() : rawState) || {};
+};
+
+var prototypeAccessors$1 = { namespaced: { configurable: true } };
+
+prototypeAccessors$1.namespaced.get = function () {
+  return !!this._rawModule.namespaced
+};
+
+Module.prototype.addChild = function addChild (key, module) {
+  this._children[key] = module;
+};
+
+Module.prototype.removeChild = function removeChild (key) {
+  delete this._children[key];
+};
+
+Module.prototype.getChild = function getChild (key) {
+  return this._children[key]
+};
+
+Module.prototype.update = function update (rawModule) {
+  this._rawModule.namespaced = rawModule.namespaced;
+  if (rawModule.actions) {
+    this._rawModule.actions = rawModule.actions;
+  }
+  if (rawModule.mutations) {
+    this._rawModule.mutations = rawModule.mutations;
+  }
+  if (rawModule.getters) {
+    this._rawModule.getters = rawModule.getters;
+  }
+};
+
+Module.prototype.forEachChild = function forEachChild (fn) {
+  forEachValue(this._children, fn);
+};
+
+Module.prototype.forEachGetter = function forEachGetter (fn) {
+  if (this._rawModule.getters) {
+    forEachValue(this._rawModule.getters, fn);
+  }
+};
+
+Module.prototype.forEachAction = function forEachAction (fn) {
+  if (this._rawModule.actions) {
+    forEachValue(this._rawModule.actions, fn);
+  }
+};
+
+Module.prototype.forEachMutation = function forEachMutation (fn) {
+  if (this._rawModule.mutations) {
+    forEachValue(this._rawModule.mutations, fn);
+  }
+};
+
+Object.defineProperties( Module.prototype, prototypeAccessors$1 );
+
+var ModuleCollection = function ModuleCollection (rawRootModule) {
+  // register root module (Vuex.Store options)
+  this.register([], rawRootModule, false);
+};
+
+ModuleCollection.prototype.get = function get (path) {
+  return path.reduce(function (module, key) {
+    return module.getChild(key)
+  }, this.root)
+};
+
+ModuleCollection.prototype.getNamespace = function getNamespace (path) {
+  var module = this.root;
+  return path.reduce(function (namespace, key) {
+    module = module.getChild(key);
+    return namespace + (module.namespaced ? key + '/' : '')
+  }, '')
+};
+
+ModuleCollection.prototype.update = function update$1 (rawRootModule) {
+  update([], this.root, rawRootModule);
+};
+
+ModuleCollection.prototype.register = function register (path, rawModule, runtime) {
+    var this$1 = this;
+    if ( runtime === void 0 ) runtime = true;
+
+  if (true) {
+    assertRawModule(path, rawModule);
+  }
+
+  var newModule = new Module(rawModule, runtime);
+  if (path.length === 0) {
+    this.root = newModule;
+  } else {
+    var parent = this.get(path.slice(0, -1));
+    parent.addChild(path[path.length - 1], newModule);
+  }
+
+  // register nested modules
+  if (rawModule.modules) {
+    forEachValue(rawModule.modules, function (rawChildModule, key) {
+      this$1.register(path.concat(key), rawChildModule, runtime);
+    });
+  }
+};
+
+ModuleCollection.prototype.unregister = function unregister (path) {
+  var parent = this.get(path.slice(0, -1));
+  var key = path[path.length - 1];
+  if (!parent.getChild(key).runtime) { return }
+
+  parent.removeChild(key);
+};
+
+function update (path, targetModule, newModule) {
+  if (true) {
+    assertRawModule(path, newModule);
+  }
+
+  // update target module
+  targetModule.update(newModule);
+
+  // update nested modules
+  if (newModule.modules) {
+    for (var key in newModule.modules) {
+      if (!targetModule.getChild(key)) {
+        if (true) {
+          console.warn(
+            "[vuex] trying to add a new module '" + key + "' on hot reloading, " +
+            'manual reload is needed'
+          );
+        }
+        return
+      }
+      update(
+        path.concat(key),
+        targetModule.getChild(key),
+        newModule.modules[key]
+      );
+    }
+  }
+}
+
+var functionAssert = {
+  assert: function (value) { return typeof value === 'function'; },
+  expected: 'function'
+};
+
+var objectAssert = {
+  assert: function (value) { return typeof value === 'function' ||
+    (typeof value === 'object' && typeof value.handler === 'function'); },
+  expected: 'function or object with "handler" function'
+};
+
+var assertTypes = {
+  getters: functionAssert,
+  mutations: functionAssert,
+  actions: objectAssert
+};
+
+function assertRawModule (path, rawModule) {
+  Object.keys(assertTypes).forEach(function (key) {
+    if (!rawModule[key]) { return }
+
+    var assertOptions = assertTypes[key];
+
+    forEachValue(rawModule[key], function (value, type) {
+      assert(
+        assertOptions.assert(value),
+        makeAssertionMessage(path, key, type, value, assertOptions.expected)
+      );
+    });
+  });
+}
+
+function makeAssertionMessage (path, key, type, value, expected) {
+  var buf = key + " should be " + expected + " but \"" + key + "." + type + "\"";
+  if (path.length > 0) {
+    buf += " in module \"" + (path.join('.')) + "\"";
+  }
+  buf += " is " + (JSON.stringify(value)) + ".";
+  return buf
+}
+
+var Vue; // bind on install
+
+var Store = function Store (options) {
+  var this$1 = this;
+  if ( options === void 0 ) options = {};
+
+  // Auto install if it is not done yet and `window` has `Vue`.
+  // To allow users to avoid auto-installation in some cases,
+  // this code should be placed here. See #731
+  if (!Vue && typeof window !== 'undefined' && window.Vue) {
+    install(window.Vue);
+  }
+
+  if (true) {
+    assert(Vue, "must call Vue.use(Vuex) before creating a store instance.");
+    assert(typeof Promise !== 'undefined', "vuex requires a Promise polyfill in this browser.");
+    assert(this instanceof Store, "Store must be called with the new operator.");
+  }
+
+  var plugins = options.plugins; if ( plugins === void 0 ) plugins = [];
+  var strict = options.strict; if ( strict === void 0 ) strict = false;
+
+  var state = options.state; if ( state === void 0 ) state = {};
+  if (typeof state === 'function') {
+    state = state() || {};
+  }
+
+  // store internal state
+  this._committing = false;
+  this._actions = Object.create(null);
+  this._actionSubscribers = [];
+  this._mutations = Object.create(null);
+  this._wrappedGetters = Object.create(null);
+  this._modules = new ModuleCollection(options);
+  this._modulesNamespaceMap = Object.create(null);
+  this._subscribers = [];
+  this._watcherVM = new Vue();
+
+  // bind commit and dispatch to self
+  var store = this;
+  var ref = this;
+  var dispatch = ref.dispatch;
+  var commit = ref.commit;
+  this.dispatch = function boundDispatch (type, payload) {
+    return dispatch.call(store, type, payload)
+  };
+  this.commit = function boundCommit (type, payload, options) {
+    return commit.call(store, type, payload, options)
+  };
+
+  // strict mode
+  this.strict = strict;
+
+  // init root module.
+  // this also recursively registers all sub-modules
+  // and collects all module getters inside this._wrappedGetters
+  installModule(this, state, [], this._modules.root);
+
+  // initialize the store vm, which is responsible for the reactivity
+  // (also registers _wrappedGetters as computed properties)
+  resetStoreVM(this, state);
+
+  // apply plugins
+  plugins.forEach(function (plugin) { return plugin(this$1); });
+
+  if (Vue.config.devtools) {
+    devtoolPlugin(this);
+  }
+};
+
+var prototypeAccessors = { state: { configurable: true } };
+
+prototypeAccessors.state.get = function () {
+  return this._vm._data.$$state
+};
+
+prototypeAccessors.state.set = function (v) {
+  if (true) {
+    assert(false, "Use store.replaceState() to explicit replace store state.");
+  }
+};
+
+Store.prototype.commit = function commit (_type, _payload, _options) {
+    var this$1 = this;
+
+  // check object-style commit
+  var ref = unifyObjectStyle(_type, _payload, _options);
+    var type = ref.type;
+    var payload = ref.payload;
+    var options = ref.options;
+
+  var mutation = { type: type, payload: payload };
+  var entry = this._mutations[type];
+  if (!entry) {
+    if (true) {
+      console.error(("[vuex] unknown mutation type: " + type));
+    }
+    return
+  }
+  this._withCommit(function () {
+    entry.forEach(function commitIterator (handler) {
+      handler(payload);
+    });
+  });
+  this._subscribers.forEach(function (sub) { return sub(mutation, this$1.state); });
+
+  if (
+    "development" !== 'production' &&
+    options && options.silent
+  ) {
+    console.warn(
+      "[vuex] mutation type: " + type + ". Silent option has been removed. " +
+      'Use the filter functionality in the vue-devtools'
+    );
+  }
+};
+
+Store.prototype.dispatch = function dispatch (_type, _payload) {
+    var this$1 = this;
+
+  // check object-style dispatch
+  var ref = unifyObjectStyle(_type, _payload);
+    var type = ref.type;
+    var payload = ref.payload;
+
+  var action = { type: type, payload: payload };
+  var entry = this._actions[type];
+  if (!entry) {
+    if (true) {
+      console.error(("[vuex] unknown action type: " + type));
+    }
+    return
+  }
+
+  this._actionSubscribers.forEach(function (sub) { return sub(action, this$1.state); });
+
+  return entry.length > 1
+    ? Promise.all(entry.map(function (handler) { return handler(payload); }))
+    : entry[0](payload)
+};
+
+Store.prototype.subscribe = function subscribe (fn) {
+  return genericSubscribe(fn, this._subscribers)
+};
+
+Store.prototype.subscribeAction = function subscribeAction (fn) {
+  return genericSubscribe(fn, this._actionSubscribers)
+};
+
+Store.prototype.watch = function watch (getter, cb, options) {
+    var this$1 = this;
+
+  if (true) {
+    assert(typeof getter === 'function', "store.watch only accepts a function.");
+  }
+  return this._watcherVM.$watch(function () { return getter(this$1.state, this$1.getters); }, cb, options)
+};
+
+Store.prototype.replaceState = function replaceState (state) {
+    var this$1 = this;
+
+  this._withCommit(function () {
+    this$1._vm._data.$$state = state;
+  });
+};
+
+Store.prototype.registerModule = function registerModule (path, rawModule, options) {
+    if ( options === void 0 ) options = {};
+
+  if (typeof path === 'string') { path = [path]; }
+
+  if (true) {
+    assert(Array.isArray(path), "module path must be a string or an Array.");
+    assert(path.length > 0, 'cannot register the root module by using registerModule.');
+  }
+
+  this._modules.register(path, rawModule);
+  installModule(this, this.state, path, this._modules.get(path), options.preserveState);
+  // reset store to update getters...
+  resetStoreVM(this, this.state);
+};
+
+Store.prototype.unregisterModule = function unregisterModule (path) {
+    var this$1 = this;
+
+  if (typeof path === 'string') { path = [path]; }
+
+  if (true) {
+    assert(Array.isArray(path), "module path must be a string or an Array.");
+  }
+
+  this._modules.unregister(path);
+  this._withCommit(function () {
+    var parentState = getNestedState(this$1.state, path.slice(0, -1));
+    Vue.delete(parentState, path[path.length - 1]);
+  });
+  resetStore(this);
+};
+
+Store.prototype.hotUpdate = function hotUpdate (newOptions) {
+  this._modules.update(newOptions);
+  resetStore(this, true);
+};
+
+Store.prototype._withCommit = function _withCommit (fn) {
+  var committing = this._committing;
+  this._committing = true;
+  fn();
+  this._committing = committing;
+};
+
+Object.defineProperties( Store.prototype, prototypeAccessors );
+
+function genericSubscribe (fn, subs) {
+  if (subs.indexOf(fn) < 0) {
+    subs.push(fn);
+  }
+  return function () {
+    var i = subs.indexOf(fn);
+    if (i > -1) {
+      subs.splice(i, 1);
+    }
+  }
+}
+
+function resetStore (store, hot) {
+  store._actions = Object.create(null);
+  store._mutations = Object.create(null);
+  store._wrappedGetters = Object.create(null);
+  store._modulesNamespaceMap = Object.create(null);
+  var state = store.state;
+  // init all modules
+  installModule(store, state, [], store._modules.root, true);
+  // reset vm
+  resetStoreVM(store, state, hot);
+}
+
+function resetStoreVM (store, state, hot) {
+  var oldVm = store._vm;
+
+  // bind store public getters
+  store.getters = {};
+  var wrappedGetters = store._wrappedGetters;
+  var computed = {};
+  forEachValue(wrappedGetters, function (fn, key) {
+    // use computed to leverage its lazy-caching mechanism
+    computed[key] = function () { return fn(store); };
+    Object.defineProperty(store.getters, key, {
+      get: function () { return store._vm[key]; },
+      enumerable: true // for local getters
+    });
+  });
+
+  // use a Vue instance to store the state tree
+  // suppress warnings just in case the user has added
+  // some funky global mixins
+  var silent = Vue.config.silent;
+  Vue.config.silent = true;
+  store._vm = new Vue({
+    data: {
+      $$state: state
+    },
+    computed: computed
+  });
+  Vue.config.silent = silent;
+
+  // enable strict mode for new vm
+  if (store.strict) {
+    enableStrictMode(store);
+  }
+
+  if (oldVm) {
+    if (hot) {
+      // dispatch changes in all subscribed watchers
+      // to force getter re-evaluation for hot reloading.
+      store._withCommit(function () {
+        oldVm._data.$$state = null;
+      });
+    }
+    Vue.nextTick(function () { return oldVm.$destroy(); });
+  }
+}
+
+function installModule (store, rootState, path, module, hot) {
+  var isRoot = !path.length;
+  var namespace = store._modules.getNamespace(path);
+
+  // register in namespace map
+  if (module.namespaced) {
+    store._modulesNamespaceMap[namespace] = module;
+  }
+
+  // set state
+  if (!isRoot && !hot) {
+    var parentState = getNestedState(rootState, path.slice(0, -1));
+    var moduleName = path[path.length - 1];
+    store._withCommit(function () {
+      Vue.set(parentState, moduleName, module.state);
+    });
+  }
+
+  var local = module.context = makeLocalContext(store, namespace, path);
+
+  module.forEachMutation(function (mutation, key) {
+    var namespacedType = namespace + key;
+    registerMutation(store, namespacedType, mutation, local);
+  });
+
+  module.forEachAction(function (action, key) {
+    var type = action.root ? key : namespace + key;
+    var handler = action.handler || action;
+    registerAction(store, type, handler, local);
+  });
+
+  module.forEachGetter(function (getter, key) {
+    var namespacedType = namespace + key;
+    registerGetter(store, namespacedType, getter, local);
+  });
+
+  module.forEachChild(function (child, key) {
+    installModule(store, rootState, path.concat(key), child, hot);
+  });
+}
+
+/**
+ * make localized dispatch, commit, getters and state
+ * if there is no namespace, just use root ones
+ */
+function makeLocalContext (store, namespace, path) {
+  var noNamespace = namespace === '';
+
+  var local = {
+    dispatch: noNamespace ? store.dispatch : function (_type, _payload, _options) {
+      var args = unifyObjectStyle(_type, _payload, _options);
+      var payload = args.payload;
+      var options = args.options;
+      var type = args.type;
+
+      if (!options || !options.root) {
+        type = namespace + type;
+        if ("development" !== 'production' && !store._actions[type]) {
+          console.error(("[vuex] unknown local action type: " + (args.type) + ", global type: " + type));
+          return
+        }
+      }
+
+      return store.dispatch(type, payload)
+    },
+
+    commit: noNamespace ? store.commit : function (_type, _payload, _options) {
+      var args = unifyObjectStyle(_type, _payload, _options);
+      var payload = args.payload;
+      var options = args.options;
+      var type = args.type;
+
+      if (!options || !options.root) {
+        type = namespace + type;
+        if ("development" !== 'production' && !store._mutations[type]) {
+          console.error(("[vuex] unknown local mutation type: " + (args.type) + ", global type: " + type));
+          return
+        }
+      }
+
+      store.commit(type, payload, options);
+    }
+  };
+
+  // getters and state object must be gotten lazily
+  // because they will be changed by vm update
+  Object.defineProperties(local, {
+    getters: {
+      get: noNamespace
+        ? function () { return store.getters; }
+        : function () { return makeLocalGetters(store, namespace); }
+    },
+    state: {
+      get: function () { return getNestedState(store.state, path); }
+    }
+  });
+
+  return local
+}
+
+function makeLocalGetters (store, namespace) {
+  var gettersProxy = {};
+
+  var splitPos = namespace.length;
+  Object.keys(store.getters).forEach(function (type) {
+    // skip if the target getter is not match this namespace
+    if (type.slice(0, splitPos) !== namespace) { return }
+
+    // extract local getter type
+    var localType = type.slice(splitPos);
+
+    // Add a port to the getters proxy.
+    // Define as getter property because
+    // we do not want to evaluate the getters in this time.
+    Object.defineProperty(gettersProxy, localType, {
+      get: function () { return store.getters[type]; },
+      enumerable: true
+    });
+  });
+
+  return gettersProxy
+}
+
+function registerMutation (store, type, handler, local) {
+  var entry = store._mutations[type] || (store._mutations[type] = []);
+  entry.push(function wrappedMutationHandler (payload) {
+    handler.call(store, local.state, payload);
+  });
+}
+
+function registerAction (store, type, handler, local) {
+  var entry = store._actions[type] || (store._actions[type] = []);
+  entry.push(function wrappedActionHandler (payload, cb) {
+    var res = handler.call(store, {
+      dispatch: local.dispatch,
+      commit: local.commit,
+      getters: local.getters,
+      state: local.state,
+      rootGetters: store.getters,
+      rootState: store.state
+    }, payload, cb);
+    if (!isPromise(res)) {
+      res = Promise.resolve(res);
+    }
+    if (store._devtoolHook) {
+      return res.catch(function (err) {
+        store._devtoolHook.emit('vuex:error', err);
+        throw err
+      })
+    } else {
+      return res
+    }
+  });
+}
+
+function registerGetter (store, type, rawGetter, local) {
+  if (store._wrappedGetters[type]) {
+    if (true) {
+      console.error(("[vuex] duplicate getter key: " + type));
+    }
+    return
+  }
+  store._wrappedGetters[type] = function wrappedGetter (store) {
+    return rawGetter(
+      local.state, // local state
+      local.getters, // local getters
+      store.state, // root state
+      store.getters // root getters
+    )
+  };
+}
+
+function enableStrictMode (store) {
+  store._vm.$watch(function () { return this._data.$$state }, function () {
+    if (true) {
+      assert(store._committing, "Do not mutate vuex store state outside mutation handlers.");
+    }
+  }, { deep: true, sync: true });
+}
+
+function getNestedState (state, path) {
+  return path.length
+    ? path.reduce(function (state, key) { return state[key]; }, state)
+    : state
+}
+
+function unifyObjectStyle (type, payload, options) {
+  if (isObject(type) && type.type) {
+    options = payload;
+    payload = type;
+    type = type.type;
+  }
+
+  if (true) {
+    assert(typeof type === 'string', ("Expects string as the type, but found " + (typeof type) + "."));
+  }
+
+  return { type: type, payload: payload, options: options }
+}
+
+function install (_Vue) {
+  if (Vue && _Vue === Vue) {
+    if (true) {
+      console.error(
+        '[vuex] already installed. Vue.use(Vuex) should be called only once.'
+      );
+    }
+    return
+  }
+  Vue = _Vue;
+  applyMixin(Vue);
+}
+
+var mapState = normalizeNamespace(function (namespace, states) {
+  var res = {};
+  normalizeMap(states).forEach(function (ref) {
+    var key = ref.key;
+    var val = ref.val;
+
+    res[key] = function mappedState () {
+      var state = this.$store.state;
+      var getters = this.$store.getters;
+      if (namespace) {
+        var module = getModuleByNamespace(this.$store, 'mapState', namespace);
+        if (!module) {
+          return
+        }
+        state = module.context.state;
+        getters = module.context.getters;
+      }
+      return typeof val === 'function'
+        ? val.call(this, state, getters)
+        : state[val]
+    };
+    // mark vuex getter for devtools
+    res[key].vuex = true;
+  });
+  return res
+});
+
+var mapMutations = normalizeNamespace(function (namespace, mutations) {
+  var res = {};
+  normalizeMap(mutations).forEach(function (ref) {
+    var key = ref.key;
+    var val = ref.val;
+
+    res[key] = function mappedMutation () {
+      var args = [], len = arguments.length;
+      while ( len-- ) args[ len ] = arguments[ len ];
+
+      var commit = this.$store.commit;
+      if (namespace) {
+        var module = getModuleByNamespace(this.$store, 'mapMutations', namespace);
+        if (!module) {
+          return
+        }
+        commit = module.context.commit;
+      }
+      return typeof val === 'function'
+        ? val.apply(this, [commit].concat(args))
+        : commit.apply(this.$store, [val].concat(args))
+    };
+  });
+  return res
+});
+
+var mapGetters = normalizeNamespace(function (namespace, getters) {
+  var res = {};
+  normalizeMap(getters).forEach(function (ref) {
+    var key = ref.key;
+    var val = ref.val;
+
+    val = namespace + val;
+    res[key] = function mappedGetter () {
+      if (namespace && !getModuleByNamespace(this.$store, 'mapGetters', namespace)) {
+        return
+      }
+      if ("development" !== 'production' && !(val in this.$store.getters)) {
+        console.error(("[vuex] unknown getter: " + val));
+        return
+      }
+      return this.$store.getters[val]
+    };
+    // mark vuex getter for devtools
+    res[key].vuex = true;
+  });
+  return res
+});
+
+var mapActions = normalizeNamespace(function (namespace, actions) {
+  var res = {};
+  normalizeMap(actions).forEach(function (ref) {
+    var key = ref.key;
+    var val = ref.val;
+
+    res[key] = function mappedAction () {
+      var args = [], len = arguments.length;
+      while ( len-- ) args[ len ] = arguments[ len ];
+
+      var dispatch = this.$store.dispatch;
+      if (namespace) {
+        var module = getModuleByNamespace(this.$store, 'mapActions', namespace);
+        if (!module) {
+          return
+        }
+        dispatch = module.context.dispatch;
+      }
+      return typeof val === 'function'
+        ? val.apply(this, [dispatch].concat(args))
+        : dispatch.apply(this.$store, [val].concat(args))
+    };
+  });
+  return res
+});
+
+var createNamespacedHelpers = function (namespace) { return ({
+  mapState: mapState.bind(null, namespace),
+  mapGetters: mapGetters.bind(null, namespace),
+  mapMutations: mapMutations.bind(null, namespace),
+  mapActions: mapActions.bind(null, namespace)
+}); };
+
+function normalizeMap (map) {
+  return Array.isArray(map)
+    ? map.map(function (key) { return ({ key: key, val: key }); })
+    : Object.keys(map).map(function (key) { return ({ key: key, val: map[key] }); })
+}
+
+function normalizeNamespace (fn) {
+  return function (namespace, map) {
+    if (typeof namespace !== 'string') {
+      map = namespace;
+      namespace = '';
+    } else if (namespace.charAt(namespace.length - 1) !== '/') {
+      namespace += '/';
+    }
+    return fn(namespace, map)
+  }
+}
+
+function getModuleByNamespace (store, helper, namespace) {
+  var module = store._modulesNamespaceMap[namespace];
+  if ("development" !== 'production' && !module) {
+    console.error(("[vuex] module namespace not found in " + helper + "(): " + namespace));
+  }
+  return module
+}
+
+var index_esm = {
+  Store: Store,
+  install: install,
+  version: '3.0.1',
+  mapState: mapState,
+  mapMutations: mapMutations,
+  mapGetters: mapGetters,
+  mapActions: mapActions,
+  createNamespacedHelpers: createNamespacedHelpers
+};
+
+
+/* harmony default export */ __webpack_exports__["default"] = (index_esm);
+
+
+/***/ }),
+
 /***/ "./node_modules/webpack/buildin/global.js":
 /***/ (function(module, exports) {
 
@@ -42864,11 +45216,2226 @@ module.exports = function(module) {
 
 /***/ }),
 
+/***/ "./public/plugins/qrcode/jquery-qrcode.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+/*! jquery-qrcode v0.14.0 - https://larsjung.de/jquery-qrcode/ */
+(function (vendor_qrcode) {
+  'use strict';
+
+  var jq = window.jQuery;
+
+  // Check if canvas is available in the browser (as Modernizr does)
+  var hasCanvas = function () {
+    var elem = document.createElement('canvas');
+    return !!(elem.getContext && elem.getContext('2d'));
+  }();
+
+  // Wrapper for the original QR code generator.
+  function createQRCode(text, level, version, quiet) {
+    var qr = {};
+
+    var vqr = vendor_qrcode(version, level);
+    vqr.addData(text);
+    vqr.make();
+
+    quiet = quiet || 0;
+
+    var qrModuleCount = vqr.getModuleCount();
+    var quietModuleCount = vqr.getModuleCount() + 2 * quiet;
+
+    function isDark(row, col) {
+      row -= quiet;
+      col -= quiet;
+
+      if (row < 0 || row >= qrModuleCount || col < 0 || col >= qrModuleCount) {
+        return false;
+      }
+      return vqr.isDark(row, col);
+    }
+
+    function addBlank(l, t, r, b) {
+      var prevIsDark = qr.isDark;
+      var moduleSize = 1 / quietModuleCount;
+
+      qr.isDark = function (row, col) {
+        var ml = col * moduleSize;
+        var mt = row * moduleSize;
+        var mr = ml + moduleSize;
+        var mb = mt + moduleSize;
+
+        return prevIsDark(row, col) && (l > mr || ml > r || t > mb || mt > b);
+      };
+    }
+
+    qr.text = text;
+    qr.level = level;
+    qr.version = version;
+    qr.moduleCount = quietModuleCount;
+    qr.isDark = isDark;
+    qr.addBlank = addBlank;
+
+    return qr;
+  }
+
+  // Returns a minimal QR code for the given text starting with version `minVersion`.
+  // Returns `undefined` if `text` is too long to be encoded in `maxVersion`.
+  function createMinQRCode(text, level, minVersion, maxVersion, quiet) {
+    minVersion = Math.max(1, minVersion || 1);
+    maxVersion = Math.min(40, maxVersion || 40);
+    for (var version = minVersion; version <= maxVersion; version += 1) {
+      try {
+        return createQRCode(text, level, version, quiet);
+      } catch (err) {/* empty */}
+    }
+    return undefined;
+  }
+
+  function drawBackgroundLabel(qr, context, settings) {
+    var size = settings.size;
+    var font = 'bold ' + settings.mSize * size + 'px ' + settings.fontname;
+    var ctx = jq('<canvas/>')[0].getContext('2d');
+
+    ctx.font = font;
+
+    var w = ctx.measureText(settings.label).width;
+    var sh = settings.mSize;
+    var sw = w / size;
+    var sl = (1 - sw) * settings.mPosX;
+    var st = (1 - sh) * settings.mPosY;
+    var sr = sl + sw;
+    var sb = st + sh;
+    var pad = 0.01;
+
+    if (settings.mode === 1) {
+      // Strip
+      qr.addBlank(0, st - pad, size, sb + pad);
+    } else {
+      // Box
+      qr.addBlank(sl - pad, st - pad, sr + pad, sb + pad);
+    }
+
+    context.fillStyle = settings.fontcolor;
+    context.font = font;
+    context.fillText(settings.label, sl * size, st * size + 0.75 * settings.mSize * size);
+  }
+
+  function drawBackgroundImage(qr, context, settings) {
+    var size = settings.size;
+    var w = settings.image.naturalWidth || 1;
+    var h = settings.image.naturalHeight || 1;
+    var sh = settings.mSize;
+    var sw = sh * w / h;
+    var sl = (1 - sw) * settings.mPosX;
+    var st = (1 - sh) * settings.mPosY;
+    var sr = sl + sw;
+    var sb = st + sh;
+    var pad = 0.01;
+
+    if (settings.mode === 3) {
+      // Strip
+      qr.addBlank(0, st - pad, size, sb + pad);
+    } else {
+      // Box
+      qr.addBlank(sl - pad, st - pad, sr + pad, sb + pad);
+    }
+
+    context.drawImage(settings.image, sl * size, st * size, sw * size, sh * size);
+  }
+
+  function drawBackground(qr, context, settings) {
+    if (jq(settings.background).is('img')) {
+      context.drawImage(settings.background, 0, 0, settings.size, settings.size);
+    } else if (settings.background) {
+      context.fillStyle = settings.background;
+      context.fillRect(settings.left, settings.top, settings.size, settings.size);
+    }
+
+    var mode = settings.mode;
+    if (mode === 1 || mode === 2) {
+      drawBackgroundLabel(qr, context, settings);
+    } else if (mode === 3 || mode === 4) {
+      drawBackgroundImage(qr, context, settings);
+    }
+  }
+
+  function drawModuleDefault(qr, context, settings, left, top, width, row, col) {
+    if (qr.isDark(row, col)) {
+      context.rect(left, top, width, width);
+    }
+  }
+
+  function drawModuleRoundedDark(ctx, l, t, r, b, rad, nw, ne, se, sw) {
+    if (nw) {
+      ctx.moveTo(l + rad, t);
+    } else {
+      ctx.moveTo(l, t);
+    }
+
+    if (ne) {
+      ctx.lineTo(r - rad, t);
+      ctx.arcTo(r, t, r, b, rad);
+    } else {
+      ctx.lineTo(r, t);
+    }
+
+    if (se) {
+      ctx.lineTo(r, b - rad);
+      ctx.arcTo(r, b, l, b, rad);
+    } else {
+      ctx.lineTo(r, b);
+    }
+
+    if (sw) {
+      ctx.lineTo(l + rad, b);
+      ctx.arcTo(l, b, l, t, rad);
+    } else {
+      ctx.lineTo(l, b);
+    }
+
+    if (nw) {
+      ctx.lineTo(l, t + rad);
+      ctx.arcTo(l, t, r, t, rad);
+    } else {
+      ctx.lineTo(l, t);
+    }
+  }
+
+  function drawModuleRoundendLight(ctx, l, t, r, b, rad, nw, ne, se, sw) {
+    if (nw) {
+      ctx.moveTo(l + rad, t);
+      ctx.lineTo(l, t);
+      ctx.lineTo(l, t + rad);
+      ctx.arcTo(l, t, l + rad, t, rad);
+    }
+
+    if (ne) {
+      ctx.moveTo(r - rad, t);
+      ctx.lineTo(r, t);
+      ctx.lineTo(r, t + rad);
+      ctx.arcTo(r, t, r - rad, t, rad);
+    }
+
+    if (se) {
+      ctx.moveTo(r - rad, b);
+      ctx.lineTo(r, b);
+      ctx.lineTo(r, b - rad);
+      ctx.arcTo(r, b, r - rad, b, rad);
+    }
+
+    if (sw) {
+      ctx.moveTo(l + rad, b);
+      ctx.lineTo(l, b);
+      ctx.lineTo(l, b - rad);
+      ctx.arcTo(l, b, l + rad, b, rad);
+    }
+  }
+
+  function drawModuleRounded(qr, context, settings, left, top, width, row, col) {
+    var isDark = qr.isDark;
+    var right = left + width;
+    var bottom = top + width;
+    var radius = settings.radius * width;
+    var rowT = row - 1;
+    var rowB = row + 1;
+    var colL = col - 1;
+    var colR = col + 1;
+    var center = isDark(row, col);
+    var northwest = isDark(rowT, colL);
+    var north = isDark(rowT, col);
+    var northeast = isDark(rowT, colR);
+    var east = isDark(row, colR);
+    var southeast = isDark(rowB, colR);
+    var south = isDark(rowB, col);
+    var southwest = isDark(rowB, colL);
+    var west = isDark(row, colL);
+
+    if (center) {
+      drawModuleRoundedDark(context, left, top, right, bottom, radius, !north && !west, !north && !east, !south && !east, !south && !west);
+    } else {
+      drawModuleRoundendLight(context, left, top, right, bottom, radius, north && west && northwest, north && east && northeast, south && east && southeast, south && west && southwest);
+    }
+  }
+
+  function drawModules(qr, context, settings) {
+    var moduleCount = qr.moduleCount;
+    var moduleSize = settings.size / moduleCount;
+    var fn = drawModuleDefault;
+    var row;
+    var col;
+
+    if (settings.radius > 0 && settings.radius <= 0.5) {
+      fn = drawModuleRounded;
+    }
+
+    context.beginPath();
+    for (row = 0; row < moduleCount; row += 1) {
+      for (col = 0; col < moduleCount; col += 1) {
+        var l = settings.left + col * moduleSize;
+        var t = settings.top + row * moduleSize;
+        var w = moduleSize;
+
+        fn(qr, context, settings, l, t, w, row, col);
+      }
+    }
+    if (jq(settings.fill).is('img')) {
+      context.strokeStyle = 'rgba(0,0,0,0.5)';
+      context.lineWidth = 2;
+      context.stroke();
+      var prev = context.globalCompositeOperation;
+      context.globalCompositeOperation = 'destination-out';
+      context.fill();
+      context.globalCompositeOperation = prev;
+
+      context.clip();
+      context.drawImage(settings.fill, 0, 0, settings.size, settings.size);
+      context.restore();
+    } else {
+      context.fillStyle = settings.fill;
+      context.fill();
+    }
+  }
+
+  // Draws QR code to the given `canvas` and returns it.
+  function drawOnCanvas(canvas, settings) {
+    var qr = createMinQRCode(settings.text, settings.ecLevel, settings.minVersion, settings.maxVersion, settings.quiet);
+    if (!qr) {
+      return null;
+    }
+
+    var $canvas = jq(canvas).data('qrcode', qr);
+    var context = $canvas[0].getContext('2d');
+
+    drawBackground(qr, context, settings);
+    drawModules(qr, context, settings);
+
+    return $canvas;
+  }
+
+  // Returns a `canvas` element representing the QR code for the given settings.
+  function createCanvas(settings) {
+    var $canvas = jq('<canvas/>').attr('width', settings.size).attr('height', settings.size);
+    return drawOnCanvas($canvas, settings);
+  }
+
+  // Returns an `image` element representing the QR code for the given settings.
+  function createImage(settings) {
+    return jq('<img/>').attr('src', createCanvas(settings)[0].toDataURL('image/png'));
+  }
+
+  // Returns a `div` element representing the QR code for the given settings.
+  function createDiv(settings) {
+    var qr = createMinQRCode(settings.text, settings.ecLevel, settings.minVersion, settings.maxVersion, settings.quiet);
+    if (!qr) {
+      return null;
+    }
+
+    // some shortcuts to improve compression
+    var settings_size = settings.size;
+    var settings_bgColor = settings.background;
+    var math_floor = Math.floor;
+
+    var moduleCount = qr.moduleCount;
+    var moduleSize = math_floor(settings_size / moduleCount);
+    var offset = math_floor(0.5 * (settings_size - moduleSize * moduleCount));
+
+    var row;
+    var col;
+
+    var containerCSS = {
+      position: 'relative',
+      left: 0,
+      top: 0,
+      padding: 0,
+      margin: 0,
+      width: settings_size,
+      height: settings_size
+    };
+    var darkCSS = {
+      position: 'absolute',
+      padding: 0,
+      margin: 0,
+      width: moduleSize,
+      height: moduleSize,
+      'background-color': settings.fill
+    };
+
+    var $div = jq('<div/>').data('qrcode', qr).css(containerCSS);
+
+    if (settings_bgColor) {
+      $div.css('background-color', settings_bgColor);
+    }
+
+    for (row = 0; row < moduleCount; row += 1) {
+      for (col = 0; col < moduleCount; col += 1) {
+        if (qr.isDark(row, col)) {
+          jq('<div/>').css(darkCSS).css({
+            left: offset + col * moduleSize,
+            top: offset + row * moduleSize
+          }).appendTo($div);
+        }
+      }
+    }
+
+    return $div;
+  }
+
+  function createHTML(settings) {
+    if (hasCanvas && settings.render === 'canvas') {
+      return createCanvas(settings);
+    } else if (hasCanvas && settings.render === 'image') {
+      return createImage(settings);
+    }
+
+    return createDiv(settings);
+  }
+
+  // Plugin
+  // ======
+
+  // Default settings
+  // ----------------
+  var defaults = {
+    // render method: `'canvas'`, `'image'` or `'div'`
+    render: 'canvas',
+
+    // version range somewhere in 1 .. 40
+    minVersion: 1,
+    maxVersion: 40,
+
+    // error correction level: `'L'`, `'M'`, `'Q'` or `'H'`
+    ecLevel: 'L',
+
+    // offset in pixel if drawn onto existing canvas
+    left: 0,
+    top: 0,
+
+    // size in pixel
+    size: 200,
+
+    // code color or image element
+    fill: '#000',
+
+    // background color or image element, `null` for transparent background
+    background: null,
+
+    // content
+    text: 'no text',
+
+    // corner radius relative to module width: 0.0 .. 0.5
+    radius: 0,
+
+    // quiet zone in modules
+    quiet: 0,
+
+    // modes
+    // 0: normal
+    // 1: label strip
+    // 2: label box
+    // 3: image strip
+    // 4: image box
+    mode: 0,
+
+    mSize: 0.1,
+    mPosX: 0.5,
+    mPosY: 0.5,
+
+    label: 'no label',
+    fontname: 'sans',
+    fontcolor: '#000',
+
+    image: null
+  };
+
+  // Register the plugin
+  // -------------------
+  jq.fn.qrcode = function (options) {
+    var settings = jq.extend({}, defaults, options);
+
+    return this.each(function (idx, el) {
+      if (el.nodeName.toLowerCase() === 'canvas') {
+        drawOnCanvas(el, settings);
+      } else {
+        jq(el).append(createHTML(settings));
+      }
+    });
+  };
+})(function () {
+  // `qrcode` is the single public function defined by the `QR Code Generator`
+  //---------------------------------------------------------------------
+  //
+  // QR Code Generator for JavaScript
+  //
+  // Copyright (c) 2009 Kazuhiko Arase
+  //
+  // URL: http://www.d-project.com/
+  //
+  // Licensed under the MIT license:
+  //  http://www.opensource.org/licenses/mit-license.php
+  //
+  // The word 'QR Code' is registered trademark of
+  // DENSO WAVE INCORPORATED
+  //  http://www.denso-wave.com/qrcode/faqpatent-e.html
+  //
+  //---------------------------------------------------------------------
+
+  var qrcode = function () {
+
+    //---------------------------------------------------------------------
+    // qrcode
+    //---------------------------------------------------------------------
+
+    /**
+     * qrcode
+     * @param typeNumber 1 to 40
+     * @param errorCorrectLevel 'L','M','Q','H'
+     */
+    var qrcode = function qrcode(typeNumber, errorCorrectLevel) {
+
+      var PAD0 = 0xEC;
+      var PAD1 = 0x11;
+
+      var _typeNumber = typeNumber;
+      var _errorCorrectLevel = QRErrorCorrectLevel[errorCorrectLevel];
+      var _modules = null;
+      var _moduleCount = 0;
+      var _dataCache = null;
+      var _dataList = new Array();
+
+      var _this = {};
+
+      var makeImpl = function makeImpl(test, maskPattern) {
+
+        _moduleCount = _typeNumber * 4 + 17;
+        _modules = function (moduleCount) {
+          var modules = new Array(moduleCount);
+          for (var row = 0; row < moduleCount; row += 1) {
+            modules[row] = new Array(moduleCount);
+            for (var col = 0; col < moduleCount; col += 1) {
+              modules[row][col] = null;
+            }
+          }
+          return modules;
+        }(_moduleCount);
+
+        setupPositionProbePattern(0, 0);
+        setupPositionProbePattern(_moduleCount - 7, 0);
+        setupPositionProbePattern(0, _moduleCount - 7);
+        setupPositionAdjustPattern();
+        setupTimingPattern();
+        setupTypeInfo(test, maskPattern);
+
+        if (_typeNumber >= 7) {
+          setupTypeNumber(test);
+        }
+
+        if (_dataCache == null) {
+          _dataCache = createData(_typeNumber, _errorCorrectLevel, _dataList);
+        }
+
+        mapData(_dataCache, maskPattern);
+      };
+
+      var setupPositionProbePattern = function setupPositionProbePattern(row, col) {
+
+        for (var r = -1; r <= 7; r += 1) {
+
+          if (row + r <= -1 || _moduleCount <= row + r) continue;
+
+          for (var c = -1; c <= 7; c += 1) {
+
+            if (col + c <= -1 || _moduleCount <= col + c) continue;
+
+            if (0 <= r && r <= 6 && (c == 0 || c == 6) || 0 <= c && c <= 6 && (r == 0 || r == 6) || 2 <= r && r <= 4 && 2 <= c && c <= 4) {
+              _modules[row + r][col + c] = true;
+            } else {
+              _modules[row + r][col + c] = false;
+            }
+          }
+        }
+      };
+
+      var getBestMaskPattern = function getBestMaskPattern() {
+
+        var minLostPoint = 0;
+        var pattern = 0;
+
+        for (var i = 0; i < 8; i += 1) {
+
+          makeImpl(true, i);
+
+          var lostPoint = QRUtil.getLostPoint(_this);
+
+          if (i == 0 || minLostPoint > lostPoint) {
+            minLostPoint = lostPoint;
+            pattern = i;
+          }
+        }
+
+        return pattern;
+      };
+
+      var setupTimingPattern = function setupTimingPattern() {
+
+        for (var r = 8; r < _moduleCount - 8; r += 1) {
+          if (_modules[r][6] != null) {
+            continue;
+          }
+          _modules[r][6] = r % 2 == 0;
+        }
+
+        for (var c = 8; c < _moduleCount - 8; c += 1) {
+          if (_modules[6][c] != null) {
+            continue;
+          }
+          _modules[6][c] = c % 2 == 0;
+        }
+      };
+
+      var setupPositionAdjustPattern = function setupPositionAdjustPattern() {
+
+        var pos = QRUtil.getPatternPosition(_typeNumber);
+
+        for (var i = 0; i < pos.length; i += 1) {
+
+          for (var j = 0; j < pos.length; j += 1) {
+
+            var row = pos[i];
+            var col = pos[j];
+
+            if (_modules[row][col] != null) {
+              continue;
+            }
+
+            for (var r = -2; r <= 2; r += 1) {
+
+              for (var c = -2; c <= 2; c += 1) {
+
+                if (r == -2 || r == 2 || c == -2 || c == 2 || r == 0 && c == 0) {
+                  _modules[row + r][col + c] = true;
+                } else {
+                  _modules[row + r][col + c] = false;
+                }
+              }
+            }
+          }
+        }
+      };
+
+      var setupTypeNumber = function setupTypeNumber(test) {
+
+        var bits = QRUtil.getBCHTypeNumber(_typeNumber);
+
+        for (var i = 0; i < 18; i += 1) {
+          var mod = !test && (bits >> i & 1) == 1;
+          _modules[Math.floor(i / 3)][i % 3 + _moduleCount - 8 - 3] = mod;
+        }
+
+        for (var i = 0; i < 18; i += 1) {
+          var mod = !test && (bits >> i & 1) == 1;
+          _modules[i % 3 + _moduleCount - 8 - 3][Math.floor(i / 3)] = mod;
+        }
+      };
+
+      var setupTypeInfo = function setupTypeInfo(test, maskPattern) {
+
+        var data = _errorCorrectLevel << 3 | maskPattern;
+        var bits = QRUtil.getBCHTypeInfo(data);
+
+        // vertical
+        for (var i = 0; i < 15; i += 1) {
+
+          var mod = !test && (bits >> i & 1) == 1;
+
+          if (i < 6) {
+            _modules[i][8] = mod;
+          } else if (i < 8) {
+            _modules[i + 1][8] = mod;
+          } else {
+            _modules[_moduleCount - 15 + i][8] = mod;
+          }
+        }
+
+        // horizontal
+        for (var i = 0; i < 15; i += 1) {
+
+          var mod = !test && (bits >> i & 1) == 1;
+
+          if (i < 8) {
+            _modules[8][_moduleCount - i - 1] = mod;
+          } else if (i < 9) {
+            _modules[8][15 - i - 1 + 1] = mod;
+          } else {
+            _modules[8][15 - i - 1] = mod;
+          }
+        }
+
+        // fixed module
+        _modules[_moduleCount - 8][8] = !test;
+      };
+
+      var mapData = function mapData(data, maskPattern) {
+
+        var inc = -1;
+        var row = _moduleCount - 1;
+        var bitIndex = 7;
+        var byteIndex = 0;
+        var maskFunc = QRUtil.getMaskFunction(maskPattern);
+
+        for (var col = _moduleCount - 1; col > 0; col -= 2) {
+
+          if (col == 6) col -= 1;
+
+          while (true) {
+
+            for (var c = 0; c < 2; c += 1) {
+
+              if (_modules[row][col - c] == null) {
+
+                var dark = false;
+
+                if (byteIndex < data.length) {
+                  dark = (data[byteIndex] >>> bitIndex & 1) == 1;
+                }
+
+                var mask = maskFunc(row, col - c);
+
+                if (mask) {
+                  dark = !dark;
+                }
+
+                _modules[row][col - c] = dark;
+                bitIndex -= 1;
+
+                if (bitIndex == -1) {
+                  byteIndex += 1;
+                  bitIndex = 7;
+                }
+              }
+            }
+
+            row += inc;
+
+            if (row < 0 || _moduleCount <= row) {
+              row -= inc;
+              inc = -inc;
+              break;
+            }
+          }
+        }
+      };
+
+      var createBytes = function createBytes(buffer, rsBlocks) {
+
+        var offset = 0;
+
+        var maxDcCount = 0;
+        var maxEcCount = 0;
+
+        var dcdata = new Array(rsBlocks.length);
+        var ecdata = new Array(rsBlocks.length);
+
+        for (var r = 0; r < rsBlocks.length; r += 1) {
+
+          var dcCount = rsBlocks[r].dataCount;
+          var ecCount = rsBlocks[r].totalCount - dcCount;
+
+          maxDcCount = Math.max(maxDcCount, dcCount);
+          maxEcCount = Math.max(maxEcCount, ecCount);
+
+          dcdata[r] = new Array(dcCount);
+
+          for (var i = 0; i < dcdata[r].length; i += 1) {
+            dcdata[r][i] = 0xff & buffer.getBuffer()[i + offset];
+          }
+          offset += dcCount;
+
+          var rsPoly = QRUtil.getErrorCorrectPolynomial(ecCount);
+          var rawPoly = qrPolynomial(dcdata[r], rsPoly.getLength() - 1);
+
+          var modPoly = rawPoly.mod(rsPoly);
+          ecdata[r] = new Array(rsPoly.getLength() - 1);
+          for (var i = 0; i < ecdata[r].length; i += 1) {
+            var modIndex = i + modPoly.getLength() - ecdata[r].length;
+            ecdata[r][i] = modIndex >= 0 ? modPoly.getAt(modIndex) : 0;
+          }
+        }
+
+        var totalCodeCount = 0;
+        for (var i = 0; i < rsBlocks.length; i += 1) {
+          totalCodeCount += rsBlocks[i].totalCount;
+        }
+
+        var data = new Array(totalCodeCount);
+        var index = 0;
+
+        for (var i = 0; i < maxDcCount; i += 1) {
+          for (var r = 0; r < rsBlocks.length; r += 1) {
+            if (i < dcdata[r].length) {
+              data[index] = dcdata[r][i];
+              index += 1;
+            }
+          }
+        }
+
+        for (var i = 0; i < maxEcCount; i += 1) {
+          for (var r = 0; r < rsBlocks.length; r += 1) {
+            if (i < ecdata[r].length) {
+              data[index] = ecdata[r][i];
+              index += 1;
+            }
+          }
+        }
+
+        return data;
+      };
+
+      var createData = function createData(typeNumber, errorCorrectLevel, dataList) {
+
+        var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectLevel);
+
+        var buffer = qrBitBuffer();
+
+        for (var i = 0; i < dataList.length; i += 1) {
+          var data = dataList[i];
+          buffer.put(data.getMode(), 4);
+          buffer.put(data.getLength(), QRUtil.getLengthInBits(data.getMode(), typeNumber));
+          data.write(buffer);
+        }
+
+        // calc num max data.
+        var totalDataCount = 0;
+        for (var i = 0; i < rsBlocks.length; i += 1) {
+          totalDataCount += rsBlocks[i].dataCount;
+        }
+
+        if (buffer.getLengthInBits() > totalDataCount * 8) {
+          throw new Error('code length overflow. (' + buffer.getLengthInBits() + '>' + totalDataCount * 8 + ')');
+        }
+
+        // end code
+        if (buffer.getLengthInBits() + 4 <= totalDataCount * 8) {
+          buffer.put(0, 4);
+        }
+
+        // padding
+        while (buffer.getLengthInBits() % 8 != 0) {
+          buffer.putBit(false);
+        }
+
+        // padding
+        while (true) {
+
+          if (buffer.getLengthInBits() >= totalDataCount * 8) {
+            break;
+          }
+          buffer.put(PAD0, 8);
+
+          if (buffer.getLengthInBits() >= totalDataCount * 8) {
+            break;
+          }
+          buffer.put(PAD1, 8);
+        }
+
+        return createBytes(buffer, rsBlocks);
+      };
+
+      _this.addData = function (data) {
+        var newData = qr8BitByte(data);
+        _dataList.push(newData);
+        _dataCache = null;
+      };
+
+      _this.isDark = function (row, col) {
+        if (row < 0 || _moduleCount <= row || col < 0 || _moduleCount <= col) {
+          throw new Error(row + ',' + col);
+        }
+        return _modules[row][col];
+      };
+
+      _this.getModuleCount = function () {
+        return _moduleCount;
+      };
+
+      _this.make = function () {
+        makeImpl(false, getBestMaskPattern());
+      };
+
+      _this.createTableTag = function (cellSize, margin) {
+
+        cellSize = cellSize || 2;
+        margin = typeof margin == 'undefined' ? cellSize * 4 : margin;
+
+        var qrHtml = '';
+
+        qrHtml += '<table style="';
+        qrHtml += ' border-width: 0px; border-style: none;';
+        qrHtml += ' border-collapse: collapse;';
+        qrHtml += ' padding: 0px; margin: ' + margin + 'px;';
+        qrHtml += '">';
+        qrHtml += '<tbody>';
+
+        for (var r = 0; r < _this.getModuleCount(); r += 1) {
+
+          qrHtml += '<tr>';
+
+          for (var c = 0; c < _this.getModuleCount(); c += 1) {
+            qrHtml += '<td style="';
+            qrHtml += ' border-width: 0px; border-style: none;';
+            qrHtml += ' border-collapse: collapse;';
+            qrHtml += ' padding: 0px; margin: 0px;';
+            qrHtml += ' width: ' + cellSize + 'px;';
+            qrHtml += ' height: ' + cellSize + 'px;';
+            qrHtml += ' background-color: ';
+            qrHtml += _this.isDark(r, c) ? '#000000' : '#ffffff';
+            qrHtml += ';';
+            qrHtml += '"/>';
+          }
+
+          qrHtml += '</tr>';
+        }
+
+        qrHtml += '</tbody>';
+        qrHtml += '</table>';
+
+        return qrHtml;
+      };
+
+      _this.createImgTag = function (cellSize, margin) {
+
+        cellSize = cellSize || 2;
+        margin = typeof margin == 'undefined' ? cellSize * 4 : margin;
+
+        var size = _this.getModuleCount() * cellSize + margin * 2;
+        var min = margin;
+        var max = size - margin;
+
+        return createImgTag(size, size, function (x, y) {
+          if (min <= x && x < max && min <= y && y < max) {
+            var c = Math.floor((x - min) / cellSize);
+            var r = Math.floor((y - min) / cellSize);
+            return _this.isDark(r, c) ? 0 : 1;
+          } else {
+            return 1;
+          }
+        });
+      };
+
+      return _this;
+    };
+
+    //---------------------------------------------------------------------
+    // qrcode.stringToBytes
+    //---------------------------------------------------------------------
+
+    qrcode.stringToBytes = function (s) {
+      var bytes = new Array();
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charCodeAt(i);
+        bytes.push(c & 0xff);
+      }
+      return bytes;
+    };
+
+    //---------------------------------------------------------------------
+    // qrcode.createStringToBytes
+    //---------------------------------------------------------------------
+
+    /**
+     * @param unicodeData base64 string of byte array.
+     * [16bit Unicode],[16bit Bytes], ...
+     * @param numChars
+     */
+    qrcode.createStringToBytes = function (unicodeData, numChars) {
+
+      // create conversion map.
+
+      var unicodeMap = function () {
+
+        var bin = base64DecodeInputStream(unicodeData);
+        var read = function read() {
+          var b = bin.read();
+          if (b == -1) throw new Error();
+          return b;
+        };
+
+        var count = 0;
+        var unicodeMap = {};
+        while (true) {
+          var b0 = bin.read();
+          if (b0 == -1) break;
+          var b1 = read();
+          var b2 = read();
+          var b3 = read();
+          var k = String.fromCharCode(b0 << 8 | b1);
+          var v = b2 << 8 | b3;
+          unicodeMap[k] = v;
+          count += 1;
+        }
+        if (count != numChars) {
+          throw new Error(count + ' != ' + numChars);
+        }
+
+        return unicodeMap;
+      }();
+
+      var unknownChar = '?'.charCodeAt(0);
+
+      return function (s) {
+        var bytes = new Array();
+        for (var i = 0; i < s.length; i += 1) {
+          var c = s.charCodeAt(i);
+          if (c < 128) {
+            bytes.push(c);
+          } else {
+            var b = unicodeMap[s.charAt(i)];
+            if (typeof b == 'number') {
+              if ((b & 0xff) == b) {
+                // 1byte
+                bytes.push(b);
+              } else {
+                // 2bytes
+                bytes.push(b >>> 8);
+                bytes.push(b & 0xff);
+              }
+            } else {
+              bytes.push(unknownChar);
+            }
+          }
+        }
+        return bytes;
+      };
+    };
+
+    //---------------------------------------------------------------------
+    // QRMode
+    //---------------------------------------------------------------------
+
+    var QRMode = {
+      MODE_NUMBER: 1 << 0,
+      MODE_ALPHA_NUM: 1 << 1,
+      MODE_8BIT_BYTE: 1 << 2,
+      MODE_KANJI: 1 << 3
+    };
+
+    //---------------------------------------------------------------------
+    // QRErrorCorrectLevel
+    //---------------------------------------------------------------------
+
+    var QRErrorCorrectLevel = {
+      L: 1,
+      M: 0,
+      Q: 3,
+      H: 2
+    };
+
+    //---------------------------------------------------------------------
+    // QRMaskPattern
+    //---------------------------------------------------------------------
+
+    var QRMaskPattern = {
+      PATTERN000: 0,
+      PATTERN001: 1,
+      PATTERN010: 2,
+      PATTERN011: 3,
+      PATTERN100: 4,
+      PATTERN101: 5,
+      PATTERN110: 6,
+      PATTERN111: 7
+    };
+
+    //---------------------------------------------------------------------
+    // QRUtil
+    //---------------------------------------------------------------------
+
+    var QRUtil = function () {
+
+      var PATTERN_POSITION_TABLE = [[], [6, 18], [6, 22], [6, 26], [6, 30], [6, 34], [6, 22, 38], [6, 24, 42], [6, 26, 46], [6, 28, 50], [6, 30, 54], [6, 32, 58], [6, 34, 62], [6, 26, 46, 66], [6, 26, 48, 70], [6, 26, 50, 74], [6, 30, 54, 78], [6, 30, 56, 82], [6, 30, 58, 86], [6, 34, 62, 90], [6, 28, 50, 72, 94], [6, 26, 50, 74, 98], [6, 30, 54, 78, 102], [6, 28, 54, 80, 106], [6, 32, 58, 84, 110], [6, 30, 58, 86, 114], [6, 34, 62, 90, 118], [6, 26, 50, 74, 98, 122], [6, 30, 54, 78, 102, 126], [6, 26, 52, 78, 104, 130], [6, 30, 56, 82, 108, 134], [6, 34, 60, 86, 112, 138], [6, 30, 58, 86, 114, 142], [6, 34, 62, 90, 118, 146], [6, 30, 54, 78, 102, 126, 150], [6, 24, 50, 76, 102, 128, 154], [6, 28, 54, 80, 106, 132, 158], [6, 32, 58, 84, 110, 136, 162], [6, 26, 54, 82, 110, 138, 166], [6, 30, 58, 86, 114, 142, 170]];
+      var G15 = 1 << 10 | 1 << 8 | 1 << 5 | 1 << 4 | 1 << 2 | 1 << 1 | 1 << 0;
+      var G18 = 1 << 12 | 1 << 11 | 1 << 10 | 1 << 9 | 1 << 8 | 1 << 5 | 1 << 2 | 1 << 0;
+      var G15_MASK = 1 << 14 | 1 << 12 | 1 << 10 | 1 << 4 | 1 << 1;
+
+      var _this = {};
+
+      var getBCHDigit = function getBCHDigit(data) {
+        var digit = 0;
+        while (data != 0) {
+          digit += 1;
+          data >>>= 1;
+        }
+        return digit;
+      };
+
+      _this.getBCHTypeInfo = function (data) {
+        var d = data << 10;
+        while (getBCHDigit(d) - getBCHDigit(G15) >= 0) {
+          d ^= G15 << getBCHDigit(d) - getBCHDigit(G15);
+        }
+        return (data << 10 | d) ^ G15_MASK;
+      };
+
+      _this.getBCHTypeNumber = function (data) {
+        var d = data << 12;
+        while (getBCHDigit(d) - getBCHDigit(G18) >= 0) {
+          d ^= G18 << getBCHDigit(d) - getBCHDigit(G18);
+        }
+        return data << 12 | d;
+      };
+
+      _this.getPatternPosition = function (typeNumber) {
+        return PATTERN_POSITION_TABLE[typeNumber - 1];
+      };
+
+      _this.getMaskFunction = function (maskPattern) {
+
+        switch (maskPattern) {
+
+          case QRMaskPattern.PATTERN000:
+            return function (i, j) {
+              return (i + j) % 2 == 0;
+            };
+          case QRMaskPattern.PATTERN001:
+            return function (i, j) {
+              return i % 2 == 0;
+            };
+          case QRMaskPattern.PATTERN010:
+            return function (i, j) {
+              return j % 3 == 0;
+            };
+          case QRMaskPattern.PATTERN011:
+            return function (i, j) {
+              return (i + j) % 3 == 0;
+            };
+          case QRMaskPattern.PATTERN100:
+            return function (i, j) {
+              return (Math.floor(i / 2) + Math.floor(j / 3)) % 2 == 0;
+            };
+          case QRMaskPattern.PATTERN101:
+            return function (i, j) {
+              return i * j % 2 + i * j % 3 == 0;
+            };
+          case QRMaskPattern.PATTERN110:
+            return function (i, j) {
+              return (i * j % 2 + i * j % 3) % 2 == 0;
+            };
+          case QRMaskPattern.PATTERN111:
+            return function (i, j) {
+              return (i * j % 3 + (i + j) % 2) % 2 == 0;
+            };
+
+          default:
+            throw new Error('bad maskPattern:' + maskPattern);
+        }
+      };
+
+      _this.getErrorCorrectPolynomial = function (errorCorrectLength) {
+        var a = qrPolynomial([1], 0);
+        for (var i = 0; i < errorCorrectLength; i += 1) {
+          a = a.multiply(qrPolynomial([1, QRMath.gexp(i)], 0));
+        }
+        return a;
+      };
+
+      _this.getLengthInBits = function (mode, type) {
+
+        if (1 <= type && type < 10) {
+
+          // 1 - 9
+
+          switch (mode) {
+            case QRMode.MODE_NUMBER:
+              return 10;
+            case QRMode.MODE_ALPHA_NUM:
+              return 9;
+            case QRMode.MODE_8BIT_BYTE:
+              return 8;
+            case QRMode.MODE_KANJI:
+              return 8;
+            default:
+              throw new Error('mode:' + mode);
+          }
+        } else if (type < 27) {
+
+          // 10 - 26
+
+          switch (mode) {
+            case QRMode.MODE_NUMBER:
+              return 12;
+            case QRMode.MODE_ALPHA_NUM:
+              return 11;
+            case QRMode.MODE_8BIT_BYTE:
+              return 16;
+            case QRMode.MODE_KANJI:
+              return 10;
+            default:
+              throw new Error('mode:' + mode);
+          }
+        } else if (type < 41) {
+
+          // 27 - 40
+
+          switch (mode) {
+            case QRMode.MODE_NUMBER:
+              return 14;
+            case QRMode.MODE_ALPHA_NUM:
+              return 13;
+            case QRMode.MODE_8BIT_BYTE:
+              return 16;
+            case QRMode.MODE_KANJI:
+              return 12;
+            default:
+              throw new Error('mode:' + mode);
+          }
+        } else {
+          throw new Error('type:' + type);
+        }
+      };
+
+      _this.getLostPoint = function (qrcode) {
+
+        var moduleCount = qrcode.getModuleCount();
+
+        var lostPoint = 0;
+
+        // LEVEL1
+
+        for (var row = 0; row < moduleCount; row += 1) {
+          for (var col = 0; col < moduleCount; col += 1) {
+
+            var sameCount = 0;
+            var dark = qrcode.isDark(row, col);
+
+            for (var r = -1; r <= 1; r += 1) {
+
+              if (row + r < 0 || moduleCount <= row + r) {
+                continue;
+              }
+
+              for (var c = -1; c <= 1; c += 1) {
+
+                if (col + c < 0 || moduleCount <= col + c) {
+                  continue;
+                }
+
+                if (r == 0 && c == 0) {
+                  continue;
+                }
+
+                if (dark == qrcode.isDark(row + r, col + c)) {
+                  sameCount += 1;
+                }
+              }
+            }
+
+            if (sameCount > 5) {
+              lostPoint += 3 + sameCount - 5;
+            }
+          }
+        };
+
+        // LEVEL2
+
+        for (var row = 0; row < moduleCount - 1; row += 1) {
+          for (var col = 0; col < moduleCount - 1; col += 1) {
+            var count = 0;
+            if (qrcode.isDark(row, col)) count += 1;
+            if (qrcode.isDark(row + 1, col)) count += 1;
+            if (qrcode.isDark(row, col + 1)) count += 1;
+            if (qrcode.isDark(row + 1, col + 1)) count += 1;
+            if (count == 0 || count == 4) {
+              lostPoint += 3;
+            }
+          }
+        }
+
+        // LEVEL3
+
+        for (var row = 0; row < moduleCount; row += 1) {
+          for (var col = 0; col < moduleCount - 6; col += 1) {
+            if (qrcode.isDark(row, col) && !qrcode.isDark(row, col + 1) && qrcode.isDark(row, col + 2) && qrcode.isDark(row, col + 3) && qrcode.isDark(row, col + 4) && !qrcode.isDark(row, col + 5) && qrcode.isDark(row, col + 6)) {
+              lostPoint += 40;
+            }
+          }
+        }
+
+        for (var col = 0; col < moduleCount; col += 1) {
+          for (var row = 0; row < moduleCount - 6; row += 1) {
+            if (qrcode.isDark(row, col) && !qrcode.isDark(row + 1, col) && qrcode.isDark(row + 2, col) && qrcode.isDark(row + 3, col) && qrcode.isDark(row + 4, col) && !qrcode.isDark(row + 5, col) && qrcode.isDark(row + 6, col)) {
+              lostPoint += 40;
+            }
+          }
+        }
+
+        // LEVEL4
+
+        var darkCount = 0;
+
+        for (var col = 0; col < moduleCount; col += 1) {
+          for (var row = 0; row < moduleCount; row += 1) {
+            if (qrcode.isDark(row, col)) {
+              darkCount += 1;
+            }
+          }
+        }
+
+        var ratio = Math.abs(100 * darkCount / moduleCount / moduleCount - 50) / 5;
+        lostPoint += ratio * 10;
+
+        return lostPoint;
+      };
+
+      return _this;
+    }();
+
+    //---------------------------------------------------------------------
+    // QRMath
+    //---------------------------------------------------------------------
+
+    var QRMath = function () {
+
+      var EXP_TABLE = new Array(256);
+      var LOG_TABLE = new Array(256);
+
+      // initialize tables
+      for (var i = 0; i < 8; i += 1) {
+        EXP_TABLE[i] = 1 << i;
+      }
+      for (var i = 8; i < 256; i += 1) {
+        EXP_TABLE[i] = EXP_TABLE[i - 4] ^ EXP_TABLE[i - 5] ^ EXP_TABLE[i - 6] ^ EXP_TABLE[i - 8];
+      }
+      for (var i = 0; i < 255; i += 1) {
+        LOG_TABLE[EXP_TABLE[i]] = i;
+      }
+
+      var _this = {};
+
+      _this.glog = function (n) {
+
+        if (n < 1) {
+          throw new Error('glog(' + n + ')');
+        }
+
+        return LOG_TABLE[n];
+      };
+
+      _this.gexp = function (n) {
+
+        while (n < 0) {
+          n += 255;
+        }
+
+        while (n >= 256) {
+          n -= 255;
+        }
+
+        return EXP_TABLE[n];
+      };
+
+      return _this;
+    }();
+
+    //---------------------------------------------------------------------
+    // qrPolynomial
+    //---------------------------------------------------------------------
+
+    function qrPolynomial(num, shift) {
+
+      if (typeof num.length == 'undefined') {
+        throw new Error(num.length + '/' + shift);
+      }
+
+      var _num = function () {
+        var offset = 0;
+        while (offset < num.length && num[offset] == 0) {
+          offset += 1;
+        }
+        var _num = new Array(num.length - offset + shift);
+        for (var i = 0; i < num.length - offset; i += 1) {
+          _num[i] = num[i + offset];
+        }
+        return _num;
+      }();
+
+      var _this = {};
+
+      _this.getAt = function (index) {
+        return _num[index];
+      };
+
+      _this.getLength = function () {
+        return _num.length;
+      };
+
+      _this.multiply = function (e) {
+
+        var num = new Array(_this.getLength() + e.getLength() - 1);
+
+        for (var i = 0; i < _this.getLength(); i += 1) {
+          for (var j = 0; j < e.getLength(); j += 1) {
+            num[i + j] ^= QRMath.gexp(QRMath.glog(_this.getAt(i)) + QRMath.glog(e.getAt(j)));
+          }
+        }
+
+        return qrPolynomial(num, 0);
+      };
+
+      _this.mod = function (e) {
+
+        if (_this.getLength() - e.getLength() < 0) {
+          return _this;
+        }
+
+        var ratio = QRMath.glog(_this.getAt(0)) - QRMath.glog(e.getAt(0));
+
+        var num = new Array(_this.getLength());
+        for (var i = 0; i < _this.getLength(); i += 1) {
+          num[i] = _this.getAt(i);
+        }
+
+        for (var i = 0; i < e.getLength(); i += 1) {
+          num[i] ^= QRMath.gexp(QRMath.glog(e.getAt(i)) + ratio);
+        }
+
+        // recursive call
+        return qrPolynomial(num, 0).mod(e);
+      };
+
+      return _this;
+    };
+
+    //---------------------------------------------------------------------
+    // QRRSBlock
+    //---------------------------------------------------------------------
+
+    var QRRSBlock = function () {
+
+      var RS_BLOCK_TABLE = [
+
+      // L
+      // M
+      // Q
+      // H
+
+      // 1
+      [1, 26, 19], [1, 26, 16], [1, 26, 13], [1, 26, 9],
+
+      // 2
+      [1, 44, 34], [1, 44, 28], [1, 44, 22], [1, 44, 16],
+
+      // 3
+      [1, 70, 55], [1, 70, 44], [2, 35, 17], [2, 35, 13],
+
+      // 4
+      [1, 100, 80], [2, 50, 32], [2, 50, 24], [4, 25, 9],
+
+      // 5
+      [1, 134, 108], [2, 67, 43], [2, 33, 15, 2, 34, 16], [2, 33, 11, 2, 34, 12],
+
+      // 6
+      [2, 86, 68], [4, 43, 27], [4, 43, 19], [4, 43, 15],
+
+      // 7
+      [2, 98, 78], [4, 49, 31], [2, 32, 14, 4, 33, 15], [4, 39, 13, 1, 40, 14],
+
+      // 8
+      [2, 121, 97], [2, 60, 38, 2, 61, 39], [4, 40, 18, 2, 41, 19], [4, 40, 14, 2, 41, 15],
+
+      // 9
+      [2, 146, 116], [3, 58, 36, 2, 59, 37], [4, 36, 16, 4, 37, 17], [4, 36, 12, 4, 37, 13],
+
+      // 10
+      [2, 86, 68, 2, 87, 69], [4, 69, 43, 1, 70, 44], [6, 43, 19, 2, 44, 20], [6, 43, 15, 2, 44, 16],
+
+      // 11
+      [4, 101, 81], [1, 80, 50, 4, 81, 51], [4, 50, 22, 4, 51, 23], [3, 36, 12, 8, 37, 13],
+
+      // 12
+      [2, 116, 92, 2, 117, 93], [6, 58, 36, 2, 59, 37], [4, 46, 20, 6, 47, 21], [7, 42, 14, 4, 43, 15],
+
+      // 13
+      [4, 133, 107], [8, 59, 37, 1, 60, 38], [8, 44, 20, 4, 45, 21], [12, 33, 11, 4, 34, 12],
+
+      // 14
+      [3, 145, 115, 1, 146, 116], [4, 64, 40, 5, 65, 41], [11, 36, 16, 5, 37, 17], [11, 36, 12, 5, 37, 13],
+
+      // 15
+      [5, 109, 87, 1, 110, 88], [5, 65, 41, 5, 66, 42], [5, 54, 24, 7, 55, 25], [11, 36, 12, 7, 37, 13],
+
+      // 16
+      [5, 122, 98, 1, 123, 99], [7, 73, 45, 3, 74, 46], [15, 43, 19, 2, 44, 20], [3, 45, 15, 13, 46, 16],
+
+      // 17
+      [1, 135, 107, 5, 136, 108], [10, 74, 46, 1, 75, 47], [1, 50, 22, 15, 51, 23], [2, 42, 14, 17, 43, 15],
+
+      // 18
+      [5, 150, 120, 1, 151, 121], [9, 69, 43, 4, 70, 44], [17, 50, 22, 1, 51, 23], [2, 42, 14, 19, 43, 15],
+
+      // 19
+      [3, 141, 113, 4, 142, 114], [3, 70, 44, 11, 71, 45], [17, 47, 21, 4, 48, 22], [9, 39, 13, 16, 40, 14],
+
+      // 20
+      [3, 135, 107, 5, 136, 108], [3, 67, 41, 13, 68, 42], [15, 54, 24, 5, 55, 25], [15, 43, 15, 10, 44, 16],
+
+      // 21
+      [4, 144, 116, 4, 145, 117], [17, 68, 42], [17, 50, 22, 6, 51, 23], [19, 46, 16, 6, 47, 17],
+
+      // 22
+      [2, 139, 111, 7, 140, 112], [17, 74, 46], [7, 54, 24, 16, 55, 25], [34, 37, 13],
+
+      // 23
+      [4, 151, 121, 5, 152, 122], [4, 75, 47, 14, 76, 48], [11, 54, 24, 14, 55, 25], [16, 45, 15, 14, 46, 16],
+
+      // 24
+      [6, 147, 117, 4, 148, 118], [6, 73, 45, 14, 74, 46], [11, 54, 24, 16, 55, 25], [30, 46, 16, 2, 47, 17],
+
+      // 25
+      [8, 132, 106, 4, 133, 107], [8, 75, 47, 13, 76, 48], [7, 54, 24, 22, 55, 25], [22, 45, 15, 13, 46, 16],
+
+      // 26
+      [10, 142, 114, 2, 143, 115], [19, 74, 46, 4, 75, 47], [28, 50, 22, 6, 51, 23], [33, 46, 16, 4, 47, 17],
+
+      // 27
+      [8, 152, 122, 4, 153, 123], [22, 73, 45, 3, 74, 46], [8, 53, 23, 26, 54, 24], [12, 45, 15, 28, 46, 16],
+
+      // 28
+      [3, 147, 117, 10, 148, 118], [3, 73, 45, 23, 74, 46], [4, 54, 24, 31, 55, 25], [11, 45, 15, 31, 46, 16],
+
+      // 29
+      [7, 146, 116, 7, 147, 117], [21, 73, 45, 7, 74, 46], [1, 53, 23, 37, 54, 24], [19, 45, 15, 26, 46, 16],
+
+      // 30
+      [5, 145, 115, 10, 146, 116], [19, 75, 47, 10, 76, 48], [15, 54, 24, 25, 55, 25], [23, 45, 15, 25, 46, 16],
+
+      // 31
+      [13, 145, 115, 3, 146, 116], [2, 74, 46, 29, 75, 47], [42, 54, 24, 1, 55, 25], [23, 45, 15, 28, 46, 16],
+
+      // 32
+      [17, 145, 115], [10, 74, 46, 23, 75, 47], [10, 54, 24, 35, 55, 25], [19, 45, 15, 35, 46, 16],
+
+      // 33
+      [17, 145, 115, 1, 146, 116], [14, 74, 46, 21, 75, 47], [29, 54, 24, 19, 55, 25], [11, 45, 15, 46, 46, 16],
+
+      // 34
+      [13, 145, 115, 6, 146, 116], [14, 74, 46, 23, 75, 47], [44, 54, 24, 7, 55, 25], [59, 46, 16, 1, 47, 17],
+
+      // 35
+      [12, 151, 121, 7, 152, 122], [12, 75, 47, 26, 76, 48], [39, 54, 24, 14, 55, 25], [22, 45, 15, 41, 46, 16],
+
+      // 36
+      [6, 151, 121, 14, 152, 122], [6, 75, 47, 34, 76, 48], [46, 54, 24, 10, 55, 25], [2, 45, 15, 64, 46, 16],
+
+      // 37
+      [17, 152, 122, 4, 153, 123], [29, 74, 46, 14, 75, 47], [49, 54, 24, 10, 55, 25], [24, 45, 15, 46, 46, 16],
+
+      // 38
+      [4, 152, 122, 18, 153, 123], [13, 74, 46, 32, 75, 47], [48, 54, 24, 14, 55, 25], [42, 45, 15, 32, 46, 16],
+
+      // 39
+      [20, 147, 117, 4, 148, 118], [40, 75, 47, 7, 76, 48], [43, 54, 24, 22, 55, 25], [10, 45, 15, 67, 46, 16],
+
+      // 40
+      [19, 148, 118, 6, 149, 119], [18, 75, 47, 31, 76, 48], [34, 54, 24, 34, 55, 25], [20, 45, 15, 61, 46, 16]];
+
+      var qrRSBlock = function qrRSBlock(totalCount, dataCount) {
+        var _this = {};
+        _this.totalCount = totalCount;
+        _this.dataCount = dataCount;
+        return _this;
+      };
+
+      var _this = {};
+
+      var getRsBlockTable = function getRsBlockTable(typeNumber, errorCorrectLevel) {
+
+        switch (errorCorrectLevel) {
+          case QRErrorCorrectLevel.L:
+            return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0];
+          case QRErrorCorrectLevel.M:
+            return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1];
+          case QRErrorCorrectLevel.Q:
+            return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2];
+          case QRErrorCorrectLevel.H:
+            return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3];
+          default:
+            return undefined;
+        }
+      };
+
+      _this.getRSBlocks = function (typeNumber, errorCorrectLevel) {
+
+        var rsBlock = getRsBlockTable(typeNumber, errorCorrectLevel);
+
+        if (typeof rsBlock == 'undefined') {
+          throw new Error('bad rs block @ typeNumber:' + typeNumber + '/errorCorrectLevel:' + errorCorrectLevel);
+        }
+
+        var length = rsBlock.length / 3;
+
+        var list = new Array();
+
+        for (var i = 0; i < length; i += 1) {
+
+          var count = rsBlock[i * 3 + 0];
+          var totalCount = rsBlock[i * 3 + 1];
+          var dataCount = rsBlock[i * 3 + 2];
+
+          for (var j = 0; j < count; j += 1) {
+            list.push(qrRSBlock(totalCount, dataCount));
+          }
+        }
+
+        return list;
+      };
+
+      return _this;
+    }();
+
+    //---------------------------------------------------------------------
+    // qrBitBuffer
+    //---------------------------------------------------------------------
+
+    var qrBitBuffer = function qrBitBuffer() {
+
+      var _buffer = new Array();
+      var _length = 0;
+
+      var _this = {};
+
+      _this.getBuffer = function () {
+        return _buffer;
+      };
+
+      _this.getAt = function (index) {
+        var bufIndex = Math.floor(index / 8);
+        return (_buffer[bufIndex] >>> 7 - index % 8 & 1) == 1;
+      };
+
+      _this.put = function (num, length) {
+        for (var i = 0; i < length; i += 1) {
+          _this.putBit((num >>> length - i - 1 & 1) == 1);
+        }
+      };
+
+      _this.getLengthInBits = function () {
+        return _length;
+      };
+
+      _this.putBit = function (bit) {
+
+        var bufIndex = Math.floor(_length / 8);
+        if (_buffer.length <= bufIndex) {
+          _buffer.push(0);
+        }
+
+        if (bit) {
+          _buffer[bufIndex] |= 0x80 >>> _length % 8;
+        }
+
+        _length += 1;
+      };
+
+      return _this;
+    };
+
+    //---------------------------------------------------------------------
+    // qr8BitByte
+    //---------------------------------------------------------------------
+
+    var qr8BitByte = function qr8BitByte(data) {
+
+      var _mode = QRMode.MODE_8BIT_BYTE;
+      var _data = data;
+      var _bytes = qrcode.stringToBytes(data);
+
+      var _this = {};
+
+      _this.getMode = function () {
+        return _mode;
+      };
+
+      _this.getLength = function (buffer) {
+        return _bytes.length;
+      };
+
+      _this.write = function (buffer) {
+        for (var i = 0; i < _bytes.length; i += 1) {
+          buffer.put(_bytes[i], 8);
+        }
+      };
+
+      return _this;
+    };
+
+    //=====================================================================
+    // GIF Support etc.
+    //
+
+    //---------------------------------------------------------------------
+    // byteArrayOutputStream
+    //---------------------------------------------------------------------
+
+    var byteArrayOutputStream = function byteArrayOutputStream() {
+
+      var _bytes = new Array();
+
+      var _this = {};
+
+      _this.writeByte = function (b) {
+        _bytes.push(b & 0xff);
+      };
+
+      _this.writeShort = function (i) {
+        _this.writeByte(i);
+        _this.writeByte(i >>> 8);
+      };
+
+      _this.writeBytes = function (b, off, len) {
+        off = off || 0;
+        len = len || b.length;
+        for (var i = 0; i < len; i += 1) {
+          _this.writeByte(b[i + off]);
+        }
+      };
+
+      _this.writeString = function (s) {
+        for (var i = 0; i < s.length; i += 1) {
+          _this.writeByte(s.charCodeAt(i));
+        }
+      };
+
+      _this.toByteArray = function () {
+        return _bytes;
+      };
+
+      _this.toString = function () {
+        var s = '';
+        s += '[';
+        for (var i = 0; i < _bytes.length; i += 1) {
+          if (i > 0) {
+            s += ',';
+          }
+          s += _bytes[i];
+        }
+        s += ']';
+        return s;
+      };
+
+      return _this;
+    };
+
+    //---------------------------------------------------------------------
+    // base64EncodeOutputStream
+    //---------------------------------------------------------------------
+
+    var base64EncodeOutputStream = function base64EncodeOutputStream() {
+
+      var _buffer = 0;
+      var _buflen = 0;
+      var _length = 0;
+      var _base64 = '';
+
+      var _this = {};
+
+      var writeEncoded = function writeEncoded(b) {
+        _base64 += String.fromCharCode(encode(b & 0x3f));
+      };
+
+      var encode = function encode(n) {
+        if (n < 0) {
+          // error.
+        } else if (n < 26) {
+          return 0x41 + n;
+        } else if (n < 52) {
+          return 0x61 + (n - 26);
+        } else if (n < 62) {
+          return 0x30 + (n - 52);
+        } else if (n == 62) {
+          return 0x2b;
+        } else if (n == 63) {
+          return 0x2f;
+        }
+        throw new Error('n:' + n);
+      };
+
+      _this.writeByte = function (n) {
+
+        _buffer = _buffer << 8 | n & 0xff;
+        _buflen += 8;
+        _length += 1;
+
+        while (_buflen >= 6) {
+          writeEncoded(_buffer >>> _buflen - 6);
+          _buflen -= 6;
+        }
+      };
+
+      _this.flush = function () {
+
+        if (_buflen > 0) {
+          writeEncoded(_buffer << 6 - _buflen);
+          _buffer = 0;
+          _buflen = 0;
+        }
+
+        if (_length % 3 != 0) {
+          // padding
+          var padlen = 3 - _length % 3;
+          for (var i = 0; i < padlen; i += 1) {
+            _base64 += '=';
+          }
+        }
+      };
+
+      _this.toString = function () {
+        return _base64;
+      };
+
+      return _this;
+    };
+
+    //---------------------------------------------------------------------
+    // base64DecodeInputStream
+    //---------------------------------------------------------------------
+
+    var base64DecodeInputStream = function base64DecodeInputStream(str) {
+
+      var _str = str;
+      var _pos = 0;
+      var _buffer = 0;
+      var _buflen = 0;
+
+      var _this = {};
+
+      _this.read = function () {
+
+        while (_buflen < 8) {
+
+          if (_pos >= _str.length) {
+            if (_buflen == 0) {
+              return -1;
+            }
+            throw new Error('unexpected end of file./' + _buflen);
+          }
+
+          var c = _str.charAt(_pos);
+          _pos += 1;
+
+          if (c == '=') {
+            _buflen = 0;
+            return -1;
+          } else if (c.match(/^\s$/)) {
+            // ignore if whitespace.
+            continue;
+          }
+
+          _buffer = _buffer << 6 | decode(c.charCodeAt(0));
+          _buflen += 6;
+        }
+
+        var n = _buffer >>> _buflen - 8 & 0xff;
+        _buflen -= 8;
+        return n;
+      };
+
+      var decode = function decode(c) {
+        if (0x41 <= c && c <= 0x5a) {
+          return c - 0x41;
+        } else if (0x61 <= c && c <= 0x7a) {
+          return c - 0x61 + 26;
+        } else if (0x30 <= c && c <= 0x39) {
+          return c - 0x30 + 52;
+        } else if (c == 0x2b) {
+          return 62;
+        } else if (c == 0x2f) {
+          return 63;
+        } else {
+          throw new Error('c:' + c);
+        }
+      };
+
+      return _this;
+    };
+
+    //---------------------------------------------------------------------
+    // gifImage (B/W)
+    //---------------------------------------------------------------------
+
+    var gifImage = function gifImage(width, height) {
+
+      var _width = width;
+      var _height = height;
+      var _data = new Array(width * height);
+
+      var _this = {};
+
+      _this.setPixel = function (x, y, pixel) {
+        _data[y * _width + x] = pixel;
+      };
+
+      _this.write = function (out) {
+
+        //---------------------------------
+        // GIF Signature
+
+        out.writeString('GIF87a');
+
+        //---------------------------------
+        // Screen Descriptor
+
+        out.writeShort(_width);
+        out.writeShort(_height);
+
+        out.writeByte(0x80); // 2bit
+        out.writeByte(0);
+        out.writeByte(0);
+
+        //---------------------------------
+        // Global Color Map
+
+        // black
+        out.writeByte(0x00);
+        out.writeByte(0x00);
+        out.writeByte(0x00);
+
+        // white
+        out.writeByte(0xff);
+        out.writeByte(0xff);
+        out.writeByte(0xff);
+
+        //---------------------------------
+        // Image Descriptor
+
+        out.writeString(',');
+        out.writeShort(0);
+        out.writeShort(0);
+        out.writeShort(_width);
+        out.writeShort(_height);
+        out.writeByte(0);
+
+        //---------------------------------
+        // Local Color Map
+
+        //---------------------------------
+        // Raster Data
+
+        var lzwMinCodeSize = 2;
+        var raster = getLZWRaster(lzwMinCodeSize);
+
+        out.writeByte(lzwMinCodeSize);
+
+        var offset = 0;
+
+        while (raster.length - offset > 255) {
+          out.writeByte(255);
+          out.writeBytes(raster, offset, 255);
+          offset += 255;
+        }
+
+        out.writeByte(raster.length - offset);
+        out.writeBytes(raster, offset, raster.length - offset);
+        out.writeByte(0x00);
+
+        //---------------------------------
+        // GIF Terminator
+        out.writeString(';');
+      };
+
+      var bitOutputStream = function bitOutputStream(out) {
+
+        var _out = out;
+        var _bitLength = 0;
+        var _bitBuffer = 0;
+
+        var _this = {};
+
+        _this.write = function (data, length) {
+
+          if (data >>> length != 0) {
+            throw new Error('length over');
+          }
+
+          while (_bitLength + length >= 8) {
+            _out.writeByte(0xff & (data << _bitLength | _bitBuffer));
+            length -= 8 - _bitLength;
+            data >>>= 8 - _bitLength;
+            _bitBuffer = 0;
+            _bitLength = 0;
+          }
+
+          _bitBuffer = data << _bitLength | _bitBuffer;
+          _bitLength = _bitLength + length;
+        };
+
+        _this.flush = function () {
+          if (_bitLength > 0) {
+            _out.writeByte(_bitBuffer);
+          }
+        };
+
+        return _this;
+      };
+
+      var getLZWRaster = function getLZWRaster(lzwMinCodeSize) {
+
+        var clearCode = 1 << lzwMinCodeSize;
+        var endCode = (1 << lzwMinCodeSize) + 1;
+        var bitLength = lzwMinCodeSize + 1;
+
+        // Setup LZWTable
+        var table = lzwTable();
+
+        for (var i = 0; i < clearCode; i += 1) {
+          table.add(String.fromCharCode(i));
+        }
+        table.add(String.fromCharCode(clearCode));
+        table.add(String.fromCharCode(endCode));
+
+        var byteOut = byteArrayOutputStream();
+        var bitOut = bitOutputStream(byteOut);
+
+        // clear code
+        bitOut.write(clearCode, bitLength);
+
+        var dataIndex = 0;
+
+        var s = String.fromCharCode(_data[dataIndex]);
+        dataIndex += 1;
+
+        while (dataIndex < _data.length) {
+
+          var c = String.fromCharCode(_data[dataIndex]);
+          dataIndex += 1;
+
+          if (table.contains(s + c)) {
+
+            s = s + c;
+          } else {
+
+            bitOut.write(table.indexOf(s), bitLength);
+
+            if (table.size() < 0xfff) {
+
+              if (table.size() == 1 << bitLength) {
+                bitLength += 1;
+              }
+
+              table.add(s + c);
+            }
+
+            s = c;
+          }
+        }
+
+        bitOut.write(table.indexOf(s), bitLength);
+
+        // end code
+        bitOut.write(endCode, bitLength);
+
+        bitOut.flush();
+
+        return byteOut.toByteArray();
+      };
+
+      var lzwTable = function lzwTable() {
+
+        var _map = {};
+        var _size = 0;
+
+        var _this = {};
+
+        _this.add = function (key) {
+          if (_this.contains(key)) {
+            throw new Error('dup key:' + key);
+          }
+          _map[key] = _size;
+          _size += 1;
+        };
+
+        _this.size = function () {
+          return _size;
+        };
+
+        _this.indexOf = function (key) {
+          return _map[key];
+        };
+
+        _this.contains = function (key) {
+          return typeof _map[key] != 'undefined';
+        };
+
+        return _this;
+      };
+
+      return _this;
+    };
+
+    var createImgTag = function createImgTag(width, height, getPixel, alt) {
+
+      var gif = gifImage(width, height);
+      for (var y = 0; y < height; y += 1) {
+        for (var x = 0; x < width; x += 1) {
+          gif.setPixel(x, y, getPixel(x, y));
+        }
+      }
+
+      var b = byteArrayOutputStream();
+      gif.write(b);
+
+      var base64 = base64EncodeOutputStream();
+      var bytes = b.toByteArray();
+      for (var i = 0; i < bytes.length; i += 1) {
+        base64.writeByte(bytes[i]);
+      }
+      base64.flush();
+
+      var img = '';
+      img += '<img';
+      img += ' src="';
+      img += 'data:image/gif;base64,';
+      img += base64;
+      img += '"';
+      img += ' width="';
+      img += width;
+      img += '"';
+      img += ' height="';
+      img += height;
+      img += '"';
+      if (alt) {
+        img += ' alt="';
+        img += alt;
+        img += '"';
+      }
+      img += '/>';
+
+      return img;
+    };
+
+    //---------------------------------------------------------------------
+    // returns qrcode function.
+
+    return qrcode;
+  }();
+
+  (function (factory) {
+    if (true) {
+      !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+    } else if ((typeof exports === 'undefined' ? 'undefined' : _typeof(exports)) === 'object') {
+      module.exports = factory();
+    }
+  })(function () {
+    return qrcode;
+  });
+  //---------------------------------------------------------------------
+  //
+  // QR Code Generator for JavaScript UTF8 Support (optional)
+  //
+  // Copyright (c) 2011 Kazuhiko Arase
+  //
+  // URL: http://www.d-project.com/
+  //
+  // Licensed under the MIT license:
+  //  http://www.opensource.org/licenses/mit-license.php
+  //
+  // The word 'QR Code' is registered trademark of
+  // DENSO WAVE INCORPORATED
+  //  http://www.denso-wave.com/qrcode/faqpatent-e.html
+  //
+  //---------------------------------------------------------------------
+
+  !function (qrcode) {
+
+    //---------------------------------------------------------------------
+    // overwrite qrcode.stringToBytes
+    //---------------------------------------------------------------------
+
+    qrcode.stringToBytes = function (s) {
+      // http://stackoverflow.com/questions/18729405/how-to-convert-utf8-string-to-byte-array
+      function toUTF8Array(str) {
+        var utf8 = [];
+        for (var i = 0; i < str.length; i++) {
+          var charcode = str.charCodeAt(i);
+          if (charcode < 0x80) utf8.push(charcode);else if (charcode < 0x800) {
+            utf8.push(0xc0 | charcode >> 6, 0x80 | charcode & 0x3f);
+          } else if (charcode < 0xd800 || charcode >= 0xe000) {
+            utf8.push(0xe0 | charcode >> 12, 0x80 | charcode >> 6 & 0x3f, 0x80 | charcode & 0x3f);
+          }
+          // surrogate pair
+          else {
+              i++;
+              // UTF-16 encodes 0x10000-0x10FFFF by
+              // subtracting 0x10000 and splitting the
+              // 20 bits of 0x0-0xFFFFF into two halves
+              charcode = 0x10000 + ((charcode & 0x3ff) << 10 | str.charCodeAt(i) & 0x3ff);
+              utf8.push(0xf0 | charcode >> 18, 0x80 | charcode >> 12 & 0x3f, 0x80 | charcode >> 6 & 0x3f, 0x80 | charcode & 0x3f);
+            }
+        }
+        return utf8;
+      }
+      return toUTF8Array(s);
+    };
+  }(qrcode);
+
+  return qrcode; // eslint-disable-line no-undef
+}());
+
+/***/ }),
+
+/***/ "./resources/assets/js/api/index.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.post = post;
+exports.get = get;
+
+var _axios = __webpack_require__("./node_modules/axios/index.js");
+
+var _axios2 = _interopRequireDefault(_axios);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function post(url, data) {
+    return (0, _axios2.default)({
+        method: 'POST',
+        url: url,
+        data: data,
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+}
+
+function get(url) {
+    return (0, _axios2.default)({
+        method: 'GET',
+        url: url,
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+}
+
+/***/ }),
+
 /***/ "./resources/assets/js/app.js":
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+
+var _store = __webpack_require__("./resources/assets/js/store.js");
 
 /**
  * First we will load all of this project's JavaScript dependencies which
@@ -42886,10 +47453,12 @@ window.Vue = __webpack_require__("./node_modules/vue/dist/vue.common.js");
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-Vue.component('example-component', __webpack_require__("./resources/assets/js/components/ExampleComponent.vue"));
+Vue.component('init', __webpack_require__("./resources/assets/js/components/Init.vue"));
+Vue.component('profile', __webpack_require__("./resources/assets/js/components/views/profiles/Profile.vue"));
 
 var app = new Vue({
-  el: '#app'
+  el: '#app',
+  store: _store.store
 });
 
 /***/ }),
@@ -42955,15 +47524,15 @@ if (token) {
 
 /***/ }),
 
-/***/ "./resources/assets/js/components/ExampleComponent.vue":
+/***/ "./resources/assets/js/components/Init.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 var normalizeComponent = __webpack_require__("./node_modules/vue-loader/lib/component-normalizer.js")
 /* script */
-var __vue_script__ = __webpack_require__("./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}],\"es2015\",\"es2017\"],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0&bustCache!./resources/assets/js/components/ExampleComponent.vue")
+var __vue_script__ = __webpack_require__("./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}],\"es2015\",\"es2017\"],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0&bustCache!./resources/assets/js/components/Init.vue")
 /* template */
-var __vue_template__ = __webpack_require__("./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-7168fb6a\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0&bustCache!./resources/assets/js/components/ExampleComponent.vue")
+var __vue_template__ = __webpack_require__("./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-0d120472\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0&bustCache!./resources/assets/js/components/Init.vue")
 /* template functional */
 var __vue_template_functional__ = false
 /* styles */
@@ -42980,7 +47549,7 @@ var Component = normalizeComponent(
   __vue_scopeId__,
   __vue_module_identifier__
 )
-Component.options.__file = "resources/assets/js/components/ExampleComponent.vue"
+Component.options.__file = "resources/assets/js/components/Init.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {  return key !== "default" && key.substr(0, 2) !== "__"})) {  console.error("named exports are not supported in *.vue files.")}
 
 /* hot reload */
@@ -42990,9 +47559,9 @@ if (false) {(function () {
   if (!hotAPI.compatible) return
   module.hot.accept()
   if (!module.hot.data) {
-    hotAPI.createRecord("data-v-7168fb6a", Component.options)
+    hotAPI.createRecord("data-v-0d120472", Component.options)
   } else {
-    hotAPI.reload("data-v-7168fb6a", Component.options)
+    hotAPI.reload("data-v-0d120472", Component.options)
 ' + '  }
   module.hot.dispose(function (data) {
     disposed = true
@@ -43001,6 +47570,156 @@ if (false) {(function () {
 
 module.exports = Component.exports
 
+
+/***/ }),
+
+/***/ "./resources/assets/js/components/views/profiles/Profile.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+function injectStyle (ssrContext) {
+  if (disposed) return
+  __webpack_require__("./node_modules/vue-style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-4b2f723c\",\"scoped\":false,\"hasInlineConfig\":true}!./node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./resources/assets/js/components/views/profiles/Profile.vue")
+}
+var normalizeComponent = __webpack_require__("./node_modules/vue-loader/lib/component-normalizer.js")
+/* script */
+var __vue_script__ = __webpack_require__("./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}],\"es2015\",\"es2017\"],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0&bustCache!./resources/assets/js/components/views/profiles/Profile.vue")
+/* template */
+var __vue_template__ = __webpack_require__("./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-4b2f723c\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0&bustCache!./resources/assets/js/components/views/profiles/Profile.vue")
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = injectStyle
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/components/views/profiles/Profile.vue"
+if (Component.esModule && Object.keys(Component.esModule).some(function (key) {  return key !== "default" && key.substr(0, 2) !== "__"})) {  console.error("named exports are not supported in *.vue files.")}
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-4b2f723c", Component.options)
+  } else {
+    hotAPI.reload("data-v-4b2f723c", Component.options)
+' + '  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+
+/***/ "./resources/assets/js/components/views/profiles/QRcode.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+var normalizeComponent = __webpack_require__("./node_modules/vue-loader/lib/component-normalizer.js")
+/* script */
+var __vue_script__ = __webpack_require__("./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}],\"es2015\",\"es2017\"],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0&bustCache!./resources/assets/js/components/views/profiles/QRcode.vue")
+/* template */
+var __vue_template__ = __webpack_require__("./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-a5fb9daa\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0&bustCache!./resources/assets/js/components/views/profiles/QRcode.vue")
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = null
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/components/views/profiles/QRcode.vue"
+if (Component.esModule && Object.keys(Component.esModule).some(function (key) {  return key !== "default" && key.substr(0, 2) !== "__"})) {  console.error("named exports are not supported in *.vue files.")}
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-a5fb9daa", Component.options)
+  } else {
+    hotAPI.reload("data-v-a5fb9daa", Component.options)
+' + '  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+
+/***/ "./resources/assets/js/store.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.store = undefined;
+
+var _vuex = __webpack_require__("./node_modules/vuex/dist/vuex.esm.js");
+
+var _vuex2 = _interopRequireDefault(_vuex);
+
+var _vue = __webpack_require__("./node_modules/vue/dist/vue.common.js");
+
+var _vue2 = _interopRequireDefault(_vue);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_vue2.default.use(_vuex2.default);
+
+var store = exports.store = new _vuex2.default.Store({
+    state: {
+        auth_user_data: [],
+        profile_user_data: []
+    },
+    getters: {
+        get_auth_user_data: function get_auth_user_data(state) {
+            return state.auth_user_data;
+        },
+        get_profile_user_data: function get_profile_user_data(state) {
+            return state.profile_user_data;
+        }
+    },
+    mutations: {
+        add_auth_user_data: function add_auth_user_data(state, user) {
+            state.auth_user_data = user;
+        },
+        add_profile_user_data: function add_profile_user_data(state, user) {
+            state.profile_user_data = user;
+        }
+    }
+});
 
 /***/ }),
 

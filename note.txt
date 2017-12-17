@@ -16,3 +16,7 @@ add to .babelrc
 
 composer require laravel/socialite
 
+composer require laravel/passport
+    php artisan migrate
+    php artisan passport:install
+    

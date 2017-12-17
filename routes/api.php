@@ -14,5 +14,10 @@ use Illuminate\Http\Request;
 */
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+    $user = $request->user();
+    return $user->_get_index();
+});
+
+Route::group(['middleware' => 'auth:api', 'prefix' => 'v1'], function() {
+    Route::get('/{slug}', 'Api\ProfileController@index')->where('slug', '[0-9a-zA-Z-_]+');
 });
