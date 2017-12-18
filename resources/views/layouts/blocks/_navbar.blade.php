@@ -20,7 +20,9 @@
 		<div class="collapse navbar-collapse" id="app-navbar-collapse">
 			<!-- Left Side Of Navbar -->
 			<ul class="nav navbar-nav">
-				&nbsp;
+				@if(Auth::check())
+					<li><a href="{{ route('product.index', ['user_slug' => Auth::user()->slug]) }}">Products</a></li>
+				@endif
 			</ul>
 
 			<!-- Right Side Of Navbar -->
@@ -45,6 +47,9 @@
 					</a>
 
 					<ul class="dropdown-menu">
+						@role('Admin') {{-- Laravel-permission blade helper --}}
+							<li><a href="#"><i class="fa fa-btn fa-unlock"></i>Admin</a></li>
+						@endrole
 						<li><a href="{{ route('profile.index', ['slug' => Auth::user()->slug]) }}">Profile</a></li>
 						<li>
 							<a href="{{ route('logout') }}" onclick="event.preventDefault();

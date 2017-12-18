@@ -5,10 +5,15 @@ namespace App;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
+use File;
+
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class User extends Authenticatable
 {
-    use Notifiable, HasApiTokens;
+    use Notifiable, HasApiTokens, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -28,6 +33,22 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
+    public function delete_avatar()
+    {
+        $avatar = $this->avatar;
+        $name = basename($avatar); // return name and ext
+        //Get member directory Eg: 1
+        $dirname =pathinfo($avatar, PATHINFO_DIRNAME); //return http://coccoc.me/images/1
+        $parts = explode('/',$dirname);//create array
+        $directory = array_pop($parts); //return Eg: 1
+        $filename = $directory . '/' . $name;
+        if(File::exists('images/'.$filename)) {
+            File::delete('images/'.$filename);
+            return 1;
+        }
+        return 0;
+    }
+
     public function _get_index()
     {
         $user = $this->with('profile')->where('id', $this->id)->first();
@@ -40,8 +61,8 @@ class User extends Authenticatable
             'avatar' => $user->avatar,
             'gender' => $user->gender,
             'profile' => [
-                'about' => $user->profile->about,
-                'phone_number' => $user->profile->phone_number
+                'about' => isset($user->profile->about) ? $user->profile->about : '',
+                'phone_number' => isset($user->profile->phone_number) ? $user->profile->phone_number : ''
             ]
         ];
         return json_encode($userData);
@@ -55,5 +76,10 @@ class User extends Authenticatable
     public function profile()
     {
         return $this->hasOne(Profile::class);
+    }
+
+    public function products()
+    {
+        return $this->hasMany(Product::class);
     }
 }

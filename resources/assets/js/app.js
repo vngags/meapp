@@ -17,6 +17,7 @@ window.Vue = require('vue');
 
 Vue.component('init', require('./components/Init.vue'));
 Vue.component('profile', require('./components/views/profiles/Profile.vue'));
+Vue.component('profile-form', require('./components/views/profiles/ProfileForm.vue'));
 
 import {store} from './store'
 

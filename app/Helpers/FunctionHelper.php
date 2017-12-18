@@ -26,6 +26,24 @@ class FunctionHelper
         }
 
         $avatar->save(public_path('images/avatars/'.$filename.'.png'));
-        return url('avatars/' . $filename . '.png');
+        return url('images/avatars/' . $filename . '.png');
+    }
+
+    static function save_social_avatar($src, $name) 
+    {
+        $filename = str_slug($name) . '_' . str_random(6);
+        $avatar = Image::make($src);
+        if (!file_exists(public_path('images/avatars'))) {
+            mkdir(public_path('images/avatars'), 0777, true);
+        }
+        $avatar->save(public_path('images/avatars/'.$filename.'.png'));
+        return url('images/avatars/' . $filename . '.png');
+    }
+
+    static public function generate_usercode()
+    {
+        $code = mt_rand(111111, 999999);
+        $count = \App\User::where('user_code', $code)->count();
+        return  $count ? "{$code}-{$count}" : $code;    
     }
 }

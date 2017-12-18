@@ -8,6 +8,7 @@ use Auth;
 use App\Social;
 use App\User;
 use App\Profile;
+use FunctionHelper;
 
 class SocialController extends Controller
 {
@@ -24,7 +25,14 @@ class SocialController extends Controller
         $user_email = User::where('email', $user->email)->first();
 
         if($user_email) {
-
+            //replace new avatar if change
+            $new_avatar = FunctionHelper::save_social_avatar($user->avatar, $user->name);
+            if($new_avatar) {
+                $user_email->delete_avatar();
+                $user_email->update([
+                    'avatar' => $new_avatar
+                ]);                
+            }           
             //Check provider name in socials
             $profile = Profile::firstOrCreate(
                 ['user_id' => $user_email->id]
@@ -38,15 +46,17 @@ class SocialController extends Controller
             return redirect('/');     
         }else{
             //create new user
-            $user_code = mt_rand(1111111111, 9999999999);
+            $user_code = FunctionHelper::generate_usercode();
+            $avatar = FunctionHelper::save_social_avatar($user->avatar, $user->name);  
             $u = User::create([
                 'name' => $user->name,
                 'email' => $user->email,
                 'slug' => $user_code, 
                 'user_code' => $user_code,
                 'gender' => isset($user->user['gender']) ? $user->user['gender'] : 'male',
-                'avatar' => $user->avatar
+                'avatar' => $avatar
             ]);
+            $u->assignRole('writer');
             //create new socials
             Social::create([
                 'user_id' => $u->id,

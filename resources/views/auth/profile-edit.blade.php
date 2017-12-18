@@ -4,7 +4,7 @@
 <div class="container">
     <div class="row">
         <div class="col-md-12">
-            {{ $user->name }} edit
+            <profile-form :uid="{{ $user->user_code }}"></profile-form>
         </div>
     </div>
 </div>

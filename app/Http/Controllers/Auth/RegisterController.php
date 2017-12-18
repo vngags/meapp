@@ -65,7 +65,7 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        $user_code = mt_rand(1111111111, 9999999999);
+        $user_code = FunctionHelper::generate_usercode();
         $avatar = FunctionHelper::create_avatar_by_name($data['name']);
         $user = User::create([
             'name' => $data['name'],
