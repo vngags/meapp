@@ -13,6 +13,8 @@
 
 	<!-- Styles -->
 	<link href="{{ mix('css/app.css') }}" rel="stylesheet"> @yield('style')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="{{ asset('plugins/swal/sweetalert2.css') }}">
 </head>
 
 <body class="@yield('body_class')">

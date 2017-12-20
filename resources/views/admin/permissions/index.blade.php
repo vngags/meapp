@@ -12,11 +12,33 @@
 				</div>
 
 				<div class="panel-body">
-					<ul>
-						@foreach($permissions as $permission)
-						<li>{{ $permission->name }}</li>
-						@endforeach
-					</ul>
+					<table class="table table-hover table-bordered">
+						<thead>
+							<tr>
+								<th>STT</th>
+								<th>Permission Name</th>
+								<th>Action</th>
+							</tr>
+						</thead>
+						<tbody>
+							@foreach($permissions as $key => $permission)
+							<tr>
+								<td>{{ $key }}</td>
+								<td>{{ $permission->name }}</td>
+								<td>
+									<a href="{{ route('permission.edit', ['id' => $permission->id]) }}" class="btn btn-xs btn-info">Edit</a>
+									<a class="btn btn-xs btn-danger" href="{{ route('permission.destroy', ['id' => $permission->id]) }}" onclick="event.preventDefault();
+                                                     document.getElementById('delete-permission-form-{{ $permission->id }}').submit();">
+										Delete
+									</a>
+									<form id="delete-permission-form-{{ $permission->id }}" action="{{ route('permission.destroy', ['id' => $permission->id]) }}" method="POST" style="display: none;">
+										{{ csrf_field() }}
+									</form>
+								</td>
+							</tr>
+							@endforeach
+						</tbody>
+					</table>
 				</div>
 			</div>
 		</div>

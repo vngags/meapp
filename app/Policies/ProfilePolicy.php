@@ -10,6 +10,11 @@ class ProfilePolicy
 {
     use HandlesAuthorization;
 
+    public function before(User $user)
+    {
+        return $user->hasRole('Admin');
+    }
+
     /**
      * Determine whether the user can view the profile.
      *

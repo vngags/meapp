@@ -17,7 +17,12 @@ window.Vue = require('vue');
 
 Vue.component('init', require('./components/Init.vue'));
 Vue.component('profile', require('./components/views/profiles/Profile.vue'));
+Vue.component('my-profile', require('./components/views/profiles/MyProfile.vue'));
 Vue.component('profile-form', require('./components/views/profiles/ProfileForm.vue'));
+Vue.component('follow', require('./components/views/profiles/Follow.vue'));
+
+//Product components
+Vue.component('product-form', require('./components/views/products/ProductForm.vue'));
 
 import {store} from './store'
 
@@ -25,3 +30,4 @@ const app = new Vue({
     el: '#app',
     store
 });
+

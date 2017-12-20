@@ -46,28 +46,8 @@ class LoginController extends Controller
                 'intended' => $this->redirectPath()
             ]);
         }
+        if($user->getRoleNames() && $user->getRoleNames()[0] == 'Admin') {
+            return redirect()->route('admin.dashbroad');
+        }
     }
-    // protected function sendLoginResponse(Request $request)
-    // {
-    //     $request->session()->regenerate();
-    //     $this->clearLoginAttempts($request);
-    //     if ($request->ajax()) {
-    //         return response()->json($this->guard()->user(), 200);
-    //     }
-    //     return $this->authenticated($request, $this->guard()->user())
-    //             ?: redirect()->intended($this->redirectPath());
-    // }
-    // protected function sendFailedLoginResponse(Request $request)
-    // {
-    //     if ($request->ajax()) {
-    //         return response()->json([
-    //             'error' => 'Errors'
-    //         ], 401);
-    //     }
-    //     return redirect()->back()
-    //         ->withInput($request->only($this->username(), 'remember'))
-    //         ->withErrors([
-    //             $this->username() => 'Errors',
-    //         ]);
-    // }
 }

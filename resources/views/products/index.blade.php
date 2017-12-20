@@ -7,7 +7,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading clearfix">
                     Product List
-                    @can('create-post')
+                    @can('create', App\Product::class)
                         <span class="pull-right">
                             <a href="{{ route('product.create', ['user_slug' => Auth::user()->slug]) }}" class="btn btn-sm btn-primary">Create</a>
                         </span>

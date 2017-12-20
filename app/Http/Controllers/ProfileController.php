@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Profile;
 use App\User;
 use Auth;
 
@@ -23,8 +24,17 @@ class ProfileController extends Controller
         return view('auth.profile')->withUser($user);
     }
 
-    public function edit()
+    public function edit($user_slug)
     {
-        return view('auth.profile-edit')->withUser(Auth::user());
+        $user = User::findBySlug($user_slug);
+        $profile = $user->profile;
+        $this->authorize($profile, 'update');
+        return view('auth.profile-edit')->withUser($user);
+    }
+
+    public function list()
+    {
+        $users = User::all();
+        return view('auth.user-list')->withUsers($users);
     }
 }

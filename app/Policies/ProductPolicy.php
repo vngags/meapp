@@ -10,6 +10,13 @@ class ProductPolicy
 {
     use HandlesAuthorization;
 
+    public function before(User $user)
+    {
+        if ($user->hasRole('Admin')) {
+            return true;
+        }
+    }
+
     /**
      * Determine whether the user can view the product.
      *
@@ -19,7 +26,7 @@ class ProductPolicy
      */
     public function view(User $user, Product $product)
     {
-        
+        return true;
     }
 
     /**

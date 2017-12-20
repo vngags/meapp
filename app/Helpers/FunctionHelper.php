@@ -43,7 +43,7 @@ class FunctionHelper
     static public function generate_usercode()
     {
         $code = mt_rand(111111, 999999);
-        $count = \App\User::where('user_code', $code)->count();
+        $count = \App\User::where('uid', $code)->count();
         return  $count ? "{$code}-{$count}" : $code;    
     }
 }

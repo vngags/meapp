@@ -8,12 +8,14 @@ use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use File;
 
+use App\Traits\Friendable;
+
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
 class User extends Authenticatable
 {
-    use Notifiable, HasApiTokens, HasRoles;
+    use Notifiable, HasApiTokens, HasRoles, Friendable;
 
     /**
      * The attributes that are mass assignable.
@@ -21,7 +23,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'slug', 'user_code', 'avatar', 'gender'
+        'name', 'email', 'password', 'slug', 'uid', 'avatar', 'gender'
     ];
 
     /**
@@ -32,6 +34,16 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    public function scopeFindBySlug($query, $slug)
+    {
+        return $query->where('slug', $slug)->first();
+    }
+
+    public function scopeFindByUid($query, $uid)
+    {
+        return $query->where('uid', $uid)->first();
+    }
 
     public function delete_avatar()
     {
@@ -51,10 +63,9 @@ class User extends Authenticatable
 
     public function _get_index()
     {
-        $user = $this->with('profile')->where('id', $this->id)->first();
-        
+        $user = self::with(['profile', 'products'])->where('id', $this->id)->first();
         $userData = [
-            'uid' => $user->user_code,
+            'uid' => $user->uid,
             'name' => $user->name,
             'slug' => $user->slug,
             'email' => $user->email,
@@ -63,10 +74,15 @@ class User extends Authenticatable
             'profile' => [
                 'about' => isset($user->profile->about) ? $user->profile->about : '',
                 'phone_number' => isset($user->profile->phone_number) ? $user->profile->phone_number : ''
-            ]
+            ],
+            'rule' => $user->getRoleNames(),
+            'permissions' => $user->getAllPermissions(),
+            'products' => $user->products
         ];
         return json_encode($userData);
     }
+
+    
 
     public function social()
     {

@@ -28,6 +28,7 @@
 
                 <div class="panel-body">
                     <h1>{{ $product->title }}</h1>
+                    <small><a href="{{ route('profile.index', ['slug' => $product->user->slug]) }}">{{ $product->user->name }}</a></small>
                     <div>
                         {{ $product->body }}
                     </div>

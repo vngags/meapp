@@ -22,16 +22,16 @@
 			<ul class="nav navbar-nav">
 				@if(Auth::check())
 					<li><a href="{{ route('product.index', ['user_slug' => Auth::user()->slug]) }}">Products</a></li>
-				@endif
+				@endif				
 			</ul>
 
 			<!-- Right Side Of Navbar -->
 			<ul class="nav navbar-nav navbar-right">
 				<!-- Authentication Links -->
 				@guest
-				<li>
+				{{--  <li>
 					<a href="#" data-toggle="modal" data-target="#myModal">Modal</a>
-				</li>
+				</li>  --}}
 				<li>
 					<a href="{{ route('login') }}">Login</a>
 				</li>
@@ -47,14 +47,14 @@
 					</a>
 
 					<ul class="dropdown-menu">
-						@role('Admin') {{-- Laravel-permission blade helper --}}
-							<li><a href="#"><i class="fa fa-btn fa-unlock"></i>Admin</a></li>
+						@role('Admin')
+							<li><a href="{{ route('admin.dashbroad') }}"><i class="fa fa-cog"></i> Admin</a></li>
 						@endrole
-						<li><a href="{{ route('profile.index', ['slug' => Auth::user()->slug]) }}">Profile</a></li>
+						<li><a href="{{ route('profile.index', ['slug' => Auth::user()->slug]) }}"><i class="fa fa-user"></i> Profile</a></li>
 						<li>
 							<a href="{{ route('logout') }}" onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">
-								Logout
+								<i class="fa fa-sign-out"></i> Logout
 							</a>
 
 							<form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">

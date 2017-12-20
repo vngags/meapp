@@ -15,7 +15,7 @@
             }
         },
         mounted() {  
-            this.set_QRCode()
+            // this.set_QRCode()
         },
         methods: {
             // get_user_data() {
@@ -38,7 +38,7 @@
                     minVersion: 1,
                     maxVersion: 40,
                     // error correction level: 'L', 'M', 'Q' or 'H'
-                    ecLevel: 'L',
+                    ecLevel: 'H',
                     // offset in pixel if drawn onto existing canvas
                     left: 0,
                     top: 0,

@@ -32,7 +32,7 @@ class ProductController extends Controller
     public function store(Request $request, $user_slug)
     {
         $this->validate($request, [
-            'title' => 'required|max:100',
+            'title' => 'required|max:255',
             'body' => 'required'
         ]);
         $product = Product::create([
@@ -41,14 +41,23 @@ class ProductController extends Controller
             'slug' => $request->title,
             'body' => $request->body
         ]);
-        return redirect()->route('product.index', ['user_slug' => $user_slug]);
+        if($product) {
+            return redirect()->route('product.index', ['user_slug' => $user_slug]);
+        }else{
+            return redirect()->back()->withErrors();
+        }        
     }
 
     
     public function show($user_slug, $slug)
     {       
-        $product = Product::with('user')->where('slug', $slug)->first(); //Find post of id = $id  
-        return view ('products.show')->withProduct($product);
+        $product = Product::fetchByUidSlug($user_slug, $slug);
+        
+        if($product) {
+            return view ('products.show')->withProduct($product);
+        }else{
+            return redirect()->route('product.index', ['user_slug' => $user_slug]);
+        }
     }
 
     

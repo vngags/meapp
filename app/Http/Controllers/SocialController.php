@@ -22,7 +22,7 @@ class SocialController extends Controller
     {
         $user = Socialite::driver($provider)->user();
         //Check email of user has exists in socials?
-        $user_email = User::where('email', $user->email)->first();
+        $user_email = User::where('email', $user->email)->first();        
 
         if($user_email) {
             //replace new avatar if change
@@ -52,11 +52,11 @@ class SocialController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'slug' => $user_code, 
-                'user_code' => $user_code,
+                'uid' => $user_code,
                 'gender' => isset($user->user['gender']) ? $user->user['gender'] : 'male',
                 'avatar' => $avatar
             ]);
-            $u->assignRole('writer');
+            $u->assignRole('member');
             //create new socials
             Social::create([
                 'user_id' => $u->id,

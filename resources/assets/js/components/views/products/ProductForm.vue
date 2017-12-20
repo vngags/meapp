@@ -1,0 +1,43 @@
+<template>
+    <div class="product-form">
+
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input type="text" class="form-control input-lg" placeholder="Product Title..." v-model="form.title">
+        </div>
+
+        <div class="form-group">
+            <label>Product Images</label>
+            <upload-image ref="child"></upload-image>
+        </div>
+        <div class="form-group">
+            <label>Product Content</label>
+            <textarea name="body" class="form-control" cols="30" rows="10" v-model="form.body"></textarea>
+        </div>
+        <button type="button" @click="child_upload" class="btn btn-primary">Upload</button>
+    </div>
+</template>
+
+<script>
+    import UploadImage from './UploadImage'
+    export default {
+        components: {
+            UploadImage
+        },
+        data() {
+            return {
+                form: [],
+                
+            }
+        },
+        methods: {
+            child_upload() {
+                this.$refs.child.upload() // undefined
+            }
+        }
+    }
+</script>
+
+<style>
+    
+ </style>

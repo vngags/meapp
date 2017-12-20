@@ -22,6 +22,31 @@ Route::get('auth/{provider}/callback', 'SocialController@handleProviderCallback'
 
 
 
+Route::group(['prefix' => 'admin', 'middleware' => 'auth'], function() {
+    Route::get('/', 'AdminController@dashbroad')->name('admin.dashbroad');
+    
+    Route::group(['prefix' => 'role', 'middleware' => 'auth'], function() {
+        Route::get('/', 'RoleController@index')->name('role.index');
+        Route::post('/create', 'RoleController@store')->name('role.store');
+        Route::get('/{id}/edit', 'RoleController@edit')->name('role.edit');
+        Route::post('/update/{id}', 'RoleController@update')->name('role.update');
+    });
+
+    Route::group(['prefix' => 'permissions'], function() {
+        Route::get('/', 'PermissionController@index')->name('permission.index');
+        Route::post('/delete/{id}', 'PermissionController@destroy')->name('permission.destroy');
+        Route::post('/', 'PermissionController@store')->name('permission.store');
+        Route::get('/{id}/edit', 'PermissionController@edit')->name('permission.edit');
+        Route::post('/update', 'PermissionController@update')->name('permission.update');
+    });
+
+});
+
+
+
+
+Route::get('user_list', 'ProfileController@list')->name('user.list');
+
 Route::get('/{slug}', 'ProfileController@index')->name('profile.index')->where('slug', '[0-9a-zA-Z-_]+');
 
 
@@ -40,14 +65,10 @@ Route::get('/{slug}', 'ProfileController@index')->name('profile.index')->where('
 
 
 
-Route::resource('roles', 'RoleController');
-Route::resource('permissions', 'PermissionController');
+// Route::resource('roles', 'RoleController');
+// Route::resource('permissions', 'PermissionController');
 
-Route::group(['prefix' => 'admin'], function() {
-    Route::group(['prefix' => 'permissions'], function() {
-        Route::get('/', 'PermissionController@index')->name('permission.index');
-        Route::post('/', 'PermissionController@store')->name('permission.store');
-    });
-});
+
 
 Route::get('{user_slug}/profile_edit', 'ProfileController@edit')->name('profile.edit');
+
