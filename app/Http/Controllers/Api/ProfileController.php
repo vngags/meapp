@@ -31,4 +31,9 @@ class ProfileController extends Controller
         return $user;
     }
 
+    public function get_unread_notifications(Request $request)
+    {
+        return $request->user()->unreadNotifications;
+    }
+    
 }

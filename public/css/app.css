@@ -8387,6 +8387,11 @@ button.close {
           box-shadow: none !important;
 }
 
+.scroller {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 .simple-modal.modal {
   height: auto;
   min-height: 100%;
@@ -8435,6 +8440,19 @@ button.close {
 .fade-enter,
 .fade-leave-to {
   opacity: 0;
+}
+
+.fadebg-enter-active,
+.fadebg-leave-active {
+  -webkit-transition: all .5s;
+  transition: all .5s;
+  background: #fff;
+}
+
+.fadebg-enter,
+.fadebg-leave-to {
+  opacity: 0;
+  background: #ECF1F5;
 }
 
 .btn {
@@ -8525,6 +8543,7 @@ button.close {
 .dropdown-menu {
   border-radius: 0;
   border-color: rgba(0, 0, 0, 0.12);
+  margin-top: -2px !important;
 }
 
 .dropdown-menu > li > a {
@@ -8553,5 +8572,195 @@ button.close {
     -webkit-transform: scale(1);
     transform: scale(1);
   }
+}
+
+@-webkit-keyframes ring {
+  0% {
+    -webkit-transform: rotate(35deg);
+  }
+
+  12.5% {
+    -webkit-transform: rotate(-30deg);
+  }
+
+  25% {
+    -webkit-transform: rotate(25deg);
+  }
+
+  37.5% {
+    -webkit-transform: rotate(-20deg);
+  }
+
+  50% {
+    -webkit-transform: rotate(15deg);
+  }
+
+  62.5% {
+    -webkit-transform: rotate(-10deg);
+  }
+
+  75% {
+    -webkit-transform: rotate(5deg);
+  }
+
+  100% {
+    -webkit-transform: rotate(0deg);
+  }
+}
+
+@keyframes ring {
+  0% {
+    -webkit-transform: rotate(35deg);
+    transform: rotate(35deg);
+  }
+
+  12.5% {
+    -webkit-transform: rotate(-30deg);
+    transform: rotate(-30deg);
+  }
+
+  25% {
+    -webkit-transform: rotate(25deg);
+    transform: rotate(25deg);
+  }
+
+  37.5% {
+    -webkit-transform: rotate(-20deg);
+    transform: rotate(-20deg);
+  }
+
+  50% {
+    -webkit-transform: rotate(15deg);
+    transform: rotate(15deg);
+  }
+
+  62.5% {
+    -webkit-transform: rotate(-10deg);
+    transform: rotate(-10deg);
+  }
+
+  75% {
+    -webkit-transform: rotate(5deg);
+    transform: rotate(5deg);
+  }
+
+  100% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+}
+
+/* Notifications */
+
+.notifications .notification {
+  display: inline-block;
+  position: relative;
+  padding: 15px;
+  font-size: 1.3em;
+}
+
+.notifications .notification:hover:before {
+  color: #999;
+}
+
+.notifications .notification:before,
+.notifications .notification:after {
+  color: #a8a8a8;
+}
+
+.notifications .notification:before {
+  display: block;
+  content: "\E123";
+  font-family: 'Glyphicons Halflings';
+  -webkit-transform-origin: top center;
+          transform-origin: top center;
+}
+
+.notifications .notification:after {
+  font-family: Arial;
+  font-size: 0.7em;
+  font-weight: 700;
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  padding: 2px 5px;
+  line-height: 100%;
+  opacity: 0;
+  border-radius: 60px;
+  background: #db3434;
+  content: attr(data-count);
+  -webkit-transform: scale(0.5);
+  transform: scale(0.5);
+  -webkit-transition: opacity, -webkit-transform;
+  transition: opacity, -webkit-transform;
+  transition: transform, opacity;
+  transition: transform, opacity, -webkit-transform;
+  -webkit-transition-duration: 0s, 0s, 0s;
+          transition-duration: 0s, 0s, 0s;
+  -webkit-transition-timing-function: ease, ease, ease;
+          transition-timing-function: ease, ease, ease;
+  -webkit-transition-duration: 0.3s;
+  transition-duration: 0.3s;
+  -webkit-transition-timing-function: ease-out;
+  transition-timing-function: ease-out;
+  color: #fff;
+}
+
+.notifications .notification.notify:before {
+  -webkit-animation: ring 1.5s ease;
+  animation: ring 1.5s ease;
+}
+
+.notifications .notification.show-count:after {
+  -webkit-transform: scale(1);
+  transform: scale(1);
+  opacity: 1;
+}
+
+.notifications .dropdown-menu {
+  min-width: 300px;
+}
+
+.notifications .dropdown-menu .notify-title h4 {
+  margin: 0;
+  border-bottom: 1px solid #eee;
+  text-align: center;
+  font-size: 12px;
+  text-transform: uppercase;
+  font-weight: bold;
+  line-height: 24px;
+  padding-bottom: 3px;
+}
+
+.notifications .dropdown-menu li > a {
+  display: table;
+  padding: 10px;
+  line-height: 1;
+  white-space: normal;
+  width: 100%;
+  border-bottom: 1px solid #eee;
+  font-size: 13px;
+  color: #666;
+}
+
+.notifications .dropdown-menu li > a:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.notifications .dropdown-menu li > a a {
+  line-height: 1.3em;
+}
+
+.notifications .dropdown-menu li > a time {
+  color: #999;
+}
+
+.notifications .dropdown-menu li:last-child > a {
+  border-bottom: none;
+}
+
+.notifications .dropdown-menu .notify-footer {
+  border-top: 1px solid #eee;
+  padding: 5px 10px 2px;
 }
 

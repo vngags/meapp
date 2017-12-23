@@ -21,6 +21,7 @@
 	<div id="app">
         @if(Auth::check())
             <init></init>   
+            <listen :id="{{ Auth::user()->id }}"></listen>            
         @endif
 		@include('layouts.blocks._navbar') @yield('content')        
 	</div>

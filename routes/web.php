@@ -20,7 +20,7 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::get('auth/{provider}', 'SocialController@redirectToProvider');
 Route::get('auth/{provider}/callback', 'SocialController@handleProviderCallback');
 
-
+Route::get('/notifications', 'ProfileController@get_notifications')->name('profile.notifications');
 
 Route::group(['prefix' => 'admin', 'middleware' => 'auth'], function() {
     Route::get('/', 'AdminController@dashbroad')->name('admin.dashbroad');

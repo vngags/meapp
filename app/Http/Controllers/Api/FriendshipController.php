@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Notifications\AddFollow;
 use App\User;
 use Auth;
 
@@ -27,7 +28,10 @@ class FriendshipController extends Controller
             'user_slug' => 'required'
         ]);
         $user = User::findBySlug($request->user_slug);
+        $user->notify(new AddFollow(Auth::user()));
         if(Auth::user()->addFollowing($user->uid) == 1) {
+            // User::find($user->id)->notify(new \App\Notifications\AddFollow(Auth::user()));
+            
             return ['status' => 'following'];
         }
         return ['status' => 0];

@@ -39,6 +39,7 @@
 					<a href="{{ route('register') }}">Register</a>
 				</li>
 				@else
+				<li><unread-notification></unread-notification></li>
 				<li class="dropdown">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true">
 						<div class="img-circle border-outline _ib outline-circle"><img src="{{ Auth::user()->avatar }}" width="24" class="img-circle"></div>

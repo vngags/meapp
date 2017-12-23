@@ -18,10 +18,39 @@
                 <follow :slug="profile_user.slug"></follow>
 
                 <div class="form-group">
-                    <a @click="show_qrcode" class="dropdown-toggle" id="show-qrcode" data-tooltip="QRCODE" data-placement="top"><i class="fa fa-qrcode"></i></a>
-                    <qr-code v-if="profile_user.uid" ref="qrcode" :avatar="profile_user.avatar" :url="'http://coccoc.me/'+profile_user.slug" style="display:none"></qr-code>
+                    <a @click="show_qrcode" class="dropdown-toggle" id="show-qrcode" data-tooltip="QRCODE" data-placement="top">
+                        <i class="fa fa-qrcode"></i>
+                    </a>
+                    <qr-code v-if="profile_user.uid" ref="qrcode" :avatar="profile_user.avatar" :url="'http://coccoc.me/'+profile_user.slug"
+                        style="display:none"></qr-code>
                 </div>
-                
+
+                <div class="form-group">
+                    <h4>Following
+                        <span v-if="profile_user.followings.length > 0" class="badge">{{ profile_user.followings.length }}</span>
+                    </h4>
+                    <transition name="fadebg">
+                        <div v-if="profile_user.followings.length > 0" v-for="following in profile_user.followings">
+                            <a :href="'/' + following.slug" class="border-outline outline-circle">
+                                <img :src="following.avatar" width="28" class="img-circle">
+                            </a>
+                        </div>
+                    </transition>
+                </div>
+
+                <div class="form-group">
+                    <h4>Followers
+                        <span v-if="profile_user.followers.length > 0" class="badge">{{ profile_user.followers.length }}</span>
+                    </h4>
+                    <transition name="fadebg">
+                        <div v-if="profile_user.followers.length > 0" v-for="follower in profile_user.followers">
+                            <a :href="'/' + follower.slug" class="border-outline outline-circle">
+                                <img :src="follower.avatar" width="28" class="img-circle">
+                            </a>
+                        </div>
+                    </transition>
+                </div>
+
                 <div class="rules_permissions">
                     <h4>Vai trò</h4>
                     <li>{{ profile_user.rule[0] }}</li>
@@ -33,20 +62,25 @@
                     <h4>Products</h4>
                     <ul>
                         <li v-for="product in profile_user.products">
-                            <h5><a :href="'/' + profile_user.slug + '/post/' + product.slug">{{product.title}}</a></h5>
+                            <h5>
+                                <a :href="'/' + profile_user.slug + '/post/' + product.slug">{{product.title}}</a>
+                            </h5>
                             <span>{{ product.body }}</span>
                         </li>
                     </ul>
                 </div>
-            </div>            
+            </div>
         </transition>
     </div>
 </template>
 
 <script>
-    import {get, post} from '../../../api'
+    import {
+        get,
+        post
+    } from '../../../api'
     import QrCode from './QRcode'
-    export default {        
+    export default {
         props: ['slug'],
         components: {
             QrCode
@@ -57,10 +91,10 @@
         methods: {
             get_user_data() {
                 get(`/api/v1/${this.slug}`)
-                .then(resp => {
-                    // console.log(resp);
-                    this.$store.commit('add_profile_user_data', resp.data)
-                })
+                    .then(resp => {
+                        // console.log(resp);
+                        this.$store.commit('add_profile_user_data', resp.data)
+                    })
             },
             async show_qrcode() {
 
@@ -79,7 +113,7 @@
                     showConfirmButton: false,
                     animation: false
                 }).catch(swal.noop);
-            }
+            },            
         },
         computed: {
             user() {

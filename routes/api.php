@@ -23,12 +23,14 @@ Route::group(['middleware' => 'auth:api', 'prefix' => 'v1'], function() {
     Route::post('/update_profile', 'Api\ProfileController@update')->where('slug', '[0-9a-zA-Z-_]+');
     Route::group(['prefix' => 'media'], function() {
         Route::post('/upload', 'Api\MediaController@upload');
-        Route::post('/destroy', 'Api\MediaController@destroy');
+        Route::post('/delete', 'Api\MediaController@destroy');
+        Route::get('/list', 'Api\MediaController@list');
     });    
 
     Route::post('check_following', 'Api\FriendshipController@check_following');
     Route::post('add_following', 'Api\FriendshipController@add_following');
     Route::post('remove_following', 'Api\FriendshipController@remove_following');
+    Route::get('get_unread_notifications', 'Api\ProfileController@get_unread_notifications');
 });
 
 Route::group(['middleware' => 'api', 'prefix' => 'v1'], function() {

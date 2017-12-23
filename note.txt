@@ -1,6 +1,7 @@
 composer require predis/predis
 
-npm install --save-dev vue-timeago vuex socket.io laravel-echo laravel-echo-server
+npm install --save-dev vue-timeago vuex socket.io 
+laravel-echo laravel-echo-server socket.io-client dotenv
 
 npm install babel-cli babel-preset-es2015 babel-preset-es2017
 
@@ -22,3 +23,8 @@ composer require laravel/passport
     
 //Permission and rules
 composer require spatie/laravel-permission
+
+
+//add server.js using socket.io
+
+npm in stall vue-timeago

@@ -8,7 +8,7 @@
 
         <div class="form-group">
             <label>Product Images</label>
-            <upload-image ref="child"></upload-image>
+            <dropzone ref="child"></dropzone>
         </div>
         <div class="form-group">
             <label>Product Content</label>
@@ -19,10 +19,10 @@
 </template>
 
 <script>
-    import UploadImage from './UploadImage'
+    import Dropzone from './Dropzone'
     export default {
         components: {
-            UploadImage
+            Dropzone
         },
         data() {
             return {
@@ -31,8 +31,10 @@
             }
         },
         methods: {
-            child_upload() {
-                this.$refs.child.upload() // undefined
+            async child_upload() {
+                await this.$refs.child.upload() // undefined
+                console.log(2);
+                
             }
         }
     }

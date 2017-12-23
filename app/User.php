@@ -63,7 +63,7 @@ class User extends Authenticatable
 
     public function _get_index()
     {
-        $user = self::with(['profile', 'products'])->where('id', $this->id)->first();
+        $user = self::with(['profile', 'products'])->where('id', $this->id)->first();        
         $userData = [
             'uid' => $user->uid,
             'name' => $user->name,
@@ -77,7 +77,9 @@ class User extends Authenticatable
             ],
             'rule' => $user->getRoleNames(),
             'permissions' => $user->getAllPermissions(),
-            'products' => $user->products
+            'products' => $user->products,
+            'followings' => $user->getFollowings(),
+            'followers' => $user->getFollowers()
         ];
         return json_encode($userData);
     }
@@ -97,5 +99,10 @@ class User extends Authenticatable
     public function products()
     {
         return $this->hasMany(Product::class);
+    }
+
+    public function media()
+    {
+        return $this->hasMany(Media::class);
     }
 }

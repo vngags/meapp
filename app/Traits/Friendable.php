@@ -52,20 +52,20 @@ trait Friendable
 
     public function getFollowings()
     {
-        $users = array();
+        $users = [];
         $followings = Friendship::where('follower_id', $this->uid)->get();
-        foreach($followings as $uid) {
-            array_push($users, \App\User::where('uid', $uid)->_get_index());
+        foreach($followings->pluck('user_id') as $uid) {
+            array_push($users, \App\User::select('name', 'slug', 'avatar')->where('uid', $uid)->first());
         }
         return $users;
     }
 
     public function getFollowers()
     {
-        $users = array();
+        $users = [];
         $followers = Friendship::where('user_id', $this->uid)->get();
-        foreach ($followers as $uid) {
-            array_push($users, \App\User::where('uid', $uid)->_get_index());
+        foreach ($followers->pluck('follower_id') as $uid) {
+            array_push($users, \App\User::select('name', 'slug', 'avatar')->where('uid', $uid)->first());
         }
         return $users;
     }

@@ -45,11 +45,13 @@
                 this.loading = true
                 post('/api/v1/add_following', {
                     user_slug: this.slug
-                }).then(resp => {       
-                    console.log(resp.data.status);
-                    
+                }).then(resp => {                           
                     if(resp.data.status == 'following') {
                         this.status = 'following'
+                        this.$store.commit('add_new_following', {
+                            slug: this.user.slug,
+                            avatar: this.user.avatar
+                        })
                     }
                     this.loading = false
                 })
@@ -61,6 +63,7 @@
                 }).then(resp => {
                     if(resp.data.status == 'removed') {
                         this.status = 0
+                        this.$store.commit('remove_following', this.user.slug)
                     }
                     this.loading = false
                 })

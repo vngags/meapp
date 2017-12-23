@@ -37,4 +37,11 @@ class ProfileController extends Controller
         $users = User::all();
         return view('auth.user-list')->withUsers($users);
     }
+
+    public function get_notifications()
+    {
+        $nots = Auth::user()->notifications;
+        Auth::user()->unreadNotifications->markAsRead();
+        return view('auth.notifications')->withNotifications($nots);
+    }
 }
