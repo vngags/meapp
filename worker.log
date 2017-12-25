@@ -244,3 +244,171 @@ In AbstractConnection.php line 155:
   Error while reading line from the server. [tcp://127.0.0.1:6379]  
                                                                     
 
+
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+[2017-12-24 04:32:18] Processing: App\Notifications\AddFollow
+[2017-12-24 04:32:18] Processing: App\Notifications\AddFollow
+[2017-12-24 04:32:18] Processed:  App\Notifications\AddFollow
+[2017-12-24 04:32:18] Processed:  App\Notifications\AddFollow
+[2017-12-24 04:32:18] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-24 04:32:18] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-24 04:32:42] Processing: App\Notifications\AddFollow
+[2017-12-24 04:32:42] Processed:  App\Notifications\AddFollow
+[2017-12-24 04:32:42] Processing: App\Notifications\AddFollow
+[2017-12-24 04:32:42] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-24 04:32:42] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-24 04:32:42] Processed:  App\Notifications\AddFollow
+[2017-12-24 04:33:03] Processing: App\Notifications\AddFollow
+[2017-12-24 04:33:03] Processed:  App\Notifications\AddFollow
+[2017-12-24 04:33:03] Processing: App\Notifications\AddFollow
+[2017-12-24 04:33:03] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-24 04:33:03] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-24 04:33:03] Processed:  App\Notifications\AddFollow
+[2017-12-24 04:33:33] Processing: App\Notifications\AddFollow
+[2017-12-24 04:33:33] Processing: App\Notifications\AddFollow
+[2017-12-24 04:33:33] Processed:  App\Notifications\AddFollow
+[2017-12-24 04:33:33] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-24 04:33:33] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-24 04:33:33] Processed:  App\Notifications\AddFollow
+[2017-12-24 12:01:05] Processing: App\Notifications\AddFollow
+[2017-12-24 12:01:05] Processed:  App\Notifications\AddFollow
+[2017-12-24 12:01:05] Processing: App\Notifications\AddFollow
+[2017-12-24 12:01:05] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-24 12:01:05] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-24 12:01:05] Processed:  App\Notifications\AddFollow
+[2017-12-24 12:03:48] Processing: App\Notifications\AddFollow
+[2017-12-24 12:03:48] Processed:  App\Notifications\AddFollow
+[2017-12-24 12:03:48] Processing: App\Notifications\AddFollow
+[2017-12-24 12:03:48] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-24 12:03:48] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-24 12:03:48] Processed:  App\Notifications\AddFollow
+[2017-12-24 12:10:57] Processing: App\Notifications\AddFollow
+[2017-12-24 12:10:57] Processed:  App\Notifications\AddFollow
+[2017-12-24 12:10:57] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-24 12:10:57] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-24 12:10:57] Processing: App\Notifications\AddFollow
+[2017-12-24 12:10:57] Processed:  App\Notifications\AddFollow
+[2017-12-25 04:24:18] Processing: App\Notifications\AddFollow
+[2017-12-25 04:24:18] Processing: App\Notifications\AddFollow
+[2017-12-25 04:24:18] Processed:  App\Notifications\AddFollow
+[2017-12-25 04:24:18] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 04:24:18] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 04:24:19] Processed:  App\Notifications\AddFollow
+[2017-12-25 04:37:31] Processing: App\Notifications\AddFollow
+[2017-12-25 04:37:31] Processed:  App\Notifications\AddFollow
+[2017-12-25 04:37:31] Processing: App\Notifications\AddFollow
+[2017-12-25 04:37:31] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 04:37:31] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 04:37:31] Processed:  App\Notifications\AddFollow
+[2017-12-25 04:38:51] Processing: App\Notifications\AddFollow
+[2017-12-25 04:38:51] Processing: App\Notifications\AddFollow
+[2017-12-25 04:38:52] Processed:  App\Notifications\AddFollow
+[2017-12-25 04:38:52] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 04:38:52] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 04:38:52] Processed:  App\Notifications\AddFollow
+[2017-12-25 04:39:15] Processing: App\Notifications\AddFollow
+[2017-12-25 04:39:15] Processing: App\Notifications\AddFollow
+[2017-12-25 04:39:16] Processed:  App\Notifications\AddFollow
+[2017-12-25 04:39:16] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 04:39:16] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 04:39:16] Processed:  App\Notifications\AddFollow
+[2017-12-25 04:52:44] Processing: App\Notifications\AddFollow
+[2017-12-25 04:52:44] Processing: App\Notifications\AddFollow
+[2017-12-25 04:52:44] Processed:  App\Notifications\AddFollow
+[2017-12-25 04:52:44] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 04:52:44] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 04:52:44] Processed:  App\Notifications\AddFollow
+
+
+
+
+
+
+
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+                                                                    
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+

@@ -13,27 +13,32 @@
 
 	<!-- Styles -->
 	<link href="{{ mix('css/app.css') }}" rel="stylesheet"> @yield('style')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="{{ asset('plugins/swal/sweetalert2.css') }}">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="{{ asset('plugins/swal/sweetalert2.css') }}"> @stack('style')
 </head>
 
 <body class="@yield('body_class')">
 	<div id="app">
-        @if(Auth::check())
-            <init></init>   
-            <listen :id="{{ Auth::user()->id }}"></listen>            
-        @endif
-		@include('layouts.blocks._navbar') @yield('content')        
+		@if(Auth::check())
+		<init></init>
+		<listen :id="{{ Auth::user()->id }}"></listen>
+		@endif @include('layouts.blocks._navbar')
+		<div style="margin-top:80px">
+			@yield('content')
+		</div>
+		<div style="padding-bottom:100px"></div>
 	</div>
 
 
 	<!-- Scripts -->
 	<script src="{{ mix('js/app.js') }}"></script>
-    <script src="{{ mix('js/frontend.js') }}"></script>
-	@yield('script')
-    @include('layouts.blocks._login_modal')
-    <script>
-        $(document).ready(() => {
+	<script src="{{ mix('js/frontend.js') }}"></script>
+
+	@stack('script')
+	<!-- stack use push -->
+	@include('layouts.blocks._login_modal')
+	<script>
+		$(document).ready(() => {
             var formLogin = $('#modal-login');
             formLogin.submit((e) => {
                 e.preventDefault();
@@ -53,7 +58,7 @@
                 });
             });
         });
-    </script>
+	</script>
 </body>
 
 </html>

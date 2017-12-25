@@ -13,12 +13,12 @@
         &:after {
             color: #a8a8a8;
         }
-        &:before {
-            display: block;
-            content: "\e123";
-            font-family: 'Glyphicons Halflings';
-            transform-origin: top center;
-        }
+        // &:before {
+        //     display: block;
+        //     content: "\e123";
+        //     font-family: 'Glyphicons Halflings';
+        //     transform-origin: top center;
+        // }
         &:after {
             font-family: Arial;
             font-size: 0.7em;
@@ -46,14 +46,24 @@
             transition-timing-function: ease-out;
             color: #fff;
         }
-        &.notify:before {
-            -webkit-animation: ring 1.5s ease;
-            animation: ring 1.5s ease;
+        &.notify {
+            // &:before {
+            //     -webkit-animation: ring 1.5s ease;
+            //     animation: ring 1.5s ease;
+            // }
+            & svg {
+                -webkit-animation: ring 1.5s ease;
+                animation: ring 1.5s ease;
+            }
         }
         &.show-count:after {
             -webkit-transform: scale(1);
             transform: scale(1);
             opacity: 1;
+        }
+        & svg {
+            margin-bottom: -6px;
+            transform-origin: top center;
         }
     }
     & .dropdown-menu {
@@ -69,13 +79,19 @@
             padding-bottom: 3px;
         }
         & li {
+            border-bottom: 1px solid #ddd;
+            &:last-child() {
+                border-bottom: none;
+            }
+            &.unread {
+                background: #f1f1f1;
+            }
             &>a {
                 display: table;
                 padding: 10px;
                 line-height: 1;
                 white-space: normal;
                 width: 100%;
-                border-bottom: 1px solid #eee;
                 font-size: 13px;
                 color: #666;
                 &:hover {

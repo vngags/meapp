@@ -54,8 +54,7 @@ Route::get('/{slug}', 'ProfileController@index')->name('profile.index')->where('
     //Products
     Route::get('/{user_slug}/post', 'ProductController@index')->name('product.index'); 
     Route::get('/{user_slug}/post/create', 'ProductController@create')->name('product.create');
-    Route::get('/{user_slug}/post/{slug}', 'ProductController@show')->name('product.show');
-    Route::post('/{user_slug}/post/store', 'ProductController@store')->name('product.store');
+    Route::get('/{user_slug}/post/{slug}', 'ProductController@show')->name('product.show');    
     Route::post('/{user_slug}/post/delete/{id}', 'ProductController@destroy')->name('product.destroy');
            
     Route::get('/{user_slug}/post/{slug}/edit', 'ProductController@edit')->name('product.edit');   

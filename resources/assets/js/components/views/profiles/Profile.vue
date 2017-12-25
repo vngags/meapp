@@ -29,26 +29,26 @@
                     <h4>Following
                         <span v-if="profile_user.followings.length > 0" class="badge">{{ profile_user.followings.length }}</span>
                     </h4>
-                    <transition name="fadebg">
-                        <div v-if="profile_user.followings.length > 0" v-for="following in profile_user.followings">
+                    <transition-group name="fadebg">
+                        <div v-if="profile_user.followings.length > 0" :key="following.slug" v-for="following in profile_user.followings">
                             <a :href="'/' + following.slug" class="border-outline outline-circle">
                                 <img :src="following.avatar" width="28" class="img-circle">
                             </a>
                         </div>
-                    </transition>
+                    </transition-group>
                 </div>
 
                 <div class="form-group">
                     <h4>Followers
                         <span v-if="profile_user.followers.length > 0" class="badge">{{ profile_user.followers.length }}</span>
                     </h4>
-                    <transition name="fadebg">
-                        <div v-if="profile_user.followers.length > 0" v-for="follower in profile_user.followers">
+                    <transition-group name="fadebg">
+                        <div v-if="profile_user.followers.length > 0" :key="follower.slug" v-for="follower in profile_user.followers">
                             <a :href="'/' + follower.slug" class="border-outline outline-circle">
                                 <img :src="follower.avatar" width="28" class="img-circle">
                             </a>
                         </div>
-                    </transition>
+                    </transition-group>
                 </div>
 
                 <div class="rules_permissions">
@@ -56,7 +56,7 @@
                     <li>{{ profile_user.rule[0] }}</li>
                     <hr>
                     <h4>Permissions</h4>
-                    <li v-for="permission in profile_user.permissions">{{ permission.name }}</li>
+                    <li v-for="permission in profile_user.permissions">{{ permission }}</li>
                 </div>
                 <div class="products">
                     <h4>Products</h4>

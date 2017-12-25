@@ -1718,14 +1718,11 @@ exports.default = {
     mounted: function mounted() {
         var _this = this;
 
-        (0, _api.get)('/api/user').then(function (resp) {
+        (0, _api.get)('/api/v1/user').then(function (resp) {
             _this.$store.commit('add_auth_user_data', resp.data);
         });
     }
 }; //
-//
-//
-//
 
 /***/ }),
 
@@ -1738,9 +1735,6 @@ exports.default = {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-//
-//
-//
 //
 
 exports.default = {
@@ -1784,7 +1778,6 @@ exports.default = {
     },
     mounted: function mounted() {
         var vm = this;
-        this.get_unread_notifications();
         this.getWinSize();
         this.$nextTick(function () {
             window.addEventListener("resize", vm.getWinSize);
@@ -1795,27 +1788,37 @@ exports.default = {
         getWinSize: function getWinSize() {
             this.winWidth = document.documentElement.clientWidth;
             this.winHeight = document.documentElement.clientHeight - 180 >= 100 ? document.documentElement.clientHeight - 180 : 100;
-        },
-        get_unread_notifications: function get_unread_notifications() {
-            var _this = this;
-
-            var vm = this;
-            (0, _api.get)('/api/v1/get_unread_notifications').then(function (resp) {
-                resp.data.forEach(function (item) {
-                    _this.$store.commit('add_unread_notification', item);
-                });
-            });
         }
     },
     computed: {
-        notify: function notify() {
-            return this.$store.getters.get_notifications;
+        user: function user() {
+            return this.$store.getters.get_auth_user_data;
         }
     },
     beforeDestroy: function beforeDestroy() {
         window.removeEventListener("resize", this.getWinSize);
     }
 }; //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -1879,7 +1882,7 @@ var _dropzone = __webpack_require__("./node_modules/dropzone/dist/dropzone.js");
 
 var _dropzone2 = _interopRequireDefault(_dropzone);
 
-__webpack_require__("./node_modules/dropzone/dist/dropzone.css");
+__webpack_require__("./public/plugins/vue2dropzone/vue2Dropzone.css");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1894,66 +1897,106 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
 
-// import '../../../../../../public/plugins/vue2dropzone/vue2Dropzone.css'
 exports.default = {
+    props: ['attachments_ids', 'params', 'maxfile'],
+    data: function data() {
+        return {
+            myDropzone: null
+        };
+    },
+
+    watch: {
+        'attachments_ids': 'fetchImage'
+    },
     mounted: function mounted() {
-        var _ref;
-
-        var myDropzone = new _dropzone2.default(".dropzone", (_ref = {
-            url: '/api/v1/media/upload',
-            thumbnailWidth: 150,
-            thumbnailHeight: 150,
-            maxFilesize: 5,
-            maxFiles: 10,
-            acceptedFiles: ".jpeg,.jpg,.png,.gif",
-            createImageThumbnails: true,
-            uploadMultiple: false,
-            paramName: "product_images",
-            parallelUploads: 1,
-            dictDefaultMessage: 'Kéo thả hình ảnh hoặc click vào đây',
-            dictMaxFilesExceeded: 'Số lượng hình ảnh đã đạt tối đa (10 ảnh)',
-            dictInvalidFileType: 'Loại tệp tin không được hỗ trợ',
-            dictFallbackMessage: 'Trình duyệt của bạn không hỗ trợ kéo thả tệp tin',
-            dictFileTooBig: "Kích thước quá lớn ({{filesize}}MB). Tối đa: {{maxFilesize}}MB"
-        }, _defineProperty(_ref, 'dictInvalidFileType', 'Loại tệp tin không được hỗ trợ'), _defineProperty(_ref, 'dictResponseError', "Server responded with {{statusCode}} code"), _defineProperty(_ref, 'dictCancelUpload', 'Hủy tải lên'), _defineProperty(_ref, 'dictCancelUploadConfirmation', 'Bạn có muốn hủy tải lên?'), _defineProperty(_ref, 'dictRemoveFile', 'Xóa'), _defineProperty(_ref, 'acceptedFiles', 'image/*'), _defineProperty(_ref, 'addRemoveLinks', true), _defineProperty(_ref, 'headers', {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }), _defineProperty(_ref, 'init', function init() {
-            var dz = this;
-            this.on('success', function (file, response) {
-                file.filename = response.name;
-            });
-
-            this.on("removedfile", function (file) {
-                (0, _api.post)('/api/v1/media/delete', {
-                    product_image: file.filename
-                }).then(function (resp) {
-                    // if(resp.data.status == 'deleted') {
-                    //     this.removeFile(file);
-                    // }                   
-                    console.log('removed');
-                });
-            });
-
-            (0, _api.get)('/api/v1/media/list').then(function (resp) {
-                resp.data.forEach(function (img) {
-                    var thumb = {
-                        name: img.name,
-                        size: img.size,
-                        dataURL: '/images/' + img.fullname,
-                        filename: img.name
-                    };
-                    dz.files.push(thumb);
-                    dz.emit('addedfile', thumb);
-                    dz.createThumbnailFromUrl(thumb, dz.options.thumbnailWidth, dz.options.thumbnailHeight, dz.options.thumbnailMethod, true, function (thumbnail) {
-                        dz.emit('thumbnail', thumb, thumbnail);
-                    });
-                    dz.emit('complete', thumb);
-                });
-            });
-        }), _ref));
+        this.setup_dropzone();
         _dropzone2.default.autoDiscover = false;
+        this.fetchImage();
+    },
+
+    methods: {
+        setup_dropzone: function setup_dropzone() {
+            var _ref;
+
+            var vm = this;
+            vm.myDropzone = new _dropzone2.default(".dropzone", (_ref = {
+                url: '/api/v1/media/upload',
+                thumbnailWidth: 150,
+                thumbnailHeight: 150,
+                maxFilesize: 5,
+                maxFiles: this.maxfile,
+                params: this.params,
+                acceptedFiles: ".jpeg,.jpg,.png,.gif",
+                createImageThumbnails: true,
+                uploadMultiple: false,
+                paramName: "product_images",
+                parallelUploads: 1,
+                dictDefaultMessage: '',
+                dictMaxFilesExceeded: 'Số lượng hình ảnh đã đạt tối đa (10 ảnh)',
+                dictInvalidFileType: 'Loại tệp tin không được hỗ trợ',
+                dictFallbackMessage: 'Trình duyệt của bạn không hỗ trợ kéo thả tệp tin',
+                dictFileTooBig: "Kích thước quá lớn ({{filesize}}MB). Tối đa: {{maxFilesize}}MB"
+            }, _defineProperty(_ref, 'dictInvalidFileType', 'Loại tệp tin không được hỗ trợ'), _defineProperty(_ref, 'dictResponseError', "Server responded with {{statusCode}} code"), _defineProperty(_ref, 'dictCancelUpload', 'Hủy tải lên'), _defineProperty(_ref, 'dictCancelUploadConfirmation', 'Bạn có muốn hủy tải lên?'), _defineProperty(_ref, 'dictRemoveFile', ''), _defineProperty(_ref, 'acceptedFiles', 'image/*'), _defineProperty(_ref, 'addRemoveLinks', true), _defineProperty(_ref, 'previewsContainer', '.previews'), _defineProperty(_ref, 'headers', {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }), _defineProperty(_ref, 'init', function init() {
+                var dz = this;
+                this.on('success', function (file, response) {
+                    file.filename = response.name;
+                    file.dataURL = '/images/' + response.fullname;
+                    file.id = response.id;
+                    vm.$emit('completed', response.id);
+                });
+
+                this.on("removedfile", function (file) {
+                    (0, _api.post)('/api/v1/media/delete', {
+                        product_image: file.filename
+                    });
+                });
+
+                this.on("maxfilesexceeded", function (file) {
+                    file.removeFile();
+                });
+
+                this.on("error", function (file, message) {
+                    var _this = this;
+
+                    setTimeout(function () {
+                        _this.removeFile(file);
+                    }, 5000);
+                });
+            }), _ref));
+        },
+        fetchImage: function fetchImage() {
+            var dz = this.myDropzone;
+            var vm = this;
+            if (this.attachments_ids && this.attachments_ids.length > 0) {
+
+                dz.removeAllFiles(); //clean all file before push new
+                this.attachments_ids.forEach(function (item) {
+                    vm.$emit('completed', item);
+                    (0, _api.get)('/api/v1/media/get_image/' + item).then(function (resp) {
+                        var thumb = {
+                            name: resp.data.name,
+                            size: resp.data.size,
+                            dataURL: '/images/' + resp.data.fullname,
+                            filename: resp.data.name,
+                            id: resp.data.id
+                        };
+                        dz.files.push(thumb);
+                        dz.emit('addedfile', thumb);
+                        dz.createThumbnailFromUrl(thumb, dz.options.thumbnailWidth, dz.options.thumbnailHeight, dz.options.thumbnailMethod, true, function (thumbnail) {
+                            dz.emit('thumbnail', thumb, thumbnail);
+                        });
+                        dz.emit('complete', thumb);
+                    });
+                });
+            } //endif
+        }
     }
+
 };
 
 /***/ }),
@@ -1971,6 +2014,8 @@ Object.defineProperty(exports, "__esModule", {
 var _regenerator = __webpack_require__("./node_modules/babel-runtime/regenerator/index.js");
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
+
+var _api = __webpack_require__("./resources/assets/js/api/index.js");
 
 var _Dropzone = __webpack_require__("./resources/assets/js/components/views/products/Dropzone.vue");
 
@@ -1998,41 +2043,88 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 //
 //
 //
+//
+//
+//
+//
 
 exports.default = {
+    props: ['product_id'],
     components: {
         Dropzone: _Dropzone2.default
     },
     data: function data() {
         return {
-            form: []
-
+            form: {
+                title: null,
+                body: null,
+                attachments: [],
+                id: null
+            },
+            store_url: '/api/v1/post/store',
+            child_attachments: [],
+            loading: true
         };
+    },
+    mounted: function mounted() {
+        if (this.product_id) {
+            this.fetchData();
+            this.store_url = '/api/v1/post/update';
+            this.form.id = this.product_id;
+        } else {
+            this.loading = false;
+        }
     },
 
     methods: {
-        child_upload: function child_upload() {
+        fetchData: function fetchData() {
             var _this = this;
+
+            this.loading = true;
+            (0, _api.post)('/api/v1/post/get_product', {
+                product_id: this.product_id
+            }).then(function (resp) {
+                _this.form.title = resp.data.product.title;
+                _this.form.body = resp.data.product.body;
+                _this.child_attachments = resp.data.attachments;
+                _this.loading = false;
+            });
+        },
+        save: function save() {
+            var _this2 = this;
 
             return _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee() {
                 return _regenerator2.default.wrap(function _callee$(_context) {
                     while (1) {
                         switch (_context.prev = _context.next) {
                             case 0:
-                                _context.next = 2;
-                                return _this.$refs.child.upload();
+                                // await this.$refs.child.submited()
+                                (0, _api.post)(_this2.store_url, _this2.form).then(function (resp) {
+                                    if (resp.data.status == 'success') {
+                                        window.location.href = '/' + _this2.user.uid + '/post/' + resp.data.product.slug;
+                                    }
+                                });
 
-                            case 2:
-                                // undefined
-                                console.log(2);
-
-                            case 3:
+                            case 1:
                             case 'end':
                                 return _context.stop();
                         }
                     }
-                }, _callee, _this);
+                }, _callee, _this2);
             }))();
+        },
+        get_images: function get_images(data) {
+            // this.form.attachments = []
+            // data.forEach((image) => {                    
+            //     this.form.attachments.push(image.id)
+            //     console.log(image.id);
+            // })
+            this.form.attachments.push(data);
+        }
+    },
+    computed: {
+        user: function user() {
+            return this.$store.getters.get_auth_user_data;
         }
     }
 };
@@ -2153,6 +2245,7 @@ var _QRcode2 = _interopRequireDefault(_QRcode);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+//
 //
 //
 //
@@ -2400,74 +2493,107 @@ Object.defineProperty(exports, "__esModule", {
 
 var _api = __webpack_require__("./resources/assets/js/api/index.js");
 
+var _UploadImage = __webpack_require__("./resources/assets/js/components/views/profiles/UploadImage.vue");
+
+var _UploadImage2 = _interopRequireDefault(_UploadImage);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
 exports.default = {
-    props: ['slug'],
+    components: {
+        UploadImage: _UploadImage2.default
+    },
+    // props: ['slug'],
     data: function data() {
         return {
-            profile_data: []
+            profile_data: [],
+            loading: true
         };
     },
     mounted: function mounted() {
-        this.get_user_data();
+        // this.get_user_data()
     },
 
     methods: {
-        get_user_data: function get_user_data() {
+        // get_user_data() {
+        //     this.loading = true
+        //     get(`/api/v1/${this.slug}`)
+        //         .then(resp => {
+        //             this.profile_data = resp.data
+        //             this.loading = false
+        //         })
+        // },
+        save: function save() {
             var _this = this;
 
-            (0, _api.get)('/api/v1/' + this.slug).then(function (resp) {
-                _this.profile_data = resp.data;
-            });
-        },
-        save: function save() {
+            this.loading = true;
             (0, _api.post)('/api/v1/update_profile', this.profile_data).then(function (resp) {
+                _this.loading = false;
                 window.location.href = '/' + resp.data.slug;
+                // this.$store.commit('add_auth_user_data', resp.data)             
             });
         }
     },
     computed: {
         user: function user() {
+            this.loading = false;
             return this.$store.getters.get_auth_user_data;
         }
+    },
+    watch: {
+        user: function user() {
+            this.profile_data = {
+                uid: this.user.uid,
+                name: this.user.name,
+                email: this.user.email,
+                slug: this.user.slug,
+                avatar: this.user.avatar,
+                profile: this.user.profile
+            };
+        }
     }
-}; //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+};
 
 /***/ }),
 
@@ -2582,6 +2708,164 @@ exports.default = {
     computed: {
         user: function user() {
             return this.$store.getters.get_auth_user_data;
+        }
+    }
+};
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}],\"es2015\",\"es2017\"],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0&bustCache!./resources/assets/js/components/views/profiles/UploadImage.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _regenerator = __webpack_require__("./node_modules/babel-runtime/regenerator/index.js");
+
+var _regenerator2 = _interopRequireDefault(_regenerator);
+
+var _api = __webpack_require__("./resources/assets/js/api/index.js");
+
+var _dropzone = __webpack_require__("./node_modules/dropzone/dist/dropzone.js");
+
+var _dropzone2 = _interopRequireDefault(_dropzone);
+
+__webpack_require__("./public/plugins/vue2dropzone/vue2Dropzone.css");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; } //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+// import 'dropzone/dist/dropzone.css'
+
+
+exports.default = {
+    props: ['attachments_ids'],
+    data: function data() {
+        return {
+            myDropzone: null
+        };
+    },
+    mounted: function mounted() {
+        this.setup_dropzone();
+        _dropzone2.default.autoDiscover = false;
+    },
+
+    methods: {
+        setup_dropzone: function setup_dropzone() {
+            var _this = this;
+
+            return _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee() {
+                var _ref;
+
+                var vm;
+                return _regenerator2.default.wrap(function _callee$(_context) {
+                    while (1) {
+                        switch (_context.prev = _context.next) {
+                            case 0:
+                                vm = _this;
+
+                                vm.myDropzone = new _dropzone2.default(".dropzone", (_ref = {
+                                    url: '/api/v1/media/upload',
+                                    thumbnailWidth: 150,
+                                    thumbnailHeight: 150,
+                                    maxFilesize: 5,
+                                    maxFiles: 1,
+                                    acceptedFiles: ".jpeg,.jpg,.png,.gif",
+                                    createImageThumbnails: true,
+                                    uploadMultiple: false,
+                                    paramName: "product_images",
+                                    parallelUploads: 1,
+                                    dictDefaultMessage: '',
+                                    dictMaxFilesExceeded: 'Số lượng hình ảnh đã đạt tối đa (10 ảnh)',
+                                    dictInvalidFileType: 'Loại tệp tin không được hỗ trợ',
+                                    dictFallbackMessage: 'Trình duyệt của bạn không hỗ trợ kéo thả tệp tin',
+                                    dictFileTooBig: "Kích thước quá lớn ({{filesize}}MB). Tối đa: {{maxFilesize}}MB"
+                                }, _defineProperty(_ref, 'dictInvalidFileType', 'Loại tệp tin không được hỗ trợ'), _defineProperty(_ref, 'dictResponseError', "Server responded with {{statusCode}} code"), _defineProperty(_ref, 'dictCancelUpload', 'Hủy tải lên'), _defineProperty(_ref, 'dictCancelUploadConfirmation', 'Bạn có muốn hủy tải lên?'), _defineProperty(_ref, 'dictRemoveFile', ''), _defineProperty(_ref, 'acceptedFiles', 'image/*'), _defineProperty(_ref, 'addRemoveLinks', true), _defineProperty(_ref, 'previewsContainer', '.previews'), _defineProperty(_ref, 'headers', {
+                                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                                }), _defineProperty(_ref, 'init', function init() {
+                                    var dz = this;
+                                    this.on('success', function (file, response) {
+                                        file.filename = response.name;
+                                        file.dataURL = '/images/' + response.fullname;
+                                        file.id = response.id;
+                                        vm.$emit('completed', response.id);
+                                    });
+
+                                    this.on("maxfilesexceeded", function (file) {
+                                        this.removeAllFiles();
+                                        this.addFile(file);
+                                    });
+
+                                    this.on("removedfile", function (file) {
+                                        (0, _api.post)('/api/v1/media/delete', {
+                                            product_image: file.filename
+                                        });
+                                    });
+
+                                    this.on("maxfilesexceeded", function (file) {
+                                        file.removeFile();
+                                    });
+
+                                    this.on("error", function (file, message) {
+                                        var _this2 = this;
+
+                                        setTimeout(function () {
+                                            _this2.removeFile(file);
+                                        }, 5000);
+                                    });
+                                }), _ref));
+
+                            case 2:
+                            case 'end':
+                                return _context.stop();
+                        }
+                    }
+                }, _callee, _this);
+            }))();
+        }
+    },
+    watch: {
+        attachments_ids: function attachments_ids() {
+            var dz = this.myDropzone;
+            var vm = this;
+            if (this.attachments_ids && this.attachments_ids.length > 0) {
+                dz.removeAllFiles(); //clean all file before push new
+                this.attachments_ids.forEach(function (item) {
+                    vm.$emit('completed', item);
+                    (0, _api.get)('/api/v1/media/get_image/' + item).then(function (resp) {
+                        var thumb = {
+                            name: resp.data.name,
+                            size: resp.data.size,
+                            dataURL: '/images/' + resp.data.fullname,
+                            filename: resp.data.name,
+                            id: resp.data.id
+                        };
+                        dz.files.push(thumb);
+                        dz.emit('addedfile', thumb);
+                        dz.createThumbnailFromUrl(thumb, dz.options.thumbnailWidth, dz.options.thumbnailHeight, dz.options.thumbnailMethod, true, function (thumbnail) {
+                            dz.emit('thumbnail', thumb, thumbnail);
+                        });
+                        dz.emit('complete', thumb);
+                    });
+                });
+            } //endif
         }
     }
 };
@@ -5463,21 +5747,6 @@ module.exports = function(a, b){
 
 /***/ }),
 
-/***/ "./node_modules/css-loader/index.js!./node_modules/dropzone/dist/dropzone.css":
-/***/ (function(module, exports, __webpack_require__) {
-
-exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/css-base.js")(undefined);
-// imports
-
-
-// module
-exports.push([module.i, "/*\n * The MIT License\n * Copyright (c) 2012 Matias Meno <m@tias.me>\n */\n@-webkit-keyframes passing-through {\n  0% {\n    opacity: 0;\n    -webkit-transform: translateY(40px);\n    -moz-transform: translateY(40px);\n    -ms-transform: translateY(40px);\n    -o-transform: translateY(40px);\n    transform: translateY(40px); }\n  30%, 70% {\n    opacity: 1;\n    -webkit-transform: translateY(0px);\n    -moz-transform: translateY(0px);\n    -ms-transform: translateY(0px);\n    -o-transform: translateY(0px);\n    transform: translateY(0px); }\n  100% {\n    opacity: 0;\n    -webkit-transform: translateY(-40px);\n    -moz-transform: translateY(-40px);\n    -ms-transform: translateY(-40px);\n    -o-transform: translateY(-40px);\n    transform: translateY(-40px); } }\n@-moz-keyframes passing-through {\n  0% {\n    opacity: 0;\n    -webkit-transform: translateY(40px);\n    -moz-transform: translateY(40px);\n    -ms-transform: translateY(40px);\n    -o-transform: translateY(40px);\n    transform: translateY(40px); }\n  30%, 70% {\n    opacity: 1;\n    -webkit-transform: translateY(0px);\n    -moz-transform: translateY(0px);\n    -ms-transform: translateY(0px);\n    -o-transform: translateY(0px);\n    transform: translateY(0px); }\n  100% {\n    opacity: 0;\n    -webkit-transform: translateY(-40px);\n    -moz-transform: translateY(-40px);\n    -ms-transform: translateY(-40px);\n    -o-transform: translateY(-40px);\n    transform: translateY(-40px); } }\n@keyframes passing-through {\n  0% {\n    opacity: 0;\n    -webkit-transform: translateY(40px);\n    -moz-transform: translateY(40px);\n    -ms-transform: translateY(40px);\n    -o-transform: translateY(40px);\n    transform: translateY(40px); }\n  30%, 70% {\n    opacity: 1;\n    -webkit-transform: translateY(0px);\n    -moz-transform: translateY(0px);\n    -ms-transform: translateY(0px);\n    -o-transform: translateY(0px);\n    transform: translateY(0px); }\n  100% {\n    opacity: 0;\n    -webkit-transform: translateY(-40px);\n    -moz-transform: translateY(-40px);\n    -ms-transform: translateY(-40px);\n    -o-transform: translateY(-40px);\n    transform: translateY(-40px); } }\n@-webkit-keyframes slide-in {\n  0% {\n    opacity: 0;\n    -webkit-transform: translateY(40px);\n    -moz-transform: translateY(40px);\n    -ms-transform: translateY(40px);\n    -o-transform: translateY(40px);\n    transform: translateY(40px); }\n  30% {\n    opacity: 1;\n    -webkit-transform: translateY(0px);\n    -moz-transform: translateY(0px);\n    -ms-transform: translateY(0px);\n    -o-transform: translateY(0px);\n    transform: translateY(0px); } }\n@-moz-keyframes slide-in {\n  0% {\n    opacity: 0;\n    -webkit-transform: translateY(40px);\n    -moz-transform: translateY(40px);\n    -ms-transform: translateY(40px);\n    -o-transform: translateY(40px);\n    transform: translateY(40px); }\n  30% {\n    opacity: 1;\n    -webkit-transform: translateY(0px);\n    -moz-transform: translateY(0px);\n    -ms-transform: translateY(0px);\n    -o-transform: translateY(0px);\n    transform: translateY(0px); } }\n@keyframes slide-in {\n  0% {\n    opacity: 0;\n    -webkit-transform: translateY(40px);\n    -moz-transform: translateY(40px);\n    -ms-transform: translateY(40px);\n    -o-transform: translateY(40px);\n    transform: translateY(40px); }\n  30% {\n    opacity: 1;\n    -webkit-transform: translateY(0px);\n    -moz-transform: translateY(0px);\n    -ms-transform: translateY(0px);\n    -o-transform: translateY(0px);\n    transform: translateY(0px); } }\n@-webkit-keyframes pulse {\n  0% {\n    -webkit-transform: scale(1);\n    -moz-transform: scale(1);\n    -ms-transform: scale(1);\n    -o-transform: scale(1);\n    transform: scale(1); }\n  10% {\n    -webkit-transform: scale(1.1);\n    -moz-transform: scale(1.1);\n    -ms-transform: scale(1.1);\n    -o-transform: scale(1.1);\n    transform: scale(1.1); }\n  20% {\n    -webkit-transform: scale(1);\n    -moz-transform: scale(1);\n    -ms-transform: scale(1);\n    -o-transform: scale(1);\n    transform: scale(1); } }\n@-moz-keyframes pulse {\n  0% {\n    -webkit-transform: scale(1);\n    -moz-transform: scale(1);\n    -ms-transform: scale(1);\n    -o-transform: scale(1);\n    transform: scale(1); }\n  10% {\n    -webkit-transform: scale(1.1);\n    -moz-transform: scale(1.1);\n    -ms-transform: scale(1.1);\n    -o-transform: scale(1.1);\n    transform: scale(1.1); }\n  20% {\n    -webkit-transform: scale(1);\n    -moz-transform: scale(1);\n    -ms-transform: scale(1);\n    -o-transform: scale(1);\n    transform: scale(1); } }\n@keyframes pulse {\n  0% {\n    -webkit-transform: scale(1);\n    -moz-transform: scale(1);\n    -ms-transform: scale(1);\n    -o-transform: scale(1);\n    transform: scale(1); }\n  10% {\n    -webkit-transform: scale(1.1);\n    -moz-transform: scale(1.1);\n    -ms-transform: scale(1.1);\n    -o-transform: scale(1.1);\n    transform: scale(1.1); }\n  20% {\n    -webkit-transform: scale(1);\n    -moz-transform: scale(1);\n    -ms-transform: scale(1);\n    -o-transform: scale(1);\n    transform: scale(1); } }\n.dropzone, .dropzone * {\n  box-sizing: border-box; }\n\n.dropzone {\n  min-height: 150px;\n  border: 2px solid rgba(0, 0, 0, 0.3);\n  background: white;\n  padding: 20px 20px; }\n  .dropzone.dz-clickable {\n    cursor: pointer; }\n    .dropzone.dz-clickable * {\n      cursor: default; }\n    .dropzone.dz-clickable .dz-message, .dropzone.dz-clickable .dz-message * {\n      cursor: pointer; }\n  .dropzone.dz-started .dz-message {\n    display: none; }\n  .dropzone.dz-drag-hover {\n    border-style: solid; }\n    .dropzone.dz-drag-hover .dz-message {\n      opacity: 0.5; }\n  .dropzone .dz-message {\n    text-align: center;\n    margin: 2em 0; }\n  .dropzone .dz-preview {\n    position: relative;\n    display: inline-block;\n    vertical-align: top;\n    margin: 16px;\n    min-height: 100px; }\n    .dropzone .dz-preview:hover {\n      z-index: 1000; }\n      .dropzone .dz-preview:hover .dz-details {\n        opacity: 1; }\n    .dropzone .dz-preview.dz-file-preview .dz-image {\n      border-radius: 20px;\n      background: #999;\n      background: linear-gradient(to bottom, #eee, #ddd); }\n    .dropzone .dz-preview.dz-file-preview .dz-details {\n      opacity: 1; }\n    .dropzone .dz-preview.dz-image-preview {\n      background: white; }\n      .dropzone .dz-preview.dz-image-preview .dz-details {\n        -webkit-transition: opacity 0.2s linear;\n        -moz-transition: opacity 0.2s linear;\n        -ms-transition: opacity 0.2s linear;\n        -o-transition: opacity 0.2s linear;\n        transition: opacity 0.2s linear; }\n    .dropzone .dz-preview .dz-remove {\n      font-size: 14px;\n      text-align: center;\n      display: block;\n      cursor: pointer;\n      border: none; }\n      .dropzone .dz-preview .dz-remove:hover {\n        text-decoration: underline; }\n    .dropzone .dz-preview:hover .dz-details {\n      opacity: 1; }\n    .dropzone .dz-preview .dz-details {\n      z-index: 20;\n      position: absolute;\n      top: 0;\n      left: 0;\n      opacity: 0;\n      font-size: 13px;\n      min-width: 100%;\n      max-width: 100%;\n      padding: 2em 1em;\n      text-align: center;\n      color: rgba(0, 0, 0, 0.9);\n      line-height: 150%; }\n      .dropzone .dz-preview .dz-details .dz-size {\n        margin-bottom: 1em;\n        font-size: 16px; }\n      .dropzone .dz-preview .dz-details .dz-filename {\n        white-space: nowrap; }\n        .dropzone .dz-preview .dz-details .dz-filename:hover span {\n          border: 1px solid rgba(200, 200, 200, 0.8);\n          background-color: rgba(255, 255, 255, 0.8); }\n        .dropzone .dz-preview .dz-details .dz-filename:not(:hover) {\n          overflow: hidden;\n          text-overflow: ellipsis; }\n          .dropzone .dz-preview .dz-details .dz-filename:not(:hover) span {\n            border: 1px solid transparent; }\n      .dropzone .dz-preview .dz-details .dz-filename span, .dropzone .dz-preview .dz-details .dz-size span {\n        background-color: rgba(255, 255, 255, 0.4);\n        padding: 0 0.4em;\n        border-radius: 3px; }\n    .dropzone .dz-preview:hover .dz-image img {\n      -webkit-transform: scale(1.05, 1.05);\n      -moz-transform: scale(1.05, 1.05);\n      -ms-transform: scale(1.05, 1.05);\n      -o-transform: scale(1.05, 1.05);\n      transform: scale(1.05, 1.05);\n      -webkit-filter: blur(8px);\n      filter: blur(8px); }\n    .dropzone .dz-preview .dz-image {\n      border-radius: 20px;\n      overflow: hidden;\n      width: 120px;\n      height: 120px;\n      position: relative;\n      display: block;\n      z-index: 10; }\n      .dropzone .dz-preview .dz-image img {\n        display: block; }\n    .dropzone .dz-preview.dz-success .dz-success-mark {\n      -webkit-animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1);\n      -moz-animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1);\n      -ms-animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1);\n      -o-animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1);\n      animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1); }\n    .dropzone .dz-preview.dz-error .dz-error-mark {\n      opacity: 1;\n      -webkit-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);\n      -moz-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);\n      -ms-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);\n      -o-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);\n      animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1); }\n    .dropzone .dz-preview .dz-success-mark, .dropzone .dz-preview .dz-error-mark {\n      pointer-events: none;\n      opacity: 0;\n      z-index: 500;\n      position: absolute;\n      display: block;\n      top: 50%;\n      left: 50%;\n      margin-left: -27px;\n      margin-top: -27px; }\n      .dropzone .dz-preview .dz-success-mark svg, .dropzone .dz-preview .dz-error-mark svg {\n        display: block;\n        width: 54px;\n        height: 54px; }\n    .dropzone .dz-preview.dz-processing .dz-progress {\n      opacity: 1;\n      -webkit-transition: all 0.2s linear;\n      -moz-transition: all 0.2s linear;\n      -ms-transition: all 0.2s linear;\n      -o-transition: all 0.2s linear;\n      transition: all 0.2s linear; }\n    .dropzone .dz-preview.dz-complete .dz-progress {\n      opacity: 0;\n      -webkit-transition: opacity 0.4s ease-in;\n      -moz-transition: opacity 0.4s ease-in;\n      -ms-transition: opacity 0.4s ease-in;\n      -o-transition: opacity 0.4s ease-in;\n      transition: opacity 0.4s ease-in; }\n    .dropzone .dz-preview:not(.dz-processing) .dz-progress {\n      -webkit-animation: pulse 6s ease infinite;\n      -moz-animation: pulse 6s ease infinite;\n      -ms-animation: pulse 6s ease infinite;\n      -o-animation: pulse 6s ease infinite;\n      animation: pulse 6s ease infinite; }\n    .dropzone .dz-preview .dz-progress {\n      opacity: 1;\n      z-index: 1000;\n      pointer-events: none;\n      position: absolute;\n      height: 16px;\n      left: 50%;\n      top: 50%;\n      margin-top: -8px;\n      width: 80px;\n      margin-left: -40px;\n      background: rgba(255, 255, 255, 0.9);\n      -webkit-transform: scale(1);\n      border-radius: 8px;\n      overflow: hidden; }\n      .dropzone .dz-preview .dz-progress .dz-upload {\n        background: #333;\n        background: linear-gradient(to bottom, #666, #444);\n        position: absolute;\n        top: 0;\n        left: 0;\n        bottom: 0;\n        width: 0;\n        -webkit-transition: width 300ms ease-in-out;\n        -moz-transition: width 300ms ease-in-out;\n        -ms-transition: width 300ms ease-in-out;\n        -o-transition: width 300ms ease-in-out;\n        transition: width 300ms ease-in-out; }\n    .dropzone .dz-preview.dz-error .dz-error-message {\n      display: block; }\n    .dropzone .dz-preview.dz-error:hover .dz-error-message {\n      opacity: 1;\n      pointer-events: auto; }\n    .dropzone .dz-preview .dz-error-message {\n      pointer-events: none;\n      z-index: 1000;\n      position: absolute;\n      display: block;\n      display: none;\n      opacity: 0;\n      -webkit-transition: opacity 0.3s ease;\n      -moz-transition: opacity 0.3s ease;\n      -ms-transition: opacity 0.3s ease;\n      -o-transition: opacity 0.3s ease;\n      transition: opacity 0.3s ease;\n      border-radius: 8px;\n      font-size: 13px;\n      top: 130px;\n      left: -10px;\n      width: 140px;\n      background: #be2626;\n      background: linear-gradient(to bottom, #be2626, #a92222);\n      padding: 0.5em 1.2em;\n      color: white; }\n      .dropzone .dz-preview .dz-error-message:after {\n        content: '';\n        position: absolute;\n        top: -6px;\n        left: 64px;\n        width: 0;\n        height: 0;\n        border-left: 6px solid transparent;\n        border-right: 6px solid transparent;\n        border-bottom: 6px solid #be2626; }\n", ""]);
-
-// exports
-
-
-/***/ }),
-
 /***/ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-1595bfee\",\"scoped\":false,\"hasInlineConfig\":true}!./node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./resources/assets/js/components/views/profiles/Follow.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -5516,7 +5785,22 @@ exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/cs
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-7d83f66d\",\"scoped\":false,\"hasInlineConfig\":true}!./node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./resources/assets/js/components/views/profiles/UploadImage.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/css-base.js")(undefined);
+// imports
+
+
+// module
+exports.push([module.i, "\n#product_image {\n    width: 150px;\n    height: 150px;\n    display: inline-block;\n}\n.previews {\n    display: inline-block;\n    float: left;\n}\n.dz-default.dz-message {\n    margin: 0;\n    width: 100%;\n    height: 100%;\n    border: 2px dashed rgba(0, 0, 0, 0.1);\n    background: rgba(0, 0, 0, 0.01);\n    color: #838383;\n    -webkit-transition: all 0.3s linear;\n    transition: all 0.3s linear;\n    position: relative;\n    border-radius: 20px;\n}\n.dz-default.dz-message>span::before {\n    content: \"\\F093\";\n    font-family: FontAwesome;\n    font-size: 44px;\n    line-height: 110px;\n    color: rgba(0, 0, 0, 0.18);\n    -webkit-transition: all 0.3s linear;\n    transition: all 0.3s linear;\n}\n.dz-default.dz-message>span::after {\n    content: \"Upload Images\";\n    display: block;\n    position: absolute;\n    bottom: 10px;\n    font-weight: bold;\n    text-align: center;\n    width: 100%;\n    font-size: 12px;\n}\n#product_image:hover .dz-default span::before {\n    color: rgba(0, 0, 0, 0.2);\n}\n#product_image:hover .dz-default {\n    border-color: rgba(0, 0, 0, 0.1);\n    background: rgba(0, 0, 0, 0.05);\n}\n", ""]);
 
 // exports
 
@@ -5531,7 +5815,37 @@ exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/cs
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-96e5c444\",\"scoped\":false,\"hasInlineConfig\":true}!./node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./resources/assets/js/components/views/products/Dropzone.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/css-base.js")(undefined);
+// imports
+
+
+// module
+exports.push([module.i, "\n#product_image {\n    width: 150px;\n    height: 150px;\n    display: inline-block;\n}\n.previews {\n    display: inline-block;\n    float: left;\n}\n.dz-default.dz-message {\n    margin: 0;\n    width: 100%;\n    height: 100%;\n    border: 2px dashed rgba(0, 0, 0, 0.1);\n    background: rgba(0, 0, 0, 0.01);\n    color: #838383;\n    -webkit-transition: all 0.3s linear;\n    transition: all 0.3s linear;\n    position: relative;\n    border-radius: 20px;\n}\n.dz-default.dz-message>span::before {\n    content: \"\\F093\";\n    font-family: FontAwesome;\n    font-size: 44px;\n    line-height: 110px;\n    color: rgba(0, 0, 0, 0.18);\n    -webkit-transition: all 0.3s linear;\n    transition: all 0.3s linear;\n}\n.dz-default.dz-message>span::after {\n    content: \"Upload Images\";\n    display: block;\n    position: absolute;\n    bottom: 10px;\n    font-weight: bold;\n    text-align: center;\n    width: 100%;\n    font-size: 12px;\n}\n#product_image:hover .dz-default span::before {\n    color: rgba(0, 0, 0, 0.2);\n}\n#product_image:hover .dz-default {\n    border-color: rgba(0, 0, 0, 0.1);\n    background: rgba(0, 0, 0, 0.05);\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js!./public/plugins/vue2dropzone/vue2Dropzone.css":
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/css-base.js")(undefined);
+// imports
+
+
+// module
+exports.push([module.i, "/*\n * The MIT License\n * Copyright (c) 2012 Matias Meno <m@tias.me>\n */\n@-webkit-keyframes passing-through {\n  0% {\n    opacity: 0;\n    -webkit-transform: translateY(40px);\n    -moz-transform: translateY(40px);\n    -ms-transform: translateY(40px);\n    -o-transform: translateY(40px);\n    transform: translateY(40px); }\n  30%, 70% {\n    opacity: 1;\n    -webkit-transform: translateY(0px);\n    -moz-transform: translateY(0px);\n    -ms-transform: translateY(0px);\n    -o-transform: translateY(0px);\n    transform: translateY(0px); }\n  100% {\n    opacity: 0;\n    -webkit-transform: translateY(-40px);\n    -moz-transform: translateY(-40px);\n    -ms-transform: translateY(-40px);\n    -o-transform: translateY(-40px);\n    transform: translateY(-40px); } }\n@-moz-keyframes passing-through {\n  0% {\n    opacity: 0;\n    -webkit-transform: translateY(40px);\n    -moz-transform: translateY(40px);\n    -ms-transform: translateY(40px);\n    -o-transform: translateY(40px);\n    transform: translateY(40px); }\n  30%, 70% {\n    opacity: 1;\n    -webkit-transform: translateY(0px);\n    -moz-transform: translateY(0px);\n    -ms-transform: translateY(0px);\n    -o-transform: translateY(0px);\n    transform: translateY(0px); }\n  100% {\n    opacity: 0;\n    -webkit-transform: translateY(-40px);\n    -moz-transform: translateY(-40px);\n    -ms-transform: translateY(-40px);\n    -o-transform: translateY(-40px);\n    transform: translateY(-40px); } }\n@keyframes passing-through {\n  0% {\n    opacity: 0;\n    -webkit-transform: translateY(40px);\n    -moz-transform: translateY(40px);\n    -ms-transform: translateY(40px);\n    -o-transform: translateY(40px);\n    transform: translateY(40px); }\n  30%, 70% {\n    opacity: 1;\n    -webkit-transform: translateY(0px);\n    -moz-transform: translateY(0px);\n    -ms-transform: translateY(0px);\n    -o-transform: translateY(0px);\n    transform: translateY(0px); }\n  100% {\n    opacity: 0;\n    -webkit-transform: translateY(-40px);\n    -moz-transform: translateY(-40px);\n    -ms-transform: translateY(-40px);\n    -o-transform: translateY(-40px);\n    transform: translateY(-40px); } }\n@-webkit-keyframes slide-in {\n  0% {\n    opacity: 0;\n    -webkit-transform: translateY(40px);\n    -moz-transform: translateY(40px);\n    -ms-transform: translateY(40px);\n    -o-transform: translateY(40px);\n    transform: translateY(40px); }\n  30% {\n    opacity: 1;\n    -webkit-transform: translateY(0px);\n    -moz-transform: translateY(0px);\n    -ms-transform: translateY(0px);\n    -o-transform: translateY(0px);\n    transform: translateY(0px); } }\n@-moz-keyframes slide-in {\n  0% {\n    opacity: 0;\n    -webkit-transform: translateY(40px);\n    -moz-transform: translateY(40px);\n    -ms-transform: translateY(40px);\n    -o-transform: translateY(40px);\n    transform: translateY(40px); }\n  30% {\n    opacity: 1;\n    -webkit-transform: translateY(0px);\n    -moz-transform: translateY(0px);\n    -ms-transform: translateY(0px);\n    -o-transform: translateY(0px);\n    transform: translateY(0px); } }\n@keyframes slide-in {\n  0% {\n    opacity: 0;\n    -webkit-transform: translateY(40px);\n    -moz-transform: translateY(40px);\n    -ms-transform: translateY(40px);\n    -o-transform: translateY(40px);\n    transform: translateY(40px); }\n  30% {\n    opacity: 1;\n    -webkit-transform: translateY(0px);\n    -moz-transform: translateY(0px);\n    -ms-transform: translateY(0px);\n    -o-transform: translateY(0px);\n    transform: translateY(0px); } }\n@-webkit-keyframes pulse {\n  0% {\n    -webkit-transform: scale(1);\n    -moz-transform: scale(1);\n    -ms-transform: scale(1);\n    -o-transform: scale(1);\n    transform: scale(1); }\n  10% {\n    -webkit-transform: scale(1.1);\n    -moz-transform: scale(1.1);\n    -ms-transform: scale(1.1);\n    -o-transform: scale(1.1);\n    transform: scale(1.1); }\n  20% {\n    -webkit-transform: scale(1);\n    -moz-transform: scale(1);\n    -ms-transform: scale(1);\n    -o-transform: scale(1);\n    transform: scale(1); } }\n@-moz-keyframes pulse {\n  0% {\n    -webkit-transform: scale(1);\n    -moz-transform: scale(1);\n    -ms-transform: scale(1);\n    -o-transform: scale(1);\n    transform: scale(1); }\n  10% {\n    -webkit-transform: scale(1.1);\n    -moz-transform: scale(1.1);\n    -ms-transform: scale(1.1);\n    -o-transform: scale(1.1);\n    transform: scale(1.1); }\n  20% {\n    -webkit-transform: scale(1);\n    -moz-transform: scale(1);\n    -ms-transform: scale(1);\n    -o-transform: scale(1);\n    transform: scale(1); } }\n@keyframes pulse {\n  0% {\n    -webkit-transform: scale(1);\n    -moz-transform: scale(1);\n    -ms-transform: scale(1);\n    -o-transform: scale(1);\n    transform: scale(1); }\n  10% {\n    -webkit-transform: scale(1.1);\n    -moz-transform: scale(1.1);\n    -ms-transform: scale(1.1);\n    -o-transform: scale(1.1);\n    transform: scale(1.1); }\n  20% {\n    -webkit-transform: scale(1);\n    -moz-transform: scale(1);\n    -ms-transform: scale(1);\n    -o-transform: scale(1);\n    transform: scale(1); } }\n.dropzone, .dropzone * {\n  box-sizing: border-box; }\n\n.dropzone {\n  min-height: 150px;\n  background: white;\n  padding: 16px; }\n  .dropzone.dz-clickable {\n    cursor: pointer; }\n    .dropzone.dz-clickable * {\n      cursor: default; }\n    .dropzone.dz-clickable .dz-message, .dropzone.dz-clickable .dz-message * {\n      cursor: pointer; }\n  .dropzone.dz-started .dz-message {\n    display: none; }\n  .dropzone.dz-drag-hover {\n    border-style: solid; }\n    .dropzone.dz-drag-hover .dz-message {\n      opacity: 0.5; }\n  .dropzone .dz-message {\n    text-align: center;\n    margin: 2em 0; }\n  .dropzone .dz-preview,\n  .previews .dz-preview {\n    position: relative;\n    display: inline-block;\n    vertical-align: top;\n    margin: 16px;\n    border-radius: 10px;\n    min-height: 100px; }\n    .dropzone .dz-preview:hover,\n    .previews .dz-preview:hover {\n      z-index: 1000; }\n      .dropzone .dz-preview:hover .dz-details,\n      .previews .dz-preview:hover .dz-details {\n        opacity: 1; }\n    .dropzone .dz-preview.dz-file-preview .dz-image,\n    .previews .dz-preview.dz-file-preview .dz-image {\n      border-radius: 20px;\n      background: #999;\n      background: linear-gradient(to bottom, #eee, #ddd); }\n    .dropzone .dz-preview.dz-file-preview .dz-details,\n    .previews .dz-preview.dz-file-preview .dz-details {\n      opacity: 1; }\n    .dropzone .dz-preview.dz-image-preview,\n    .previews .dz-preview.dz-image-preview {\n      background: white; }\n      .dropzone .dz-preview.dz-image-preview .dz-details,\n      .previews .dz-preview.dz-image-preview .dz-details {\n        -webkit-transition: opacity 0.2s linear;\n        -moz-transition: opacity 0.2s linear;\n        -ms-transition: opacity 0.2s linear;\n        -o-transition: opacity 0.2s linear;\n        transition: opacity 0.2s linear; }\n    .dropzone .dz-preview .dz-remove,\n    .previews .dz-preview .dz-remove {\n      font-size: 14px;\n      text-align: center;\n      display: block;\n      cursor: pointer;\n      border: none; }\n      .dropzone .dz-preview .dz-remove:hover,\n      .previews .dz-preview .dz-remove:hover {\n        text-decoration: underline; }\n    .dropzone .dz-preview:hover .dz-details,\n    .previews .dz-preview:hover .dz-details {\n      opacity: 1; }\n    .dropzone .dz-preview .dz-details,\n    .previews .dz-preview .dz-details {\n      z-index: 20;\n      position: absolute;\n      top: 0;\n      left: 0;\n      opacity: 0;\n      font-size: 13px;\n      min-width: 100%;\n      max-width: 100%;\n      padding: 2em 1em;\n      text-align: center;\n      color: rgba(0, 0, 0, 0.9);\n      line-height: 150%; }\n      .dropzone .dz-preview .dz-details .dz-size,\n      .previews .dz-preview .dz-details .dz-size {\n        margin-bottom: 1em;\n        font-size: 16px; }\n      .dropzone .dz-preview .dz-details .dz-filename,\n      .previews .dz-preview .dz-details .dz-filename {\n        white-space: nowrap; }\n        .dropzone .dz-preview .dz-details .dz-filename:hover span,\n        .previews .dz-preview .dz-details .dz-filename:hover span {\n          border: 1px solid rgba(200, 200, 200, 0.8);\n          background-color: rgba(255, 255, 255, 0.8); }\n        .dropzone .dz-preview .dz-details .dz-filename:not(:hover),\n        .previews .dz-preview .dz-details .dz-filename:not(:hover) {\n          overflow: hidden;\n          text-overflow: ellipsis; }\n          .dropzone .dz-preview .dz-details .dz-filename:not(:hover) span,\n          .previews .dz-preview .dz-details .dz-filename:not(:hover) span {\n            border: 1px solid transparent; }\n      .dropzone .dz-preview .dz-details .dz-filename span, \n      .dropzone .dz-preview .dz-details .dz-size span,\n      .previews .dz-preview .dz-details .dz-filename span,\n      .previews .dz-preview .dz-details .dz-size span {\n        background-color: rgba(255, 255, 255, 0.4);\n        padding: 0 0.4em;\n        border-radius: 3px; }\n    .dropzone .dz-preview:hover .dz-image img,\n    .previews .dz-preview:hover .dz-image img {\n      -webkit-transform: scale(1.05, 1.05);\n      -moz-transform: scale(1.05, 1.05);\n      -ms-transform: scale(1.05, 1.05);\n      -o-transform: scale(1.05, 1.05);\n      transform: scale(1.05, 1.05);\n      -webkit-filter: blur(8px);\n      filter: blur(8px); }\n    .dropzone .dz-preview .dz-image,\n    .previews .dz-preview .dz-image {\n      border-radius: 20px;\n      overflow: hidden;\n      width: 120px;\n      height: 120px;\n      position: relative;\n      display: block;\n      z-index: 10; }\n      .dropzone .dz-preview .dz-image img,\n      .previews .dz-preview .dz-image img {\n        display: block; }\n    .dropzone .dz-preview.dz-success .dz-success-mark,\n    .previews .dz-preview.dz-sussess .dz-success-mark {\n      -webkit-animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1);\n      -moz-animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1);\n      -ms-animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1);\n      -o-animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1);\n      animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1); }\n    .dropzone .dz-preview.dz-error .dz-error-mark,\n    .previews .dz-preview.dz-error .dz-error-mark {\n      opacity: 1;\n      -webkit-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);\n      -moz-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);\n      -ms-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);\n      -o-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);\n      animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1); }\n    .dropzone .dz-preview .dz-success-mark, \n    .dropzone .dz-preview .dz-error-mark,\n    .previews .dz-preview .dz-success-mark,\n    .previews .dz-preview .dz-error-mark {\n      pointer-events: none;\n      opacity: 0;\n      z-index: 500;\n      position: absolute;\n      display: block;\n      top: 50%;\n      left: 50%;\n      margin-left: -27px;\n      margin-top: -27px; }\n      .dropzone .dz-preview .dz-success-mark svg, \n      .dropzone .dz-preview .dz-error-mark svg,\n      .previews .dz-preview .dz-success-mark svg,\n      .previews .dz-preview .dz-error-mark svg {\n        display: block;\n        width: 54px;\n        height: 54px; }\n    .dropzone .dz-preview.dz-processing .dz-progress,\n    .previews .dz-preview.dz-processing .dz-progress {\n      opacity: 1;\n      -webkit-transition: all 0.2s linear;\n      -moz-transition: all 0.2s linear;\n      -ms-transition: all 0.2s linear;\n      -o-transition: all 0.2s linear;\n      transition: all 0.2s linear; }\n    .dropzone .dz-preview.dz-complete .dz-progress,\n    .previews .dz-preview.dz-complete .dz-progress {\n      opacity: 0;\n      -webkit-transition: opacity 0.4s ease-in;\n      -moz-transition: opacity 0.4s ease-in;\n      -ms-transition: opacity 0.4s ease-in;\n      -o-transition: opacity 0.4s ease-in;\n      transition: opacity 0.4s ease-in; }\n    .dropzone .dz-preview:not(.dz-processing) .dz-progress,\n    .previews .dz-preview:not(.dz-processing) .dz-progress {\n      -webkit-animation: pulse 6s ease infinite;\n      -moz-animation: pulse 6s ease infinite;\n      -ms-animation: pulse 6s ease infinite;\n      -o-animation: pulse 6s ease infinite;\n      animation: pulse 6s ease infinite; }\n    .dropzone .dz-preview .dz-progress,\n    .previews .dz-preview .dz-progress {\n      opacity: 1;\n      z-index: 1000;\n      pointer-events: none;\n      position: absolute;\n      height: 16px;\n      left: 50%;\n      top: 50%;\n      margin-top: -8px;\n      width: 80px;\n      margin-left: -40px;\n      background: rgba(255, 255, 255, 0.9);\n      -webkit-transform: scale(1);\n      border-radius: 8px;\n      overflow: hidden; }\n      .dropzone .dz-preview .dz-progress .dz-upload,\n      .previews .dz-preview .dz-progress .dz-upload {\n        background: #333;\n        background: linear-gradient(to bottom, #666, #444);\n        position: absolute;\n        top: 0;\n        left: 0;\n        bottom: 0;\n        width: 0;\n        -webkit-transition: width 300ms ease-in-out;\n        -moz-transition: width 300ms ease-in-out;\n        -ms-transition: width 300ms ease-in-out;\n        -o-transition: width 300ms ease-in-out;\n        transition: width 300ms ease-in-out; }\n    .dropzone .dz-preview.dz-error .dz-error-message,\n    .previews .dz-preview.dz-error .dz-error-message {\n      display: block; \n      opacity: 1;\n    }\n    .dropzone .dz-preview.dz-error:hover .dz-error-message,\n    .previews .dz-preview.dz-error:hover .dz-error-message {\n      opacity: 1;\n      pointer-events: auto; }\n    .dropzone .dz-preview .dz-error-message,\n    .previews .dz-preview .dz-error-message {\n      pointer-events: none;\n      z-index: 1000;\n      position: absolute;\n      display: block;\n      display: none;\n      opacity: 0;\n      -webkit-transition: opacity 0.3s ease;\n      -moz-transition: opacity 0.3s ease;\n      -ms-transition: opacity 0.3s ease;\n      -o-transition: opacity 0.3s ease;\n      transition: opacity 0.3s ease;\n      border-radius: 8px;\n      font-size: 13px;\n      top: 130px;\n      left: -10px;\n      width: 140px;\n      background: #be2626;\n      background: linear-gradient(to bottom, #be2626, #a92222);\n      padding: 0.5em 1.2em;\n      color: white; }\n      .dropzone .dz-preview .dz-error-message:after,\n      .previews .dz-preview .dz-error-message:after {\n        content: '';\n        position: absolute;\n        top: -6px;\n        left: 64px;\n        width: 0;\n        height: 0;\n        border-left: 6px solid transparent;\n        border-right: 6px solid transparent;\n        border-bottom: 6px solid #be2626; }\n\n.previews .dz-preview .dz-remove {\n  position: absolute;\n  z-index: 30;\n  color: white;\n  top: 5px;\n  right: 5px;\n  text-decoration: none !important;\n  font-size: 0.8rem;\n  font-weight: 800;\n  opacity: 0;\n  width: 24px;\n  height: 24px;\n  line-height: 24px;\n  text-align: center;\n  background: #000;\n  border-radius: 50%;\n  z-index: 9999;  \n}\n.previews .dz-preview .dz-remove:before {\n  content: \"\\F00D\";\n  font-family: FontAwesome;\n  font-size: 12px;\n}\n.previews .dz-preview:hover .dz-remove {\n  opacity: 1;\n}\n\n\n/* \n.vue-dropzone {\n  border: 2px solid #E5E5E5;\n  font-family: 'Arial', sans-serif;\n  letter-spacing: 0.2px;\n  color: #777;\n  transition: background-color 0.2s linear;\n}\n.vue-dropzone:hover {\n  background-color: #F6F6F6;\n}\n.vue-dropzone i {\n  color: #CCC;\n}\n.vue-dropzone .dz-preview .dz-image {\n  border-radius: 0;\n  width: 100%;\n  height: 100%;\n}\n.vue-dropzone .dz-preview .dz-image img:not([src]) {\n  width: 200px;\n  height: 200px;\n}\n.vue-dropzone .dz-preview .dz-image:hover img {\n  transform: none;\n  -webkit-filter: none;\n}\n.vue-dropzone .dz-preview .dz-details {\n  bottom: 0;\n  top: 0;\n  color: white;\n  background-color: rgba(33, 150, 243, 0.8);\n  transition: opacity .2s linear;\n  text-align: left;\n}\n.vue-dropzone .dz-preview .dz-details .dz-filename {\n  overflow: hidden;\n}\n.vue-dropzone .dz-preview .dz-details .dz-filename span,\n.vue-dropzone .dz-preview .dz-details .dz-size span {\n  background-color: transparent;\n}\n.vue-dropzone .dz-preview .dz-details .dz-filename:not(:hover) span {\n  border: none;\n}\n.vue-dropzone .dz-preview .dz-details .dz-filename:hover span {\n  background-color: transparent;\n  border: none;\n}\n.vue-dropzone .dz-preview .dz-progress .dz-upload {\n  background: #cccccc;\n}\n.vue-dropzone .dz-preview .dz-remove {\n  position: absolute;\n  z-index: 30;\n  color: white;\n  top: 5px;\n  right: 5px;\n  text-decoration: none !important;\n  font-size: 0.8rem;\n  font-weight: 800;\n  opacity: 0;\n  width: 24px;\n  height: 24px;\n  line-height: 24px;\n  text-align: center;\n  background: #000;\n  border-radius: 50%;\n  z-index: 9999;  \n}\n.vue-dropzone .dz-preview .dz-remove:before {\n  content: \"\\f00d\";\n  font-family: FontAwesome;\n  font-size: 12px;\n}\n.vue-dropzone .dz-preview:hover .dz-remove {\n  opacity: 1;\n}\n.vue-dropzone .dz-preview .dz-success-mark,\n.vue-dropzone .dz-preview .dz-error-mark {\n  margin-left: auto;\n  margin-top: auto;\n  width: 100%;\n  top: 35%;\n  left: 0;\n}\n.vue-dropzone .dz-preview .dz-success-mark svg,\n.vue-dropzone .dz-preview .dz-error-mark svg {\n  margin-left: auto;\n  margin-right: auto;\n}\n.vue-dropzone .dz-preview .dz-error-message {\n  top: calc(15%);\n  margin-left: auto;\n  margin-right: auto;\n  left: 0;\n  width: 100%;\n}\n.vue-dropzone .dz-preview .dz-error-message:after {\n  bottom: -6px;\n  top: initial;\n  border-top: 6px solid #a92222;\n  border-bottom: none;\n} */\n\n", ""]);
 
 // exports
 
@@ -5618,38 +5932,6 @@ function toComment(sourceMap) {
 	return '/*# ' + data + ' */';
 }
 
-
-/***/ }),
-
-/***/ "./node_modules/dropzone/dist/dropzone.css":
-/***/ (function(module, exports, __webpack_require__) {
-
-// style-loader: Adds some css to the DOM by adding a <style> tag
-
-// load the styles
-var content = __webpack_require__("./node_modules/css-loader/index.js!./node_modules/dropzone/dist/dropzone.css");
-if(typeof content === 'string') content = [[module.i, content, '']];
-// Prepare cssTransformation
-var transform;
-
-var options = {}
-options.transform = transform
-// add the styles to the DOM
-var update = __webpack_require__("./node_modules/style-loader/lib/addStyles.js")(content, options);
-if(content.locals) module.exports = content.locals;
-// Hot Module Replacement
-if(false) {
-	// When the styles change, update the <style> tags
-	if(!content.locals) {
-		module.hot.accept("!!../../css-loader/index.js!./dropzone.css", function() {
-			var newContent = require("!!../../css-loader/index.js!./dropzone.css");
-			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
-			update(newContent);
-		});
-	}
-	// When the module is disposed, remove the <style> tags
-	module.hot.dispose(function() { update(); });
-}
 
 /***/ }),
 
@@ -45787,6 +46069,49 @@ if (false) {
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-2134da65\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0&bustCache!./resources/assets/js/components/views/PageLoading.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("transition", { attrs: { name: "fade" } }, [
+    _c("div", { staticClass: "showbox page-loading" }, [
+      _c("div", { staticClass: "loader" }, [
+        _c(
+          "svg",
+          { staticClass: "circular", attrs: { viewBox: "25 25 50 50" } },
+          [
+            _c("circle", {
+              staticClass: "path",
+              attrs: {
+                cx: "50",
+                cy: "50",
+                r: "20",
+                fill: "none",
+                "stroke-width": "2",
+                "stroke-miterlimit": "10"
+              }
+            })
+          ]
+        )
+      ])
+    ])
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-2134da65", module.exports)
+  }
+}
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-496b3184\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0&bustCache!./resources/assets/js/components/Listen.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -45911,11 +46236,11 @@ var render = function() {
                     ]),
                     _vm._v(" "),
                     _c(
-                      "transition",
+                      "transition-group",
                       { attrs: { name: "fadebg" } },
                       _vm._l(_vm.profile_user.followings, function(following) {
                         return _vm.profile_user.followings.length > 0
-                          ? _c("div", [
+                          ? _c("div", { key: following.slug }, [
                               _c(
                                 "a",
                                 {
@@ -45954,11 +46279,11 @@ var render = function() {
                     ]),
                     _vm._v(" "),
                     _c(
-                      "transition",
+                      "transition-group",
                       { attrs: { name: "fadebg" } },
                       _vm._l(_vm.profile_user.followers, function(follower) {
                         return _vm.profile_user.followers.length > 0
-                          ? _c("div", [
+                          ? _c("div", { key: follower.slug }, [
                               _c(
                                 "a",
                                 {
@@ -45993,7 +46318,7 @@ var render = function() {
                     _c("h4", [_vm._v("Permissions")]),
                     _vm._v(" "),
                     _vm._l(_vm.profile_user.permissions, function(permission) {
-                      return _c("li", [_vm._v(_vm._s(permission.name))])
+                      return _c("li", [_vm._v(_vm._s(permission))])
                     })
                   ],
                   2
@@ -46059,6 +46384,8 @@ var render = function() {
     "div",
     { staticClass: "profile" },
     [
+      !_vm.user.uid ? _c("page-loading") : _vm._e(),
+      _vm._v(" "),
       _c("transition", { attrs: { name: "fade" } }, [
         _vm.user.uid
           ? _c("div", { staticClass: "profile-header" }, [
@@ -46125,7 +46452,7 @@ var render = function() {
                       _c("h4", [_vm._v("Permissions")]),
                       _vm._v(" "),
                       _vm._l(_vm.user.permissions, function(permission) {
-                        return _c("li", [_vm._v(_vm._s(permission.name))])
+                        return _c("li", [_vm._v(_vm._s(permission))])
                       })
                     ],
                     2
@@ -46189,93 +46516,164 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("li", { staticClass: "notifications dropdown" }, [
-    _c("a", {
-      staticClass: "notification",
-      class: { "show-count": _vm.notify.length > 0 },
-      attrs: {
-        "data-count": _vm.notify.length,
-        title:
-          [_vm.notify.length > 0 ? _vm.notify.length : "Không có"] +
-          " thông báo mới",
-        "data-toggle": "dropdown",
-        role: "button",
-        "aria-expanded": "false",
-        "aria-haspopup": "true"
-      }
-    }),
-    _vm._v(" "),
-    _c("ul", { staticClass: "dropdown-menu with-arrow with-arrow-center" }, [
-      _vm._m(0),
-      _vm._v(" "),
-      _c(
-        "div",
-        {
-          staticClass: "scroller",
-          style: { "max-height": _vm.winHeight + "px" }
+    _c(
+      "a",
+      {
+        staticClass: "notification",
+        class: {
+          "show-count":
+            _vm.user.notifications && _vm.user.notifications.length > 0
         },
-        [
-          _vm.notify.length == 0
-            ? _c("li", [
-                _c(
-                  "p",
-                  { staticClass: "text-center text-brown pt20 pb20 mb0" },
-                  [_vm._v("Không có thông báo mới")]
-                )
-              ])
-            : _vm._e(),
-          _vm._v(" "),
-          _vm._l(_vm.notify, function(not) {
-            return _c("li", [
-              _c("a", { attrs: { href: not.data.url } }, [
-                _c("div", { staticClass: "w55 pull-left" }, [
-                  _c(
-                    "a",
-                    {
-                      staticClass: "border-outline outline-circle",
-                      attrs: { href: "/" + not.data.user.slug }
-                    },
-                    [
-                      _c("img", {
-                        staticClass: "img-circle",
-                        attrs: { src: not.data.user.avatar, width: "48" }
-                      })
-                    ]
-                  )
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "ml55" }, [
-                  _c("a", { attrs: { href: "/" + not.data.user.slug } }, [
-                    _c("strong", [_vm._v(_vm._s(not.data.user.name))])
-                  ]),
-                  _vm._v(" "),
-                  _c("span", {
-                    domProps: { innerHTML: _vm._s(not.data.message) }
+        attrs: {
+          "data-count": [
+            _vm.user.notifications && _vm.user.notifications.length
+          ],
+          title:
+            [
+              _vm.user.notifications && _vm.user.notifications.length > 0
+                ? _vm.user.notifications.length
+                : "Không có"
+            ] + " thông báo mới",
+          "data-toggle": "dropdown",
+          role: "button",
+          "aria-expanded": "false",
+          "aria-haspopup": "true"
+        }
+      },
+      [
+        _c(
+          "svg",
+          {
+            staticStyle: { "enable-background": "new 0 0 459.334 459.334" },
+            attrs: {
+              xmlns: "http://www.w3.org/2000/svg",
+              "xmlns:xlink": "http://www.w3.org/1999/xlink",
+              version: "1.1",
+              id: "Layer_1",
+              x: "0px",
+              y: "0px",
+              viewBox: "0 0 459.334 459.334",
+              "xml:space": "preserve",
+              width: "18px",
+              height: "18px"
+            }
+          },
+          [
+            _c("g", [
+              _c("g", [
+                _c("g", [
+                  _c("path", {
+                    attrs: {
+                      d:
+                        "M175.216,404.514c-0.001,0.12-0.009,0.239-0.009,0.359c0,30.078,24.383,54.461,54.461,54.461     s54.461-24.383,54.461-54.461c0-0.12-0.008-0.239-0.009-0.359H175.216z",
+                      fill: "#999"
+                    }
                   }),
                   _vm._v(" "),
-                  _c("p", [
-                    _c(
-                      "small",
-                      [
-                        _c("timeago", {
-                          attrs: {
-                            since: not.created_at ? not.created_at : new Date(),
-                            "auto-update": 60
-                          }
-                        })
-                      ],
-                      1
-                    )
-                  ])
+                  _c("path", {
+                    attrs: {
+                      d:
+                        "M403.549,336.438l-49.015-72.002c0-22.041,0-75.898,0-89.83c0-60.581-43.144-111.079-100.381-122.459V24.485     C254.152,10.963,243.19,0,229.667,0s-24.485,10.963-24.485,24.485v27.663c-57.237,11.381-100.381,61.879-100.381,122.459     c0,23.716,0,76.084,0,89.83l-49.015,72.002c-5.163,7.584-5.709,17.401-1.419,25.511c4.29,8.11,12.712,13.182,21.887,13.182     H383.08c9.175,0,17.597-5.073,21.887-13.182C409.258,353.839,408.711,344.022,403.549,336.438z",
+                      fill: "#999"
+                    }
+                  })
                 ])
               ])
             ])
-          })
-        ],
-        2
-      ),
-      _vm._v(" "),
-      _vm._m(1)
-    ]),
+          ]
+        )
+      ]
+    ),
+    _vm._v(" "),
+    _vm.user.notifications
+      ? _c(
+          "ul",
+          { staticClass: "dropdown-menu with-arrow with-arrow-center" },
+          [
+            _vm._m(0),
+            _vm._v(" "),
+            _c(
+              "div",
+              {
+                staticClass: "scroller",
+                style: { "max-height": _vm.winHeight + "px" }
+              },
+              [
+                _vm.user.notifications.length == 0
+                  ? _c("li", [
+                      _c(
+                        "p",
+                        { staticClass: "text-center text-brown pt20 pb20 mb0" },
+                        [_vm._v("Không có thông báo mới")]
+                      )
+                    ])
+                  : _vm._e(),
+                _vm._v(" "),
+                _vm._l(_vm.user.notifications, function(not) {
+                  return _c(
+                    "li",
+                    { class: [not.read_at ? "read" : "unread"] },
+                    [
+                      _c("a", { attrs: { href: not.data.url } }, [
+                        _c("div", { staticClass: "w55 pull-left" }, [
+                          _c(
+                            "a",
+                            {
+                              staticClass: "border-outline outline-circle _ibi",
+                              attrs: { href: "/" + not.data.user.slug }
+                            },
+                            [
+                              _c("img", {
+                                staticClass: "img-circle",
+                                attrs: {
+                                  src: not.data.user.avatar,
+                                  width: "48"
+                                }
+                              })
+                            ]
+                          )
+                        ]),
+                        _vm._v(" "),
+                        _c("div", { staticClass: "ml55" }, [
+                          _c(
+                            "a",
+                            { attrs: { href: "/" + not.data.user.slug } },
+                            [_c("strong", [_vm._v(_vm._s(not.data.user.name))])]
+                          ),
+                          _vm._v(" "),
+                          _c("span", {
+                            domProps: { innerHTML: _vm._s(not.data.message) }
+                          }),
+                          _vm._v(" "),
+                          _c("p", [
+                            _c(
+                              "small",
+                              [
+                                _c("timeago", {
+                                  attrs: {
+                                    since: not.created_at
+                                      ? not.created_at
+                                      : new Date(),
+                                    "auto-update": 60
+                                  }
+                                })
+                              ],
+                              1
+                            )
+                          ])
+                        ])
+                      ])
+                    ]
+                  )
+                })
+              ],
+              2
+            ),
+            _vm._v(" "),
+            _vm._m(1)
+          ]
+        )
+      : _vm._e(),
     _vm._v(" "),
     _vm._m(2)
   ])
@@ -46326,6 +46724,48 @@ if (false) {
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-7d83f66d\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0&bustCache!./resources/assets/js/components/views/profiles/UploadImage.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", [
+    _c("div", { staticClass: "previews" }),
+    _vm._v(" "),
+    _c(
+      "form",
+      {
+        ref: "myDropzone",
+        staticClass: "dropzone",
+        attrs: { id: "product_image" }
+      },
+      [_vm._m(0)]
+    )
+  ])
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "fallback" }, [
+      _c("input", { attrs: { name: "file[]", type: "file", multiple: "" } })
+    ])
+  }
+]
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-7d83f66d", module.exports)
+  }
+}
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-873a0440\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0&bustCache!./resources/assets/js/components/views/products/ProductForm.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -46333,80 +46773,97 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "product-form" }, [
-    _c("div", { staticClass: "form-group" }, [
-      _c("label", { attrs: { for: "title" } }, [_vm._v("Title")]),
-      _vm._v(" "),
-      _c("input", {
-        directives: [
-          {
-            name: "model",
-            rawName: "v-model",
-            value: _vm.form.title,
-            expression: "form.title"
-          }
-        ],
-        staticClass: "form-control input-lg",
-        attrs: { type: "text", placeholder: "Product Title..." },
-        domProps: { value: _vm.form.title },
-        on: {
-          input: function($event) {
-            if ($event.target.composing) {
-              return
-            }
-            _vm.$set(_vm.form, "title", $event.target.value)
-          }
-        }
-      })
-    ]),
-    _vm._v(" "),
-    _c(
-      "div",
-      { staticClass: "form-group" },
-      [
-        _c("label", [_vm._v("Product Images")]),
-        _vm._v(" "),
-        _c("dropzone", { ref: "child" })
-      ],
-      1
-    ),
-    _vm._v(" "),
-    _c("div", { staticClass: "form-group" }, [
-      _c("label", [_vm._v("Product Content")]),
-      _vm._v(" "),
-      _c("textarea", {
-        directives: [
-          {
-            name: "model",
-            rawName: "v-model",
-            value: _vm.form.body,
-            expression: "form.body"
-          }
-        ],
-        staticClass: "form-control",
-        attrs: { name: "body", cols: "30", rows: "10" },
-        domProps: { value: _vm.form.body },
-        on: {
-          input: function($event) {
-            if ($event.target.composing) {
-              return
-            }
-            _vm.$set(_vm.form, "body", $event.target.value)
-          }
-        }
-      })
-    ]),
-    _vm._v(" "),
-    _c(
-      "button",
-      {
-        staticClass: "btn btn-primary",
-        attrs: { type: "button" },
-        on: { click: _vm.child_upload }
-      },
-      [_vm._v("Upload")]
-    )
-  ])
+  return _c(
+    "div",
+    { staticClass: "product-form" },
+    [
+      _vm.loading
+        ? _c("page-loading")
+        : _c("div", [
+            _c("div", { staticClass: "form-group" }, [
+              _c("label", { attrs: { for: "title" } }, [_vm._v("Title")]),
+              _vm._v(" "),
+              _c("input", {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.form.title,
+                    expression: "form.title"
+                  }
+                ],
+                staticClass: "form-control input-lg",
+                attrs: { type: "text", placeholder: "Product Title..." },
+                domProps: { value: _vm.form.title },
+                on: {
+                  input: function($event) {
+                    if ($event.target.composing) {
+                      return
+                    }
+                    _vm.$set(_vm.form, "title", $event.target.value)
+                  }
+                }
+              })
+            ]),
+            _vm._v(" "),
+            _c(
+              "div",
+              { staticClass: "form-group" },
+              [
+                _c("label", [_vm._v("Product Images")]),
+                _vm._v(" "),
+                _c("dropzone", {
+                  ref: "child",
+                  attrs: {
+                    attachments_ids: _vm.child_attachments,
+                    maxfile: 10,
+                    params: { type: "image" }
+                  },
+                  on: { completed: _vm.get_images }
+                })
+              ],
+              1
+            ),
+            _vm._v(" "),
+            _c("div", { staticClass: "form-group" }, [
+              _c("label", [_vm._v("Product Content")]),
+              _vm._v(" "),
+              _c("textarea", {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.form.body,
+                    expression: "form.body"
+                  }
+                ],
+                staticClass: "form-control",
+                attrs: { name: "body", cols: "30", rows: "10" },
+                domProps: { value: _vm.form.body },
+                on: {
+                  input: function($event) {
+                    if ($event.target.composing) {
+                      return
+                    }
+                    _vm.$set(_vm.form, "body", $event.target.value)
+                  }
+                }
+              })
+            ]),
+            _vm._v(" "),
+            _c(
+              "button",
+              {
+                staticClass: "btn btn-sm btn-primary",
+                attrs: { type: "button" },
+                on: { click: _vm.save }
+              },
+              [_vm._v("Upload")]
+            )
+          ])
+    ],
+    1
+  )
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -46427,21 +46884,33 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _vm._m(0)
+  return _c(
+    "div",
+    [
+      _c("transition", { attrs: { name: "fade" } }, [
+        _c("div", { staticClass: "previews" })
+      ]),
+      _vm._v(" "),
+      _c(
+        "form",
+        {
+          ref: "myDropzone",
+          staticClass: "dropzone",
+          attrs: { id: "product_image" }
+        },
+        [_vm._m(0)]
+      )
+    ],
+    1
+  )
 }
 var staticRenderFns = [
   function() {
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", [
-      _c("div", { staticClass: "previews" }),
-      _vm._v(" "),
-      _c("form", { staticClass: "dropzone" }, [
-        _c("div", { staticClass: "fallback" }, [
-          _c("input", { attrs: { name: "file[]", type: "file", multiple: "" } })
-        ])
-      ])
+    return _c("div", { staticClass: "fallback" }, [
+      _c("input", { attrs: { name: "file[]", type: "file", multiple: "" } })
     ])
   }
 ]
@@ -46495,6 +46964,8 @@ var render = function() {
     "div",
     { staticClass: "profile" },
     [
+      _vm.loading ? _c("page-loading") : _vm._e(),
+      _vm._v(" "),
       _c("transition", { attrs: { name: "fade" } }, [
         _vm.profile_data.uid
           ? _c("div", [
@@ -46573,13 +47044,20 @@ var render = function() {
                 })
               ]),
               _vm._v(" "),
-              _c("div", { staticClass: "form-group" }, [
-                _c("label", [_vm._v("Avatar:")]),
-                _vm._v(" "),
-                _c("img", {
-                  attrs: { src: _vm.profile_data.avatar, width: "48" }
-                })
-              ]),
+              _c(
+                "div",
+                { staticClass: "form-group" },
+                [
+                  _c("label", [_vm._v("Avatar:")]),
+                  _vm._v(" "),
+                  _c("img", {
+                    attrs: { src: _vm.profile_data.avatar, width: "48" }
+                  }),
+                  _vm._v(" "),
+                  _c("upload-image")
+                ],
+                1
+              ),
               _vm._v(" "),
               _c("hr"),
               _vm._v(" "),
@@ -46754,6 +47232,33 @@ if(false) {
 
 /***/ }),
 
+/***/ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-7d83f66d\",\"scoped\":false,\"hasInlineConfig\":true}!./node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./resources/assets/js/components/views/profiles/UploadImage.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__("./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-7d83f66d\",\"scoped\":false,\"hasInlineConfig\":true}!./node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./resources/assets/js/components/views/profiles/UploadImage.vue");
+if(typeof content === 'string') content = [[module.i, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var update = __webpack_require__("./node_modules/vue-style-loader/lib/addStylesClient.js")("4bb56e18", content, false);
+// Hot Module Replacement
+if(false) {
+ // When the styles change, update the <style> tags
+ if(!content.locals) {
+   module.hot.accept("!!../../../../../../node_modules/css-loader/index.js!../../../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-7d83f66d\",\"scoped\":false,\"hasInlineConfig\":true}!../../../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./UploadImage.vue", function() {
+     var newContent = require("!!../../../../../../node_modules/css-loader/index.js!../../../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-7d83f66d\",\"scoped\":false,\"hasInlineConfig\":true}!../../../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./UploadImage.vue");
+     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+     update(newContent);
+   });
+ }
+ // When the module is disposed, remove the <style> tags
+ module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+
 /***/ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-873a0440\",\"scoped\":false,\"hasInlineConfig\":true}!./node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./resources/assets/js/components/views/products/ProductForm.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -46771,6 +47276,33 @@ if(false) {
  if(!content.locals) {
    module.hot.accept("!!../../../../../../node_modules/css-loader/index.js!../../../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-873a0440\",\"scoped\":false,\"hasInlineConfig\":true}!../../../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./ProductForm.vue", function() {
      var newContent = require("!!../../../../../../node_modules/css-loader/index.js!../../../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-873a0440\",\"scoped\":false,\"hasInlineConfig\":true}!../../../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./ProductForm.vue");
+     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+     update(newContent);
+   });
+ }
+ // When the module is disposed, remove the <style> tags
+ module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+
+/***/ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-96e5c444\",\"scoped\":false,\"hasInlineConfig\":true}!./node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./resources/assets/js/components/views/products/Dropzone.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__("./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-96e5c444\",\"scoped\":false,\"hasInlineConfig\":true}!./node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./resources/assets/js/components/views/products/Dropzone.vue");
+if(typeof content === 'string') content = [[module.i, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var update = __webpack_require__("./node_modules/vue-style-loader/lib/addStylesClient.js")("05ed872f", content, false);
+// Hot Module Replacement
+if(false) {
+ // When the styles change, update the <style> tags
+ if(!content.locals) {
+   module.hot.accept("!!../../../../../../node_modules/css-loader/index.js!../../../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-96e5c444\",\"scoped\":false,\"hasInlineConfig\":true}!../../../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./Dropzone.vue", function() {
+     var newContent = require("!!../../../../../../node_modules/css-loader/index.js!../../../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-96e5c444\",\"scoped\":false,\"hasInlineConfig\":true}!../../../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./Dropzone.vue");
      if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
      update(newContent);
    });
@@ -61249,6 +61781,38 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 /***/ }),
 
+/***/ "./public/plugins/vue2dropzone/vue2Dropzone.css":
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__("./node_modules/css-loader/index.js!./public/plugins/vue2dropzone/vue2Dropzone.css");
+if(typeof content === 'string') content = [[module.i, content, '']];
+// Prepare cssTransformation
+var transform;
+
+var options = {}
+options.transform = transform
+// add the styles to the DOM
+var update = __webpack_require__("./node_modules/style-loader/lib/addStyles.js")(content, options);
+if(content.locals) module.exports = content.locals;
+// Hot Module Replacement
+if(false) {
+	// When the styles change, update the <style> tags
+	if(!content.locals) {
+		module.hot.accept("!!../../../node_modules/css-loader/index.js!./vue2Dropzone.css", function() {
+			var newContent = require("!!../../../node_modules/css-loader/index.js!./vue2Dropzone.css");
+			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+			update(newContent);
+		});
+	}
+	// When the module is disposed, remove the <style> tags
+	module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+
 /***/ "./resources/assets/js/api/index.js":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -61335,6 +61899,8 @@ Vue.component('profile', __webpack_require__("./resources/assets/js/components/v
 Vue.component('my-profile', __webpack_require__("./resources/assets/js/components/views/profiles/MyProfile.vue"));
 Vue.component('profile-form', __webpack_require__("./resources/assets/js/components/views/profiles/ProfileForm.vue"));
 Vue.component('follow', __webpack_require__("./resources/assets/js/components/views/profiles/Follow.vue"));
+
+Vue.component('page-loading', __webpack_require__("./resources/assets/js/components/views/PageLoading.vue"));
 
 //Notification
 Vue.component('unread-notification', __webpack_require__("./resources/assets/js/components/UnreadNotification.vue"));
@@ -61561,10 +62127,63 @@ module.exports = Component.exports
 
 /***/ }),
 
+/***/ "./resources/assets/js/components/views/PageLoading.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+var normalizeComponent = __webpack_require__("./node_modules/vue-loader/lib/component-normalizer.js")
+/* script */
+var __vue_script__ = null
+/* template */
+var __vue_template__ = __webpack_require__("./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-2134da65\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0&bustCache!./resources/assets/js/components/views/PageLoading.vue")
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = null
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/components/views/PageLoading.vue"
+if (Component.esModule && Object.keys(Component.esModule).some(function (key) {  return key !== "default" && key.substr(0, 2) !== "__"})) {  console.error("named exports are not supported in *.vue files.")}
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-2134da65", Component.options)
+  } else {
+    hotAPI.reload("data-v-2134da65", Component.options)
+' + '  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+
 /***/ "./resources/assets/js/components/views/products/Dropzone.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
+function injectStyle (ssrContext) {
+  if (disposed) return
+  __webpack_require__("./node_modules/vue-style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-96e5c444\",\"scoped\":false,\"hasInlineConfig\":true}!./node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./resources/assets/js/components/views/products/Dropzone.vue")
+}
 var normalizeComponent = __webpack_require__("./node_modules/vue-loader/lib/component-normalizer.js")
 /* script */
 var __vue_script__ = __webpack_require__("./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}],\"es2015\",\"es2017\"],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0&bustCache!./resources/assets/js/components/views/products/Dropzone.vue")
@@ -61573,7 +62192,7 @@ var __vue_template__ = __webpack_require__("./node_modules/vue-loader/lib/templa
 /* template functional */
 var __vue_template_functional__ = false
 /* styles */
-var __vue_styles__ = null
+var __vue_styles__ = injectStyle
 /* scopeId */
 var __vue_scopeId__ = null
 /* moduleIdentifier (server only) */
@@ -61920,6 +62539,59 @@ module.exports = Component.exports
 
 /***/ }),
 
+/***/ "./resources/assets/js/components/views/profiles/UploadImage.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+function injectStyle (ssrContext) {
+  if (disposed) return
+  __webpack_require__("./node_modules/vue-style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-7d83f66d\",\"scoped\":false,\"hasInlineConfig\":true}!./node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./resources/assets/js/components/views/profiles/UploadImage.vue")
+}
+var normalizeComponent = __webpack_require__("./node_modules/vue-loader/lib/component-normalizer.js")
+/* script */
+var __vue_script__ = __webpack_require__("./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}],\"es2015\",\"es2017\"],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0&bustCache!./resources/assets/js/components/views/profiles/UploadImage.vue")
+/* template */
+var __vue_template__ = __webpack_require__("./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-7d83f66d\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0&bustCache!./resources/assets/js/components/views/profiles/UploadImage.vue")
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = injectStyle
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/components/views/profiles/UploadImage.vue"
+if (Component.esModule && Object.keys(Component.esModule).some(function (key) {  return key !== "default" && key.substr(0, 2) !== "__"})) {  console.error("named exports are not supported in *.vue files.")}
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-7d83f66d", Component.options)
+  } else {
+    hotAPI.reload("data-v-7d83f66d", Component.options)
+' + '  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+
 /***/ "./resources/assets/js/store.js":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -61981,7 +62653,7 @@ var store = exports.store = new _vuex2.default.Store({
             state.profile_user_data.followers.splice(index, 1);
         },
         add_new_notification: function add_new_notification(state, not) {
-            state.notifications.unshift(not);
+            state.auth_user_data.notifications.unshift(not);
             document.getElementById("bell_audio").play();
             $(".notification").removeClass("notify");
             setTimeout(function () {

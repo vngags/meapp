@@ -81,53 +81,59 @@
 }
 
 .btn {
-    // border: none;
-    border-radius: 3px;
-    position: relative;
-    font-size: 12px;
-    font-weight: 400;
-    letter-spacing: 0;
-    will-change: box-shadow, transform;
+    text-shadow: rgba(0, 0, 0, 0.1) 0px 1px 0px;
+    border-radius: 2px;
+    font-weight: 500;
+    font-family: Arial,sans-serif;
+    text-align: center;
+    border: 1px solid transparent !important;
+    box-sizing: border-box;
+    transition: box-shadow 400ms linear, background 400ms linear;
+    &.btn-sm {
+        padding: 3px 10px;
+        font-size: 13px;
+    }
     &.btn-default {
-        background-color: #fafafb;
+        background-color: #f6f7f9;
         color: #555;
+        border: 1px solid rgba(0,0,0,0.1) !important;
         &:hover {
-            background: #dfdfdf;
+            background: #e9ebee;
         }
     }
     &.btn-primary {
-        background-color: #02baf2;
+        background-color: #4285f4;
         color: #FFFFFF;
         &:hover {
-            background: #009dcd;
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14),0 3px 1px -2px rgba(0,0,0,0.12),0 1px 5px 0 rgba(0,0,0,0.2);
         }
     }
     &.btn-info {
         background-color: #03a9f4;
         color: #FFFFFF;
         &:hover {
-            background: #009ce4;
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14),0 3px 1px -2px rgba(0,0,0,0.12),0 1px 5px 0 rgba(0,0,0,0.2);
         }
     }
     &.btn-success {
         background-color: #4caf50;
         color: #FFFFFF;
         &:hover {
-            background: #44a147;
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14),0 3px 1px -2px rgba(0,0,0,0.12),0 1px 5px 0 rgba(0,0,0,0.2);
         }
     }
     &.btn-warning {
         background-color: #fbc02d;
         color: #FFFFFF;
         &:hover {
-            background: #e7b026;
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14),0 3px 1px -2px rgba(0,0,0,0.12),0 1px 5px 0 rgba(0,0,0,0.2);
         }
     }
     &.btn-danger {
-        background-color: #f44336;
+        background-color: #DB4B39;
         color: #FFFFFF;
         &:hover {
-            background: #e63b2f;
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14),0 3px 1px -2px rgba(0,0,0,0.12),0 1px 5px 0 rgba(0,0,0,0.2);
         }
     }
 }

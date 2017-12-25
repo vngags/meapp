@@ -1,7 +1,4 @@
-<template>
-    <div></div>
-</template>
-
+<template></template>
 <script>
     export default {
         props: ['id'],

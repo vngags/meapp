@@ -12,7 +12,7 @@
 <div class="container">
     <div class="row">
         <div class="col-md-12">
-            @can('update', $user->profile)
+            @can('update', $user)
                 <span class="pull-right">
                     <a href="{{ route('profile.edit', ['user_slug' => $user->slug]) }}" class="btn btn-sm btn-primary">Edit</a>
                 </span>

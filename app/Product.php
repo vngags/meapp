@@ -4,10 +4,13 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use App\User;
+use Auth;
 
 class Product extends Model
 {
     protected $fillable = ['user_id', 'title', 'slug', 'body'];
+
+    protected $hidden = ['pivot'];
 
     public function scopeFindBySlug($query, $slug)
     {
@@ -32,5 +35,10 @@ class Product extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function attachments()
+    {
+        return $this->belongsToMany(Media::class, 'product_media');
     }
 }

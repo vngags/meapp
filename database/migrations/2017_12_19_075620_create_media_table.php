@@ -29,6 +29,7 @@ class CreateMediaTable extends Migration
      */
     public function down()
     {
+        Schema::dropIfExists('product_media');
         Schema::dropIfExists('media');
     }
 }

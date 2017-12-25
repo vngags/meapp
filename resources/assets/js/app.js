@@ -32,6 +32,8 @@ Vue.component('my-profile', require('./components/views/profiles/MyProfile.vue')
 Vue.component('profile-form', require('./components/views/profiles/ProfileForm.vue'));
 Vue.component('follow', require('./components/views/profiles/Follow.vue'));
 
+Vue.component('page-loading', require('./components/views/PageLoading.vue'));
+
 //Notification
 Vue.component('unread-notification', require('./components/UnreadNotification.vue'));
 

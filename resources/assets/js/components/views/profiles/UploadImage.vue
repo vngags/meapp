@@ -1,8 +1,6 @@
 <template>
     <div>
-        <transition name="fade">
-            <div class="previews"></div>
-        </transition>
+        <div class="previews"></div>
         <form ref="myDropzone" class="dropzone" id="product_image">
             <div class="fallback">
                 <input name="file[]" type="file" multiple />
@@ -17,32 +15,28 @@
         post
     } from '../../../api'
     import Dropzone from 'dropzone/dist/dropzone.js'
+    // import 'dropzone/dist/dropzone.css'
     import '../../../../../../public/plugins/vue2dropzone/vue2Dropzone.css'
     export default {
-        props: ['attachments_ids', 'params', 'maxfile'],
+        props: ['attachments_ids'],
         data() {
             return {
                 myDropzone: null
             }
         },
-        watch: {
-            'attachments_ids': 'fetchImage'
-        },
         mounted() {
             this.setup_dropzone()
             Dropzone.autoDiscover = false;
-            this.fetchImage()
         },
         methods: {
-            setup_dropzone() {
+            async setup_dropzone() {
                 let vm = this
                 vm.myDropzone = new Dropzone(".dropzone", {
                     url: '/api/v1/media/upload',
                     thumbnailWidth: 150,
                     thumbnailHeight: 150,
                     maxFilesize: 5,
-                    maxFiles: this.maxfile,
-                    params: this.params,
+                    maxFiles: 1,
                     acceptedFiles: ".jpeg,.jpg,.png,.gif",
                     createImageThumbnails: true,
                     uploadMultiple: false,
@@ -73,6 +67,11 @@
                             vm.$emit('completed', response.id)
                         });
 
+                        this.on("maxfilesexceeded", function (file) {
+                            this.removeAllFiles();
+                            this.addFile(file);
+                        });
+
                         this.on("removedfile", function (file) {
                             post('/api/v1/media/delete', {
                                 product_image: file.filename
@@ -92,12 +91,12 @@
                 });
 
             },
-
-            fetchImage() {
+        },
+        watch: {
+            attachments_ids() {
                 let dz = this.myDropzone
                 let vm = this
                 if (this.attachments_ids && this.attachments_ids.length > 0) {
-
                     dz.removeAllFiles() //clean all file before push new
                     this.attachments_ids.forEach((item) => {
                         vm.$emit('completed', item)
@@ -124,8 +123,7 @@
                     })
                 } //endif
             }
-        },
-
+        }
     }
 </script>
 

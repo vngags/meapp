@@ -29,24 +29,7 @@ class ProductController extends Controller
     }
 
      
-    public function store(Request $request, $user_slug)
-    {
-        $this->validate($request, [
-            'title' => 'required|max:255',
-            'body' => 'required'
-        ]);
-        $product = Product::create([
-            'user_id' => $request->user()->id,
-            'title' => $request->title,
-            'slug' => $request->title,
-            'body' => $request->body
-        ]);
-        if($product) {
-            return redirect()->route('product.index', ['user_slug' => $user_slug]);
-        }else{
-            return redirect()->back()->withErrors();
-        }        
-    }
+    
 
     
     public function show($user_slug, $slug)

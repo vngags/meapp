@@ -9,7 +9,7 @@
                     Product List
                     @can('create', App\Product::class)
                         <span class="pull-right">
-                            <a href="{{ route('product.create', ['user_slug' => Auth::user()->slug]) }}" class="btn btn-sm btn-primary">Create</a>
+                            <a href="{{ route('product.create', ['user_slug' => Auth::user()->slug]) }}" class="btn btn-sm btn-primary">Tạo mới</a>
                         </span>
                     @endcan
                 </div>

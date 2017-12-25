@@ -9,6 +9,7 @@ use App\Media;
 use File;
 use Image;
 use Input;
+use App\User;
 
 class MediaController extends Controller
 {
@@ -17,19 +18,20 @@ class MediaController extends Controller
         if($request->hasFile('product_images')) {
 
             $directory = $request->user()->uid;
-            $filename = sha1(mt_rand());
+            $filename = sha1(time() . mt_rand());
             
             $data = FunctionHelper::save_attachment($request->product_images, $directory, $filename);
-            // $data = FunctionHelper::save_attachment_nochange_filename($request->file, $directory);
             
-            Media::create([
+            $media = Media::create([
                 'user_id' => $request->user()->id,
                 'original_url' => $data['name']                
             ]);
             return [
                 'name' => $data['name'] ,
                 'size' => $data['size'],
-                'url' => $data['url'] 
+                'fullname' => $request->user()->uid . '/' . $data['name'],
+                'url' => $data['url'],
+                'id' => $media->id
             ];   
         }
         return 0;
@@ -68,9 +70,23 @@ class MediaController extends Controller
                 'name' => $image->original_url,
                 'size' => File::size(public_path('images/' . $request->user()->uid . '/' . $image->original_url)),
                 'fullname' => $request->user()->uid . '/' . $image->original_url,
-                'url' => url('images/' . $request->user()->uid . '/' . $image->original_url)
+                'url' => url('images/' . $request->user()->uid . '/' . $image->original_url),
+                'id' => $image->id
             ]);
         }
         return $data;
+    }
+
+    public function get_image($id, Request $request)
+    {
+        $image = Media::find($id);
+        $user = User::find($image->user_id);
+        return [
+            'name' => $image->original_url,
+            'size' => File::size(public_path('images/' . $user->uid . '/' . $image->original_url)),
+            'fullname' => $user->uid . '/' . $image->original_url,
+            'url' => url('images/' . $user->uid . '/' . $image->original_url),
+            'id' => $image->id
+        ];
     }
 }

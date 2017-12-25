@@ -3,17 +3,19 @@
 namespace App\Policies;
 
 use App\User;
-use App\Profile;
+// use App\Profile;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ProfilePolicy
 {
     use HandlesAuthorization;
 
-    public function before(User $user)
-    {
-        return $user->hasRole('Admin');
-    }
+    // public function before(User $user)
+    // {
+    //     if ($user->hasRole('Admin')) {
+    //         return true;
+    //     }
+    // }
 
     /**
      * Determine whether the user can view the profile.
@@ -22,12 +24,12 @@ class ProfilePolicy
      * @param  \App\Profile  $profile
      * @return mixed
      */
-    public function view(User $user, Profile $profile)
+    public function view(User $user)
     {
-        //
+        return true;
     }
 
-    public function upload(User $user, Profile $profile)
+    public function upload(User $user)
     {
         //
     }
@@ -40,9 +42,9 @@ class ProfilePolicy
      * @param  \App\Profile  $profile
      * @return mixed
      */
-    public function update(User $user, Profile $profile)
+    public function update(User $user)
     {
-        return $user->hasPermissionTo('edit-profile') && $user->id === $profile->user_id;
+        return $user->hasPermissionTo('edit-profile');
     }
 
     /**
@@ -52,7 +54,7 @@ class ProfilePolicy
      * @param  \App\Profile  $profile
      * @return mixed
      */
-    public function delete(User $user, Profile $profile)
+    public function delete(User $user)
     {
         //
     }

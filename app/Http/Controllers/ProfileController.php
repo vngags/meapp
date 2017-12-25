@@ -3,12 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Profile;
 use App\User;
 use Auth;
 
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 
 class ProfileController extends Controller
 {
@@ -28,7 +25,7 @@ class ProfileController extends Controller
     {
         $user = User::findBySlug($user_slug);
         $profile = $user->profile;
-        $this->authorize($profile, 'update');
+        $this->authorize('update', $user);
         return view('auth.profile-edit')->withUser($user);
     }
 

@@ -1,4 +1,4 @@
-<nav class="navbar navbar-default navbar-static-top">
+<nav class="navbar navbar-default navbar-fixed-top">
 	<div class="container">
 		<div class="navbar-header">
 
@@ -12,8 +12,7 @@
 
 			<!-- Branding Image -->
 			<a class="navbar-brand" href="{{ url('/') }}">
-				<img src="{{ asset('images/svg/bird.svg') }}" class="_ibi">
-				{{ config('app.name', 'Laravel') }}
+				<img src="{{ asset('images/svg/bird.svg') }}" class="_ibi"> {{ config('app.name', 'Laravel') }}
 			</a>
 		</div>
 
@@ -21,17 +20,16 @@
 			<!-- Left Side Of Navbar -->
 			<ul class="nav navbar-nav">
 				@if(Auth::check())
-					<li><a href="{{ route('product.index', ['user_slug' => Auth::user()->slug]) }}">Products</a></li>
-				@endif				
+				<li>
+					<a href="{{ route('product.index', ['user_slug' => Auth::user()->slug]) }}">Products</a>
+				</li>
+				@endif
 			</ul>
 
 			<!-- Right Side Of Navbar -->
 			<ul class="nav navbar-nav navbar-right">
 				<!-- Authentication Links -->
 				@guest
-				{{--  <li>
-					<a href="#" data-toggle="modal" data-target="#myModal">Modal</a>
-				</li>  --}}
 				<li>
 					<a href="{{ route('login') }}">Login</a>
 				</li>
@@ -39,19 +37,29 @@
 					<a href="{{ route('register') }}">Register</a>
 				</li>
 				@else
-				<li><unread-notification></unread-notification></li>
+				<li>
+					<unread-notification></unread-notification>
+				</li>
 				<li class="dropdown">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true">
-						<div class="img-circle border-outline _ib outline-circle"><img src="{{ Auth::user()->avatar }}" width="24" class="img-circle"></div>
+						<div class="img-circle border-outline _ib outline-circle">
+							<img src="{{ Auth::user()->avatar }}" width="24" class="img-circle">
+						</div>
 						{{ Auth::user()->name }}
 						<span class="caret"></span>
 					</a>
 
 					<ul class="dropdown-menu">
 						@role('Admin')
-							<li><a href="{{ route('admin.dashbroad') }}"><i class="fa fa-cog"></i> Admin</a></li>
+						<li>
+							<a href="{{ route('admin.dashbroad') }}">
+								<i class="fa fa-cog"></i> Admin</a>
+						</li>
 						@endrole
-						<li><a href="{{ route('profile.index', ['slug' => Auth::user()->slug]) }}"><i class="fa fa-user"></i> Profile</a></li>
+						<li>
+							<a href="{{ route('profile.index', ['slug' => Auth::user()->slug]) }}">
+								<i class="fa fa-user"></i> Profile</a>
+						</li>
 						<li>
 							<a href="{{ route('logout') }}" onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">

@@ -41,7 +41,7 @@ export const store = new VueX.Store({
             state.profile_user_data.followers.splice(index, 1)
         },
         add_new_notification(state, not) {
-            state.notifications.unshift(not)
+            state.auth_user_data.notifications.unshift(not)
             document.getElementById("bell_audio").play();
             $(".notification").removeClass("notify");
             setTimeout(function() {

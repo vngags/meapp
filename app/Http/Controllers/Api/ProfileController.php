@@ -4,36 +4,39 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Auth;
-use App\User;
+use App\Repositories\Profile\ProfileRepositoryInterface;
 
 class ProfileController extends Controller
 {
+
+    protected $profileRepository;
+
+    public function __construct(ProfileRepositoryInterface $profileRepository)
+    {
+        $this->profile = $profileRepository;
+    }
+
     public function index($slug)
     {
-        $user = User::findBySlug($slug);
-        return $user->_get_index();
+        return $this->profile->getBySlug($slug);
     }
 
     public function update(Request $request)
-    {
+    {   
+        $this->authorize('update', \App\User::class);
         $this->validate($request, [
             'name' => 'required',
             'email' => 'required|email',
             'slug' => 'required',
             'profile.*' => 'nullable'
         ]);
-        $user = Auth::user();
-        $user->update([
-            'slug' => $request->slug
-        ]);
-        $user->profile()->update($request->profile);
-        return $user;
+        return $this->profile->update($request->user()->id, $request->all());
     }
 
-    public function get_unread_notifications(Request $request)
+
+    public function getAuth(Request $request)
     {
-        return $request->user()->unreadNotifications;
+        return $this->profile->getAuth($request->user()->id);
     }
     
 }

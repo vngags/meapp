@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Carbon\Carbon;
 
+use App\Product;
+use App\Policies\ProductPolicy;
+use App\User;
+use App\Policies\ProfilePolicy;
+
 class AuthServiceProvider extends ServiceProvider
 {
     /**
@@ -15,8 +20,8 @@ class AuthServiceProvider extends ServiceProvider
      * @var array
      */
     protected $policies = [
-        \App\Product::class => \App\Policies\ProductPolicy::class,
-        \App\Profile::class => \App\Policies\ProfilePolicy::class,
+        Product::class => ProductPolicy::class,
+        User::class => ProfilePolicy::class,
     ];
 
     /**

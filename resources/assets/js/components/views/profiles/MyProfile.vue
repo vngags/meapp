@@ -1,5 +1,6 @@
 <template>
     <div class="profile">
+        <page-loading v-if="!user.uid"></page-loading>
         <transition name="fade">
             <div v-if="user.uid" class="profile-header">
 
@@ -29,7 +30,7 @@
                         <li>{{ user.rule[0] }}</li>
                         <hr>
                         <h4>Permissions</h4>
-                        <li v-for="permission in user.permissions">{{ permission.name }}</li>
+                        <li v-for="permission in user.permissions">{{ permission }}</li>
                     </div>
                     <div class="products">
                         <h4>Products</h4>
