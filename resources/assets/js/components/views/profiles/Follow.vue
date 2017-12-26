@@ -1,7 +1,7 @@
 <template>
     <div class="follow">
         <!-- Loading -->
-        <button v-show="loading" type="button" class="btn button-default disabled btn-sm minw80 relative loading">
+        <button v-show="loading" type="button" class="btn button-default disabled minw80 relative loading btn-circle">
             <div class="spinner">
                     <div class="bounce1"></div>
                     <div class="bounce2"></div>
@@ -9,8 +9,8 @@
             </div>  
         </button>
         <!-- \Loading -->
-            <button @click="addFollow" v-show="!loading" v-if="status == 0" type="button" class="btn btn-primary">Follow</button>
-            <button @click="removeFollow" v-show="!loading" v-if="status == 'following'" type="button" class="btn btn-default">Unfollow</button>
+            <button @click="addFollow" v-show="!loading" v-if="status == 0" type="button" class="btn btn-primary btn-circle bold btn-outline"><i class="fa fa-user-plus"></i> Theo dõi</button>
+            <button @click="removeFollow" v-show="!loading" v-if="status == 'following'" type="button" class="btn btn-default btn-circle bold btn-outline"><i class="fa fa-times"></i> Hủy theo dõi</button>
     </div>
 </template>
 
@@ -79,9 +79,29 @@
 </script>
 
 <style>
+.size-lg .btn {
+    height: 40px !important;
+    border-radius: 20px;
+    font-size: 15px;
+    padding: 0 20px;
+}
+.size-sm .btn {
+    height: 28px !important;
+    border-radius: 14px;
+    font-size: 12px;
+    padding: 0 15px;
+}
+.size-xs .btn {
+    height: 22px !important;
+    border-radius: 11px;
+    font-size: 12px;
+    padding: 0 10px;
+}
 .follow button {
     font-size: 13px;
     min-width: 80px;
+    padding: 0 18px;
+    height: 36px;
 }
 .follow .dropdown-menu a {
     font-size: 13px;
@@ -89,9 +109,13 @@
 .follow .btn.disabled {
     background: rgba(0,0,0,0.1);
     cursor: default;
+    position: relative;
 }
 .follow .btn.disabled.loading {
-    height: 30px;
+    height: 36px;
+}
+.follow .btn.disabled.loading.btn-sm {
+    height: 28px;
 }
 .follow .btn.disabled.loading .spinner {
     text-align: center;

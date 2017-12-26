@@ -8,6 +8,8 @@
 // Bootstrap
 @import "~bootstrap-sass/assets/stylesheets/bootstrap";
 
+@import "mybootstrap";
+
 @import  "style";
 
 @import  "animation";
@@ -15,3 +17,5 @@
 @import  "notification";
 
 @import  "loading";
+
+@import  "product_images";

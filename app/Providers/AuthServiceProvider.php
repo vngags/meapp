@@ -9,7 +9,7 @@ use Carbon\Carbon;
 
 use App\Product;
 use App\Policies\ProductPolicy;
-use App\User;
+use App\Profile;
 use App\Policies\ProfilePolicy;
 
 class AuthServiceProvider extends ServiceProvider
@@ -21,7 +21,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         Product::class => ProductPolicy::class,
-        User::class => ProfilePolicy::class,
+        Profile::class => ProfilePolicy::class,
     ];
 
     /**

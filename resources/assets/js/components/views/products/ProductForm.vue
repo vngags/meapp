@@ -72,7 +72,7 @@
                 post(this.store_url, this.form)
                     .then(resp => {
                         if (resp.data.status == 'success') {
-                            window.location.href = `/${this.user.uid}/post/${resp.data.product.slug}`
+                            window.location.href = `/${this.user.slug}/post/${resp.data.product.slug}`
                         }
                     })
             },

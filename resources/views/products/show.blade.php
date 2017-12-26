@@ -3,7 +3,7 @@
 @section('content')
 <div class="container" style="padding-bottom:100px">
     <div class="row">
-        <div class="col-md-8 col-md-offset-2">
+        <div class="col-md-16 col-md-offset-4">
             <div class="panel panel-default">
                 <div class="panel-heading clearfix">
                     Product Detail
@@ -33,11 +33,17 @@
                         @foreach($product->attachments as $attachment)
                             <img src="{{ url('/images/' . $product->user->uid . '/' . $attachment->original_url) }}">
                         @endforeach
-                        {{ $product->body }}
+                        <p>
+                            {{ $product->body }}
+                        </p>
                     </div>
                 </div>
             </div>
+            @if(Auth::check())
             <a href="{{ route('product.index', ['user_slug' => Auth::user()->slug]) }}" class="text-center btn btn-sm btn-default">Back to list</a>
+            @else
+            <a href="{{ route('home') }}" class="btn btn-sm btn-default">Back to home</a>
+            @endif
         </div>
     </div>
 </div>

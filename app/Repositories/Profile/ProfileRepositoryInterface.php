@@ -8,4 +8,6 @@ interface ProfileRepositoryInterface
 
     public function getAuth($id);
 
+    public function filterData($data);
+
 }

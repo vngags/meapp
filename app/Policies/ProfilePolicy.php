@@ -2,8 +2,9 @@
 
 namespace App\Policies;
 
+use Auth;
 use App\User;
-// use App\Profile;
+use App\Profile;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ProfilePolicy
@@ -29,9 +30,9 @@ class ProfilePolicy
         return true;
     }
 
-    public function upload(User $user)
+    public function upload(User $user, Profile $profile)
     {
-        //
+        return $user->hasPermissionTo('create-profile') && $user->id === $profile->user_id;
     }
 
 
@@ -42,9 +43,9 @@ class ProfilePolicy
      * @param  \App\Profile  $profile
      * @return mixed
      */
-    public function update(User $user)
+    public function update(User $user, Profile $profile)
     {
-        return $user->hasPermissionTo('edit-profile');
+        return $user->hasPermissionTo('edit-profile') && $user->id === $profile->user_id;
     }
 
     /**
@@ -54,8 +55,8 @@ class ProfilePolicy
      * @param  \App\Profile  $profile
      * @return mixed
      */
-    public function delete(User $user)
+    public function delete(User $user, Profile $profile)
     {
-        //
+        return $user->hasPermissionTo('delete-profile') && $user->id === $profile->user_id;
     }
 }

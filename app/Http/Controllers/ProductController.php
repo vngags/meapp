@@ -3,21 +3,26 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Repositories\Product\ProductRepositoryInterface;
 use Auth;
 use App\Product;
 
 class ProductController extends Controller
 {
+    protected $productRepository;
 
-    public function __construct()
+    public function __construct(ProductRepositoryInterface $productRepository)
     {
+        $this->product = $productRepository;
         $this->middleware(['auth'])->except('index', 'show');
     }
     
 
     public function index($user_slug)
     {
-        $product = Product::with('user')->orderBy('id', 'desc')->paginate(5);
+        // $product = Product::with('user', 'attachments')->orderBy('id', 'desc')->paginate(15);
+        $product = $this->product->getAll(['user', 'attachments'], 10 );
+        $product = $product->except('created_at');
         return view('products.index')->withProducts($product);
     }
 
@@ -26,16 +31,12 @@ class ProductController extends Controller
     {
         $this->authorize('create', Product::class);
         return view('products.create');
-    }
-
-     
-    
+    }   
 
     
     public function show($user_slug, $slug)
     {       
-        $product = Product::fetchByUidSlug($user_slug, $slug);
-        
+        $product = $this->product->findByUidAndSlug($user_slug, $slug);        
         if($product) {
             return view ('products.show')->withProduct($product);
         }else{
@@ -46,8 +47,9 @@ class ProductController extends Controller
     
     public function edit($user_slug, $slug)
     {        
-        $product = Product::findBySlug($slug);
-        $this->authorize($product, 'update');
+        
+        $product = Product::findBySlug($slug);       
+        $this->authorize('update', $product); 
         return view('products.edit', ['product' => $product]); 
     }
 

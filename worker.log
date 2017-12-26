@@ -412,3 +412,201 @@ In AbstractConnection.php line 155:
   Error while reading line from the server. [tcp://127.0.0.1:6379]  
                                                                     
 
+[2017-12-25 14:37:15] Processing: App\Notifications\AddFollow
+[2017-12-25 14:37:15] Processing: App\Notifications\AddFollow
+[2017-12-25 14:37:16] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:37:16] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:37:16] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:37:16] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:37:18] Processing: App\Notifications\AddFollow
+[2017-12-25 14:37:18] Processing: App\Notifications\AddFollow
+[2017-12-25 14:37:18] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:37:18] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:37:18] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:37:18] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:39:43] Processing: App\Notifications\AddFollow
+[2017-12-25 14:39:43] Processing: App\Notifications\AddFollow
+[2017-12-25 14:39:43] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:39:43] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:39:43] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:39:43] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:39:46] Processing: App\Notifications\AddFollow
+[2017-12-25 14:39:46] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:39:46] Processing: App\Notifications\AddFollow
+[2017-12-25 14:39:46] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:39:46] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:39:46] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:41:34] Processing: App\Notifications\AddFollow
+[2017-12-25 14:41:34] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:41:34] Processing: App\Notifications\AddFollow
+[2017-12-25 14:41:34] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:41:34] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:41:34] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:42:03] Processing: App\Notifications\AddFollow
+[2017-12-25 14:42:03] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:42:03] Processing: App\Notifications\AddFollow
+[2017-12-25 14:42:03] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:42:03] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:42:03] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:44:07] Processing: App\Notifications\AddFollow
+[2017-12-25 14:44:07] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:44:07] Processing: App\Notifications\AddFollow
+[2017-12-25 14:44:07] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:44:07] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:44:07] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:44:10] Processing: App\Notifications\AddFollow
+[2017-12-25 14:44:10] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:44:10] Processing: App\Notifications\AddFollow
+[2017-12-25 14:44:10] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:44:10] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:44:10] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:44:36] Processing: App\Notifications\AddFollow
+[2017-12-25 14:44:36] Processing: App\Notifications\AddFollow
+[2017-12-25 14:44:37] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:44:37] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:44:37] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:44:37] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:45:09] Processing: App\Notifications\AddFollow
+[2017-12-25 14:45:09] Processing: App\Notifications\AddFollow
+[2017-12-25 14:45:09] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:45:09] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:45:09] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:45:09] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:48:25] Processing: App\Notifications\AddFollow
+[2017-12-25 14:48:25] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:48:25] Processing: App\Notifications\AddFollow
+[2017-12-25 14:48:25] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:48:25] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:48:25] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:48:46] Processing: App\Notifications\AddFollow
+[2017-12-25 14:48:46] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:48:46] Processing: App\Notifications\AddFollow
+[2017-12-25 14:48:46] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:48:46] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:48:46] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:49:55] Processing: App\Notifications\AddFollow
+[2017-12-25 14:49:55] Processing: App\Notifications\AddFollow
+[2017-12-25 14:49:55] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:49:55] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:49:55] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:49:56] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:56:27] Processing: App\Notifications\AddFollow
+[2017-12-25 14:56:27] Processing: App\Notifications\AddFollow
+[2017-12-25 14:56:27] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:56:27] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:56:27] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:56:27] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:56:31] Processing: App\Notifications\AddFollow
+[2017-12-25 14:56:31] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:56:31] Processing: App\Notifications\AddFollow
+[2017-12-25 14:56:32] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:56:32] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:56:32] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:56:56] Processing: App\Notifications\AddFollow
+[2017-12-25 14:56:56] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:56:56] Processing: App\Notifications\AddFollow
+[2017-12-25 14:56:56] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:56:56] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:56:56] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:56:57] Processing: App\Notifications\AddFollow
+[2017-12-25 14:56:57] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:56:57] Processing: App\Notifications\AddFollow
+[2017-12-25 14:56:57] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:56:57] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:56:57] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:58:15] Processing: App\Notifications\AddFollow
+[2017-12-25 14:58:15] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:58:15] Processing: App\Notifications\AddFollow
+[2017-12-25 14:58:15] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:58:15] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:58:16] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:58:29] Processing: App\Notifications\AddFollow
+[2017-12-25 14:58:29] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:58:29] Processing: App\Notifications\AddFollow
+[2017-12-25 14:58:29] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:58:29] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:58:29] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:58:36] Processing: App\Notifications\AddFollow
+[2017-12-25 14:58:36] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:58:36] Processing: App\Notifications\AddFollow
+[2017-12-25 14:58:36] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:58:36] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:58:37] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:59:21] Processing: App\Notifications\AddFollow
+[2017-12-25 14:59:21] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:59:21] Processing: App\Notifications\AddFollow
+[2017-12-25 14:59:22] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:59:22] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:59:22] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:59:37] Processing: App\Notifications\AddFollow
+[2017-12-25 14:59:37] Processed:  App\Notifications\AddFollow
+[2017-12-25 14:59:37] Processing: App\Notifications\AddFollow
+[2017-12-25 14:59:37] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:59:37] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 14:59:37] Processed:  App\Notifications\AddFollow
+[2017-12-25 15:01:49] Processing: App\Notifications\AddFollow
+[2017-12-25 15:01:49] Processed:  App\Notifications\AddFollow
+[2017-12-25 15:01:49] Processing: App\Notifications\AddFollow
+[2017-12-25 15:01:49] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 15:01:49] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 15:01:49] Processed:  App\Notifications\AddFollow
+[2017-12-25 16:05:24] Processing: App\Notifications\AddFollow
+[2017-12-25 16:05:24] Processing: App\Notifications\AddFollow
+[2017-12-25 16:05:24] Processed:  App\Notifications\AddFollow
+[2017-12-25 16:05:24] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 16:05:24] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 16:05:24] Processed:  App\Notifications\AddFollow
+[2017-12-25 16:05:36] Processing: App\Notifications\AddFollow
+[2017-12-25 16:05:36] Processed:  App\Notifications\AddFollow
+[2017-12-25 16:05:36] Processing: App\Notifications\AddFollow
+[2017-12-25 16:05:36] Processed:  App\Notifications\AddFollow
+[2017-12-25 16:05:36] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-25 16:05:36] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated
+
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+

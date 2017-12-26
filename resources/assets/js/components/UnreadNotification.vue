@@ -2,8 +2,8 @@
     <li class="notifications dropdown">
         <!-- <transition name="fade">
             <div v-if="user.notifications"> -->
-        <a class="notification" :data-count="[user.notifications && user.notifications.length]" :title="[user.notifications && user.notifications.length > 0 ? user.notifications.length : 'Không có'] + ' thông báo mới'"
-            :class="{ 'show-count' : (user.notifications && user.notifications.length > 0) }" data-toggle="dropdown" role="button"
+        <a class="notification" :data-count="[user.notifications && user.notifications.data.length]" :title="[user.notifications && user.notifications.data.length > 0 ? user.notifications.data.length : 'Không có'] + ' thông báo mới'"
+            :class="{ 'show-count' : (user.notifications && user.notifications.data.length > 0) }" data-toggle="dropdown" role="button"
             aria-expanded="false" aria-haspopup="true">
             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px"
                 viewBox="0 0 459.334 459.334" style="enable-background:new 0 0 459.334 459.334;" xml:space="preserve" width="18px"
@@ -25,10 +25,10 @@
                 <h4>Thông báo</h4>
             </div>
             <div class="scroller" :style="{ 'max-height': winHeight + 'px' }">
-                <li v-if="user.notifications.length == 0">
+                <li v-if="user.notifications.data.length == 0">
                     <p class="text-center text-brown pt20 pb20 mb0">Không có thông báo mới</p>
                 </li>
-                <li v-for="not in user.notifications" :class="[ not.read_at ? 'read' : 'unread' ]">
+                <li v-for="not in user.notifications.data" :class="[ not.read_at ? 'read' : 'unread' ]">
                     <a :href="not.data.url">
                         <div class="w55 pull-left">
                             <a :href="'/'+not.data.user.slug" class="border-outline outline-circle _ibi">
@@ -68,6 +68,8 @@
         get,
         post
     } from '../api'
+    // import slimScroll from '../../../../public/plugins/slimscroll/jquery.slimscroll.min.js'
+
     export default {
         data() {
             return {
@@ -78,7 +80,7 @@
             let vm = this
             this.getWinSize();
             this.$nextTick(function () {
-                window.addEventListener("resize", vm.getWinSize);
+                window.addEventListener("resize", vm.getWinSize);                
             });
         },
         methods: {
@@ -97,6 +99,6 @@
         },
         beforeDestroy() {
             window.removeEventListener("resize", this.getWinSize);
-        }
+        },
     }
 </script>

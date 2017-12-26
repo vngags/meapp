@@ -7,6 +7,8 @@
 
 require('./bootstrap');
 
+
+
 window.Vue = require('vue');
 
 import VueTimeago from 'vue-timeago'
@@ -46,4 +48,5 @@ const app = new Vue({
     el: '#app',
     store
 });
+
 

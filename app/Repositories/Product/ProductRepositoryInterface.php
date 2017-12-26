@@ -17,4 +17,6 @@ interface ProductRepositoryInterface
      */
     // public function findOnlyPublished();
 
+    public function findByUidAndSlug($uid, $slug);
+
 }

@@ -17,7 +17,7 @@
         }
     }
 }
-
+img {max-width: 100%;}
 ._ib {display: inline-block;}
 ._ibi {display: inline-block !important;}
 ._flex {display: flex;}
@@ -26,6 +26,8 @@
     overflow-x: hidden;
     overflow-y: auto;
 }
+.bold {font-weight: bold;}
+.white-bg {background: #fff;}
 
 //Simple Modal
 .simple-modal {
@@ -83,12 +85,50 @@
 .btn {
     text-shadow: rgba(0, 0, 0, 0.1) 0px 1px 0px;
     border-radius: 2px;
-    font-weight: 500;
     font-family: Arial,sans-serif;
     text-align: center;
     border: 1px solid transparent !important;
     box-sizing: border-box;
     transition: box-shadow 400ms linear, background 400ms linear;
+    &.btn-circle {
+        border-radius: 18px;
+        &.btn-sm {
+            border-radius: 14px;
+        }
+        &.btn-lg {
+            border-radius: 20px;
+        }
+    }
+    &.btn-outline {
+        &.btn-default {
+            border: 2px solid rgba(0, 0, 0, 0.2)!important;
+        }        
+        &.btn-primary {
+            background: #fff;
+            color: #4285f4;
+            border: 2px solid #4285f4 !important;
+        }
+        &.btn-danger {
+            background: #fff;
+            color: #DB4B39;
+            border: 2px solid #DB4B39 !important;
+        }
+        &.btn-info {
+            background: #fff;
+            color: #03a9f4;
+            border: 2px solid #03a9f4 !important;
+        }
+        &.btn-success {
+            background: #fff;
+            color: #4caf50;
+            border: 2px solid #4caf50 !important;
+        }
+        &.btn-warning {
+            background: #fff;
+            color: #fbc02d;
+            border: 2px solid #fbc02d !important;
+        }
+    }
     &.btn-sm {
         padding: 3px 10px;
         font-size: 13px;
@@ -213,3 +253,7 @@
         }    
     }
 } 
+
+.panel {
+    background: transparent;
+}

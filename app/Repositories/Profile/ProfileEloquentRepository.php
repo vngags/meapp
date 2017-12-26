@@ -16,35 +16,19 @@ class ProfileEloquentRepository extends EloquentRepository implements ProfileRep
     public function getbySlug($slug)
     {        
         $user = $this->_model->with(['profile', 'products'])->where('slug', $slug)->first();
-        // $data = $this->find($user->id);
-        // $this->authorize($data->profile, 'view');
-        $userData = [
-            'uid' => $user->uid,
-            'name' => $user->name,
-            'slug' => $user->slug,
-            'email' => $user->email,
-            'avatar' => $user->avatar,
-            'gender' => $user->gender,
-            'profile' => [
-                'about' => isset($user->profile->about) ? $user->profile->about : '',
-                'phone_number' => isset($user->profile->phone_number) ? $user->profile->phone_number : ''
-            ],
-            'rule' => $user->getRoleNames(),
-            'permissions' => $user->getAllPermissions()->map(function($permission) {
-                return $permission->name;
-            }),
-            'products' => $user->products,
-            'followings' => $user->getFollowings(),
-            'followers' => $user->getFollowers()
-        ];
+        $userData = $this->filterData($user);
         return json_encode($userData);
     }
 
     public function getAuth($id)
     {
         $user = $this->_model->with(['profile', 'products'])->where('id', $id)->first();
-        // $data = $this->find($id);
-        // $this->authorize($data->profile, 'view');
+        $userData = $this->filterData($user);
+        $userData['notifications'] = $user->notifications()->paginate(10);
+        return json_encode($userData);
+    }
+
+    public function filterData($user) {
         $userData = [
             'uid' => $user->uid,
             'name' => $user->name,
@@ -60,12 +44,11 @@ class ProfileEloquentRepository extends EloquentRepository implements ProfileRep
             'permissions' => $user->getAllPermissions()->map(function($permission) {
                 return $permission->name;
             }),
-            'notifications' => $user->notifications,
             'products' => $user->products,
             'followings' => $user->getFollowings(),
             'followers' => $user->getFollowers()
         ];
-        return json_encode($userData);
+        return $userData;
     }
 
 

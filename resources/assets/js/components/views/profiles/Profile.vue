@@ -15,7 +15,7 @@
                     </ul>
                 </div>
 
-                <follow :slug="profile_user.slug"></follow>
+                <follow :slug="profile_user.slug" class="size-md"></follow>
 
                 <div class="form-group">
                     <a @click="show_qrcode" class="dropdown-toggle" id="show-qrcode" data-tooltip="QRCODE" data-placement="top">
@@ -31,7 +31,7 @@
                     </h4>
                     <transition-group name="fadebg">
                         <div v-if="profile_user.followings.length > 0" :key="following.slug" v-for="following in profile_user.followings">
-                            <a :href="'/' + following.slug" class="border-outline outline-circle">
+                            <a :href="'/' + following.slug" class="border-outline outline-circle _ibi">
                                 <img :src="following.avatar" width="28" class="img-circle">
                             </a>
                         </div>
@@ -44,7 +44,7 @@
                     </h4>
                     <transition-group name="fadebg">
                         <div v-if="profile_user.followers.length > 0" :key="follower.slug" v-for="follower in profile_user.followers">
-                            <a :href="'/' + follower.slug" class="border-outline outline-circle">
+                            <a :href="'/' + follower.slug" class="border-outline outline-circle _ibi">
                                 <img :src="follower.avatar" width="28" class="img-circle">
                             </a>
                         </div>

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Repositories\Product\ProductRepositoryInterface;
+use App\Product;
+use Auth;
 
 class ProductController extends Controller
 {
@@ -20,7 +22,8 @@ class ProductController extends Controller
     }
 
     public function store(Request $request)
-    {
+    {        
+        $this->authorize('create', Product::class);
         $this->validate($request, [
             'title' => 'required|max:255',
             'body' => 'required',
@@ -35,20 +38,16 @@ class ProductController extends Controller
         ];
         $product = $this->product->create($data);
         
-        if($product) {            
-            return response()->json([
-                'status' => 'success',
-                'product' => $product
-            ]);
-        }else{
-            return response()->json([
-                'status' => 'errors'
-            ], 422);
-        }        
+        return response()->json([
+            'status' => 'success',
+            'product' => $product
+        ]);      
     }
 
     public function update(Request $request)
     {
+        $p = Product::find($request->id);
+        $this->authorize('update', $p);
         $this->validate($request, [
             'title' => 'required|max:255',
             'body' => 'required',
@@ -63,20 +62,15 @@ class ProductController extends Controller
             'attachments' => $request->attachments
         ];
         $product = $this->product->update($request->id, $data);
-        if($product) {            
-            return response()->json([
-                'status' => 'success',
-                'product' => $product
-            ]);
-        }else{
-            return response()->json([
-                'status' => 'errors'
-            ], 422);
-        }    
+        return response()->json([
+            'status' => 'success',
+            'product' => $product
+        ]);  
     }
     
     public function get_index(Request $request)
     {
+        $this->authorize('view', Product::class);
         $this->validate($request, [
             'product_id' => 'required|numeric'
         ]);

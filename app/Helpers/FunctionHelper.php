@@ -94,6 +94,8 @@ class FunctionHelper
             }
             $img->insert($watermark, 'bottom-right', 0, round($h/2 - 43));
             $img->save(public_path('images/'.$dir.'/'.$filename.'.'.$ext));
+            //save thumbnaik
+            self::saveThumbnail(url('images/' . $dir.'/'.$filename.'.'.$ext));
             $image['url'] = url('images/' . $dir.'/'.$filename.'.'.$ext);
             $image['size'] = $img->filesize();
             $image['name'] = $filename.'.'.$ext;
@@ -136,21 +138,117 @@ class FunctionHelper
             copy($file->getRealPath(), public_path('images/'.$dir.'/'.$filename_without_ext.'.'.$ext));
             $image['url'] = $dir.'/'.$filename_without_ext.'.'.$ext;
         }else {
-                $img = Image::make($file);
-                $w = $img->width();
-                $h = $img->height();
-                //resize if width > 800
-                if($w > 1200) {
-                    $img->resize(1200, null, function($constraint) {
-                    $constraint->aspectRatio();
-                    });
-                }
-                $img->insert($watermark, 'bottom-right', 0, round($h/2 - 43));
-                $img->save(public_path('images/'.$dir.'/'.$filename_without_ext.'.'.$ext));
-                $image['url'] = url('images/' . $dir.'/'.$filename_without_ext.'.'.$ext);
-                $image['size'] = $img->filesize();
-                $image['name'] = $dir.'/'.$filename_without_ext.'.'.$ext;
+            $img = Image::make($file);
+            $w = $img->width();
+            $h = $img->height();
+            //resize if width > 800
+            if($w > 1200) {
+                $img->resize(1200, null, function($constraint) {
+                $constraint->aspectRatio();
+                });
+            }
+            $img->insert($watermark, 'bottom-right', 0, round($h/2 - 43));
+            $img->save(public_path('images/'.$dir.'/'.$filename_without_ext.'.'.$ext));
+
+            //save image version       
+            $image['url'] = url('images/' . $dir.'/'.$filename_without_ext.'.'.$ext);
+            $image['size'] = $img->filesize();
+            $image['name'] = $dir.'/'.$filename_without_ext.'.'.$ext;
         }
         return $image;
+    }
+
+    static public function getImageVersion($url, $version)
+    {
+        switch($version) {
+            case 'full':
+                $dataUrl = explode('.', $url);
+                if($dataUrl[1] != 'gif') {
+                    return $dataUrl[0] . '_300x215' . '.' . $dataUrl[1];
+                }else{
+                    return $url;
+                }                
+                break;
+            case 'large':
+                $dataUrl = explode('.', $url);
+                if($dataUrl[1] != 'gif') {
+                    return $dataUrl[0] . '_196x215' . '.' . $dataUrl[1];
+                }else{
+                    return $url;
+                } 
+                break;
+            case 'half':
+                $dataUrl = explode('.', $url);
+                if($dataUrl[1] != 'gif') {
+                    return $dataUrl[0] . '_150x215' . '.' . $dataUrl[1];
+                }else{
+                    return $url;
+                } 
+                break;
+            case 'small':
+                $dataUrl = explode('.', $url);
+                if($dataUrl[1] != 'gif') {
+                    return $dataUrl[0] . '_105x105' . '.' . $dataUrl[1];
+                }else{
+                    return $url;
+                } 
+                break;
+        }
+    }
+
+
+    static public function saveThumbnail($url)
+    {
+        $sizes = [
+            [
+                'width' => 300,
+                'height' => 215
+            ],
+            [
+                'width' => 196,
+                'height' => 215
+            ],
+            [
+                'width' => 150,
+                'height' => 215
+            ],
+            [
+                'width' => 105,
+                'height' => 105
+            ]
+        ];
+        
+        foreach($sizes as $size) {
+            self::saveImageVersion($url, $size['width'], $size['height']);
+        }
+    }
+
+
+    static public function saveImageVersion($url, $width, $height)
+    {
+        $path_parts = pathinfo($url);
+        $dir = $path_parts['dirname'];//return http://coccoc.me/images/551466
+        $dataDir = explode('/', $dir);
+        $upload_dir = array_pop($dataDir);
+        $ext = $path_parts['extension'];
+        $filename = $path_parts['filename'];
+
+        $img = Image::make($url);
+        $ratio = $height/$width;
+        $img->fit($img->width(), intval($img->width() * $ratio));
+        $img->resize($width, $height);
+        // if(!File::exists(public_path('/images/' . $upload_dir . '/' . $filename . '_' . $width . 'x' . $height . '.' . $ext))) {
+        $img->save(public_path('/images/' . $upload_dir . '/' . $filename . '_' . $width . 'x' . $height . '.' . $ext));
+        // }        
+        // return $img->response('png');
+    }
+
+
+    public static function truncate($string, $length = 150) {
+        $limit = abs((int)$length);
+           if(strlen($string) > $limit) {
+              $string = preg_replace("/^(.{1,$limit})(\s.*|$)/s", '\1...', $string);
+           }
+        return $string;    
     }
 }

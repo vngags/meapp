@@ -19,6 +19,7 @@ class ProductEloquentRepository extends EloquentRepository implements ProductRep
     {
         $product = $this->_model->create([
             'title' => $data['title'],
+            'slug' => str_slug($data['title']),
             'user_id' => $data['user_id'],
             'body' => $data['body']
         ]);
@@ -33,7 +34,6 @@ class ProductEloquentRepository extends EloquentRepository implements ProductRep
         $product = $this->find($id);
         $product->update([
             'title' => $data['title'],
-            'user_id' => $data['user_id'],
             'body' => $data['body']
         ]);
         if($data['attachments'] && count($data['attachments']) > 0) {
@@ -47,10 +47,17 @@ class ProductEloquentRepository extends EloquentRepository implements ProductRep
      * get all product only published
      * @return mixed
      */
-    public function getAll()
+    public function getAll($with = null, $paginate = null)
     {
-        // $result = $this->_model->where('is_published', 1)->get();
-        $result = $this->_model->get();
+        if($with && $paginate) {
+            $result = $this->_model->with($with)->paginate($paginate);
+        }elseif($with) {
+            $result = $this->_model->with($with)->get();
+        }elseif($paginate) {
+            $result = $this->_model->paginate($paginate);
+        }else{
+            $result = $this->_model->get();
+        }        
         return $result;
     }
 
@@ -62,11 +69,13 @@ class ProductEloquentRepository extends EloquentRepository implements ProductRep
      */
     public function find($id)
     {
-        // $result = $this->_model->where('id', $id)->where('is_published', 1)->first();
         $result = $this->_model->where('id', $id)->first();
         return $result;
     }
 
-
+    public function findByUidAndSlug($uid, $slug) {
+        $owner = \App\User::where('slug', $uid)->first();
+        return $this->_model->with('user')->where('slug', $slug)->where('user_id', $owner->id)->first();
+    }
 
 }

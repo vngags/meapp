@@ -18,15 +18,21 @@ class ProfileController extends Controller
     public function index($slug)
     {        
         $user = User::where('slug', $slug)->first();
-        return view('auth.profile')->withUser($user);
+        $profile = $user->profile;
+        if($user->can('view', $profile)) {
+            return view('auth.profile')->withUser($user);
+        }
+        return redirect('/');
     }
 
     public function edit($user_slug)
     {
         $user = User::findBySlug($user_slug);
         $profile = $user->profile;
-        $this->authorize('update', $user);
-        return view('auth.profile-edit')->withUser($user);
+        if($user->can('update', $profile)) {
+            return view('auth.profile-edit')->withUser($user);
+        }
+        return redirect('/');
     }
 
     public function list()

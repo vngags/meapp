@@ -1770,6 +1770,8 @@ Object.defineProperty(exports, "__esModule", {
 
 var _api = __webpack_require__("./resources/assets/js/api/index.js");
 
+// import slimScroll from '../../../../public/plugins/slimscroll/jquery.slimscroll.min.js'
+
 exports.default = {
     data: function data() {
         return {
@@ -2101,7 +2103,7 @@ exports.default = {
                                 // await this.$refs.child.submited()
                                 (0, _api.post)(_this2.store_url, _this2.form).then(function (resp) {
                                     if (resp.data.status == 'success') {
-                                        window.location.href = '/' + _this2.user.uid + '/post/' + resp.data.product.slug;
+                                        window.location.href = '/' + _this2.user.slug + '/post/' + resp.data.product.slug;
                                     }
                                 });
 
@@ -5755,7 +5757,7 @@ exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/cs
 
 
 // module
-exports.push([module.i, "\n.follow button {\n    font-size: 13px;\n    min-width: 80px;\n}\n.follow .dropdown-menu a {\n    font-size: 13px;\n}\n.follow .btn.disabled {\n    background: rgba(0,0,0,0.1);\n    cursor: default;\n}\n.follow .btn.disabled.loading {\n    height: 30px;\n}\n.follow .btn.disabled.loading .spinner {\n    text-align: center;\n    position: absolute;\n    top: 50%;\n    left: 50%;\n    width: 36px;\n    height: 12px;\n    margin: 0;\n    z-index: 1;\n    -webkit-transform: translate(-50%, -50%);\n    transform: translate(-50%, -50%);\n}\n.follow .btn.disabled.loading .spinner .bounce1 {\n    -webkit-animation-delay: -0.32s;\n    animation-delay: -0.32s;\n}\n.follow .btn.disabled.loading .spinner .bounce2 {\n    -webkit-animation-delay: -0.16s;\n    animation-delay: -0.16s;\n}\n.follow .btn.disabled.loading .spinner > div {\n    width: 12px;\n    height: 12px;\n    background-color: rgba(0, 0, 0, 0.3);\n    border-radius: 100%;\n    display: inline-block;\n    -webkit-animation: sk-bouncedelay 1.4s infinite ease-in-out both;\n    animation: sk-bouncedelay 1.4s infinite ease-in-out both;\n        -webkit-animation-delay: 0s;\n                animation-delay: 0s;\n    float: left;\n}\n", ""]);
+exports.push([module.i, "\n.size-lg .btn {\n    height: 40px !important;\n    border-radius: 20px;\n    font-size: 15px;\n    padding: 0 20px;\n}\n.size-sm .btn {\n    height: 28px !important;\n    border-radius: 14px;\n    font-size: 12px;\n    padding: 0 15px;\n}\n.size-xs .btn {\n    height: 22px !important;\n    border-radius: 11px;\n    font-size: 12px;\n    padding: 0 10px;\n}\n.follow button {\n    font-size: 13px;\n    min-width: 80px;\n    padding: 0 18px;\n    height: 36px;\n}\n.follow .dropdown-menu a {\n    font-size: 13px;\n}\n.follow .btn.disabled {\n    background: rgba(0,0,0,0.1);\n    cursor: default;\n    position: relative;\n}\n.follow .btn.disabled.loading {\n    height: 36px;\n}\n.follow .btn.disabled.loading.btn-sm {\n    height: 28px;\n}\n.follow .btn.disabled.loading .spinner {\n    text-align: center;\n    position: absolute;\n    top: 50%;\n    left: 50%;\n    width: 36px;\n    height: 12px;\n    margin: 0;\n    z-index: 1;\n    -webkit-transform: translate(-50%, -50%);\n    transform: translate(-50%, -50%);\n}\n.follow .btn.disabled.loading .spinner .bounce1 {\n    -webkit-animation-delay: -0.32s;\n    animation-delay: -0.32s;\n}\n.follow .btn.disabled.loading .spinner .bounce2 {\n    -webkit-animation-delay: -0.16s;\n    animation-delay: -0.16s;\n}\n.follow .btn.disabled.loading .spinner > div {\n    width: 12px;\n    height: 12px;\n    background-color: rgba(0, 0, 0, 0.3);\n    border-radius: 100%;\n    display: inline-block;\n    -webkit-animation: sk-bouncedelay 1.4s infinite ease-in-out both;\n    animation: sk-bouncedelay 1.4s infinite ease-in-out both;\n        -webkit-animation-delay: 0s;\n                animation-delay: 0s;\n    float: left;\n}\n", ""]);
 
 // exports
 
@@ -45997,7 +45999,7 @@ var render = function() {
           }
         ],
         staticClass:
-          "btn button-default disabled btn-sm minw80 relative loading",
+          "btn button-default disabled minw80 relative loading btn-circle",
         attrs: { type: "button" }
       },
       [_vm._m(0)]
@@ -46015,11 +46017,11 @@ var render = function() {
                 expression: "!loading"
               }
             ],
-            staticClass: "btn btn-primary",
+            staticClass: "btn btn-primary btn-circle bold btn-outline",
             attrs: { type: "button" },
             on: { click: _vm.addFollow }
           },
-          [_vm._v("Follow")]
+          [_c("i", { staticClass: "fa fa-user-plus" }), _vm._v(" Theo dõi")]
         )
       : _vm._e(),
     _vm._v(" "),
@@ -46035,11 +46037,11 @@ var render = function() {
                 expression: "!loading"
               }
             ],
-            staticClass: "btn btn-default",
+            staticClass: "btn btn-default btn-circle bold btn-outline",
             attrs: { type: "button" },
             on: { click: _vm.removeFollow }
           },
-          [_vm._v("Unfollow")]
+          [_c("i", { staticClass: "fa fa-times" }), _vm._v(" Hủy theo dõi")]
         )
       : _vm._e()
   ])
@@ -46188,7 +46190,10 @@ var render = function() {
                   ])
                 ]),
                 _vm._v(" "),
-                _c("follow", { attrs: { slug: _vm.profile_user.slug } }),
+                _c("follow", {
+                  staticClass: "size-md",
+                  attrs: { slug: _vm.profile_user.slug }
+                }),
                 _vm._v(" "),
                 _c(
                   "div",
@@ -46244,7 +46249,8 @@ var render = function() {
                               _c(
                                 "a",
                                 {
-                                  staticClass: "border-outline outline-circle",
+                                  staticClass:
+                                    "border-outline outline-circle _ibi",
                                   attrs: { href: "/" + following.slug }
                                 },
                                 [
@@ -46287,7 +46293,8 @@ var render = function() {
                               _c(
                                 "a",
                                 {
-                                  staticClass: "border-outline outline-circle",
+                                  staticClass:
+                                    "border-outline outline-circle _ibi",
                                   attrs: { href: "/" + follower.slug }
                                 },
                                 [
@@ -46522,16 +46529,16 @@ var render = function() {
         staticClass: "notification",
         class: {
           "show-count":
-            _vm.user.notifications && _vm.user.notifications.length > 0
+            _vm.user.notifications && _vm.user.notifications.data.length > 0
         },
         attrs: {
           "data-count": [
-            _vm.user.notifications && _vm.user.notifications.length
+            _vm.user.notifications && _vm.user.notifications.data.length
           ],
           title:
             [
-              _vm.user.notifications && _vm.user.notifications.length > 0
-                ? _vm.user.notifications.length
+              _vm.user.notifications && _vm.user.notifications.data.length > 0
+                ? _vm.user.notifications.data.length
                 : "Không có"
             ] + " thông báo mới",
           "data-toggle": "dropdown",
@@ -46599,7 +46606,7 @@ var render = function() {
                 style: { "max-height": _vm.winHeight + "px" }
               },
               [
-                _vm.user.notifications.length == 0
+                _vm.user.notifications.data.length == 0
                   ? _c("li", [
                       _c(
                         "p",
@@ -46609,7 +46616,7 @@ var render = function() {
                     ])
                   : _vm._e(),
                 _vm._v(" "),
-                _vm._l(_vm.user.notifications, function(not) {
+                _vm._l(_vm.user.notifications.data, function(not) {
                   return _c(
                     "li",
                     { class: [not.read_at ? "read" : "unread"] },

@@ -17,15 +17,17 @@
 
 <body class="@yield('body_class')">
 	<div id="app">
-		@include('layouts.blocks._navbar') @yield('content')        
+		@include('layouts.blocks._navbar')
+		<div style="margin-top:80px">
+			@yield('content')
+		</div>
 	</div>
 
 
 	<!-- Scripts -->
 	<script src="{{ mix('js/app.js') }}"></script>
-    <script src="{{ mix('js/frontend.js') }}"></script>
-	@yield('script')
-    @include('layouts.blocks._login_modal')    
+	<script src="{{ mix('js/frontend.js') }}"></script>
+	@yield('script') @include('layouts.blocks._login_modal')
 </body>
 
 </html>
