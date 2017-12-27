@@ -188,7 +188,7 @@ class FunctionHelper
             case 'small':
                 $dataUrl = explode('.', $url);
                 if($dataUrl[1] != 'gif') {
-                    return $dataUrl[0] . '_105x105' . '.' . $dataUrl[1];
+                    return $dataUrl[0] . '_110x110' . '.' . $dataUrl[1];
                 }else{
                     return $url;
                 } 
@@ -213,13 +213,47 @@ class FunctionHelper
                 'height' => 215
             ],
             [
-                'width' => 105,
-                'height' => 105
+                'width' => 110,
+                'height' => 110
             ]
         ];
         
         foreach($sizes as $size) {
             self::saveImageVersion($url, $size['width'], $size['height']);
+        }
+    }
+
+    static public function deleteThumbnail($url)
+    {
+        $sizes = [
+            [
+                'width' => 300,
+                'height' => 215
+            ],
+            [
+                'width' => 196,
+                'height' => 215
+            ],
+            [
+                'width' => 150,
+                'height' => 215
+            ],
+            [
+                'width' => 110,
+                'height' => 110
+            ]
+        ];
+        
+        foreach($sizes as $size) {
+            $path_parts = pathinfo($url);
+            $dir = $path_parts['dirname'];//return http://coccoc.me/images/551466
+            $dataDir = explode('/', $dir);
+            $upload_dir = array_pop($dataDir);
+            $ext = $path_parts['extension'];
+            $filename = $path_parts['filename'];
+            if(File::exists(public_path('/images/' . $upload_dir . '/' . $filename . '_' . $size['width'] . 'x' . $size['height'] . '.' . $ext))) {
+                File::delete(public_path('/images/' . $upload_dir . '/' . $filename . '_' . $size['width'] . 'x' . $size['height'] . '.' . $ext));
+            }
         }
     }
 
@@ -237,9 +271,9 @@ class FunctionHelper
         $ratio = $height/$width;
         $img->fit($img->width(), intval($img->width() * $ratio));
         $img->resize($width, $height);
-        // if(!File::exists(public_path('/images/' . $upload_dir . '/' . $filename . '_' . $width . 'x' . $height . '.' . $ext))) {
-        $img->save(public_path('/images/' . $upload_dir . '/' . $filename . '_' . $width . 'x' . $height . '.' . $ext));
-        // }        
+        if(!File::exists(public_path('/images/' . $upload_dir . '/' . $filename . '_' . $width . 'x' . $height . '.' . $ext))) {
+            $img->save(public_path('/images/' . $upload_dir . '/' . $filename . '_' . $width . 'x' . $height . '.' . $ext));
+        }        
         // return $img->response('png');
     }
 

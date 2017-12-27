@@ -610,3 +610,57 @@ In AbstractConnection.php line 155:
   Error while reading line from the server. [tcp://127.0.0.1:6379]  
                                                                     
 
+
+
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+
+In AbstractConnection.php line 155:
+                                                                    
+  Error while reading line from the server. [tcp://127.0.0.1:6379]  
+                                                                    
+
+[2017-12-27 03:31:47] Processing: App\Notifications\AddFollow
+[2017-12-27 03:31:47] Processing: App\Notifications\AddFollow
+[2017-12-27 03:31:47] Processed:  App\Notifications\AddFollow
+[2017-12-27 03:31:47] Processed:  App\Notifications\AddFollow
+[2017-12-27 03:31:47] Processing: Illuminate\Notifications\Events\BroadcastNotificationCreated
+[2017-12-27 03:31:47] Processed:  Illuminate\Notifications\Events\BroadcastNotificationCreated

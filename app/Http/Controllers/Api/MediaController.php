@@ -50,6 +50,7 @@ class MediaController extends Controller
         if($image) {
             if(File::exists(public_path('images/' . $request->user()->uid . '/' . $request->product_image))) {
                 File::delete(public_path('images/' . $request->user()->uid . '/' . $request->product_image));
+                FunctionHelper::deleteThumbnail(url('images/' . $request->user()->uid . '/' . $request->product_image));
             }
             $image->delete();
             return response()->json([

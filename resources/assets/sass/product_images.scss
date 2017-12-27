@@ -1,7 +1,7 @@
 .attachments {
     position: relative;
     display: block;
-    margin-left: 0;
+    margin: 0;
     &::before {
         content: "";
         padding-bottom: 71%;
@@ -61,7 +61,7 @@
         }
     }
     & .large-image {
-        width: 65%;
+        width: 64.2%;
         position: absolute;
         top: 0;
         left: 0;
@@ -86,7 +86,7 @@
         float: right;
         flex-direction: column;
         height: 100%;
-        width: 35%;
+        width: 35.8%;
         position: absolute;
         right: 0;
         bottom: 0;

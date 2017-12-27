@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Repositories\Product\ProductRepositoryInterface;
-use Auth;
 use App\Product;
 
 class ProductController extends Controller
@@ -20,9 +19,7 @@ class ProductController extends Controller
 
     public function index($user_slug)
     {
-        // $product = Product::with('user', 'attachments')->orderBy('id', 'desc')->paginate(15);
         $product = $this->product->getAll(['user', 'attachments'], 10 );
-        $product = $product->except('created_at');
         return view('products.index')->withProducts($product);
     }
 

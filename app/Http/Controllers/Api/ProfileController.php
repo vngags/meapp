@@ -23,7 +23,7 @@ class ProfileController extends Controller
 
     public function update(Request $request)
     {   
-        $this->authorize('update', \App\User::class);
+        $this->authorize('update', $request->user()->profile);
         $this->validate($request, [
             'name' => 'required',
             'email' => 'required|email',

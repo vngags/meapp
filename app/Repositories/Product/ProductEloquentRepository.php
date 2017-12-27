@@ -50,13 +50,13 @@ class ProductEloquentRepository extends EloquentRepository implements ProductRep
     public function getAll($with = null, $paginate = null)
     {
         if($with && $paginate) {
-            $result = $this->_model->with($with)->paginate($paginate);
+            $result = $this->_model->with($with)->orderBy('created_at', 'desc')->paginate($paginate);
         }elseif($with) {
-            $result = $this->_model->with($with)->get();
+            $result = $this->_model->with($with)->orderBy('created_at', 'desc')->get();
         }elseif($paginate) {
-            $result = $this->_model->paginate($paginate);
+            $result = $this->_model->orderBy('created_at', 'desc')->paginate($paginate);
         }else{
-            $result = $this->_model->get();
+            $result = $this->_model->orderBy('created_at', 'desc')->get();
         }        
         return $result;
     }
