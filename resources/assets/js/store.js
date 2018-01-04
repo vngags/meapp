@@ -7,7 +7,8 @@ export const store = new VueX.Store({
     state: {
         auth_user_data: [],
         profile_user_data: [],
-        notifications: []
+        notifications: [],
+        products: []
     },
     getters: {
         get_auth_user_data(state) {
@@ -18,6 +19,9 @@ export const store = new VueX.Store({
         },
         get_notifications(state) {
             return state.notifications
+        },
+        get_all_products(state) {
+            return state.products
         }
     },
     mutations: {
@@ -50,6 +54,12 @@ export const store = new VueX.Store({
         },
         add_unread_notification(state, not) {
             state.notifications.push(not)
+        },
+        add_new_products(state, product) {
+            state.products.push(product)
+        },
+        refresh_products(state, data) {
+            state.products = []
         }
     }
 })

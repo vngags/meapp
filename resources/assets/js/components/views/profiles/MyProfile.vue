@@ -56,6 +56,7 @@
         post
     } from '../../../api'
     import QrCode from './QRcode'
+    
     export default {
         props: ['slug'],
         components: {

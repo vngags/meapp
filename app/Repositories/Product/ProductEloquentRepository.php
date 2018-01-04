@@ -21,7 +21,11 @@ class ProductEloquentRepository extends EloquentRepository implements ProductRep
             'title' => $data['title'],
             'slug' => str_slug($data['title']),
             'user_id' => $data['user_id'],
-            'body' => $data['body']
+            'body' => $data['body'],
+            'price' => $data['price'],
+            'new_price' => $data['new_price'],
+            'price_start' => $data['start_price'],
+            'price_end' => $data['end_price']
         ]);
         if($data['attachments'] && count($data['attachments']) > 0) {
             $product->attachments()->sync($data['attachments']);
@@ -34,7 +38,11 @@ class ProductEloquentRepository extends EloquentRepository implements ProductRep
         $product = $this->find($id);
         $product->update([
             'title' => $data['title'],
-            'body' => $data['body']
+            'body' => $data['body'],
+            'price' => $data['price'],
+            'new_price' => $data['new_price'],
+            'price_start' => $data['start_price'],
+            'price_end' => $data['end_price']
         ]);
         if($data['attachments'] && count($data['attachments']) > 0) {
             $product->attachments()->sync($data['attachments']);
@@ -60,6 +68,7 @@ class ProductEloquentRepository extends EloquentRepository implements ProductRep
         }        
         return $result;
     }
+
 
 
     /**

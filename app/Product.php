@@ -5,12 +5,21 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use App\User;
 use Auth;
+use Nicolaslopezj\Searchable\SearchableTrait;
 
 class Product extends Model
 {
-    protected $fillable = ['user_id', 'title', 'slug', 'body'];
+    use SearchableTrait;
+    protected $fillable = ['user_id', 'title', 'slug', 'body', 'price', 'new_price', 'price_start', 'price_end'];
 
     protected $hidden = ['pivot'];
+
+    protected $searchable = [
+        'columns' => [
+            'products.title' => 10,
+            'products.body' => 10
+        ]
+    ];
 
     public function scopeFindBySlug($query, $slug)
     {

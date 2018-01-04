@@ -68,6 +68,11 @@
                                 </a>
                             </div>
                         </div>
+
+                        <div class="form-group">
+                            <p class="text-center">Chưa có tài khoản? <a href="{{ route('register') }}">Đăng ký</a></p>
+                        </div>
+
                     </form>
                 </div>
             </div>

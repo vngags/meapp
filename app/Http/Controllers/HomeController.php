@@ -21,7 +21,7 @@ class HomeController extends Controller
     public function __construct(ProductRepositoryInterface $productRepository)
     {
         $this->product = $productRepository;
-        $this->middleware('auth');
+        $this->middleware('auth')->except('index');
     }
 
     /**
@@ -31,7 +31,7 @@ class HomeController extends Controller
      */
     public function index()
     {   
-        $product = $this->product->getAll(['user', 'attachments'], 10 );
+        $product = $this->product->getAll(['user', 'attachments'], 12 );
         return view('products.index')->withProducts($product);
         // $media = \App\Media::get();
         // foreach($media as $image) {

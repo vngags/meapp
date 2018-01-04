@@ -198,7 +198,7 @@
     display: inline-block;
     vertical-align: top;
     margin: 16px;
-    border-radius: 10px;
+    border-radius: 20px;
     min-height: 100px; }
     .dropzone .dz-preview:hover,
     .previews .dz-preview:hover {
@@ -257,6 +257,7 @@
         font-size: 16px; }
       .dropzone .dz-preview .dz-details .dz-filename,
       .previews .dz-preview .dz-details .dz-filename {
+        display: none;
         white-space: nowrap; }
         .dropzone .dz-preview .dz-details .dz-filename:hover span,
         .previews .dz-preview .dz-details .dz-filename:hover span {
@@ -427,6 +428,19 @@
         border-left: 6px solid transparent;
         border-right: 6px solid transparent;
         border-bottom: 6px solid #be2626; }
+.previews .dz-preview .edit-image {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  z-index: 99;
+  width: 25px;
+  height: 25px;
+  line-height: 25px;
+  text-align: center;
+  padding: 0;
+}
+
+
 
 .previews .dz-preview .dz-remove {
   position: absolute;

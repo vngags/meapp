@@ -7,6 +7,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use File;
+use Nicolaslopezj\Searchable\SearchableTrait;
+
 
 use App\Traits\Friendable;
 
@@ -15,7 +17,7 @@ use Spatie\Permission\Models\Permission;
 
 class User extends Authenticatable
 {
-    use Notifiable, HasApiTokens, HasRoles, Friendable;
+    use Notifiable, HasApiTokens, HasRoles, Friendable, SearchableTrait;
 
     /**
      * The attributes that are mass assignable.
@@ -26,6 +28,8 @@ class User extends Authenticatable
         'name', 'email', 'password', 'slug', 'uid', 'avatar', 'gender'
     ];
 
+    protected $appends = ['all_permissions','can'];
+
     /**
      * The attributes that should be hidden for arrays.
      *
@@ -34,6 +38,38 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+    
+
+    protected $searchable = [
+        'columns' => [
+            'users.name' => 10,
+            'users.email' => 10,
+            'users.slug' => 2,
+            'profiles.about' => 2,
+            'profiles.phone_number' => 1,
+        ],
+        'joins' => [
+            'profiles' => ['users.id','profiles.user_id'],
+        ],
+    ];
+
+    public function getAllPermissionsAttribute()
+    {
+        return $this->getAllPermissions();
+    }
+
+    public function getCanAttribute()
+    {
+        $permissions = [];
+        foreach (Permission::all() as $permission) {
+            if ($this->can($permission->name)) {
+                $permissions[$permission->name] = true;
+            } else {
+                $permissions[$permission->name] = false;
+            }
+        }
+        return $permissions;
+    }
 
     public function scopeFindBySlug($query, $slug)
     {

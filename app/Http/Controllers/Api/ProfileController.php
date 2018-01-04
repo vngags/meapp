@@ -18,7 +18,8 @@ class ProfileController extends Controller
 
     public function index($slug)
     {
-        return $this->profile->getBySlug($slug);
+        $obj = $this->profile->getBySlug($slug);
+        return $obj;
     }
 
     public function update(Request $request)

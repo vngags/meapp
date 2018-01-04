@@ -19,4 +19,11 @@ class Media extends Model
     {
         return $this->belongsToMany(Product::class);
     }
+
+    public function image_detail()
+    {
+        return $this->hasOne(ProductImageDetail::class);
+    }
+
+
 }

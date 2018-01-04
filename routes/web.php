@@ -43,11 +43,12 @@ Route::group(['prefix' => 'admin', 'middleware' => 'auth'], function() {
 });
 
 
-
+Route::get('search', 'SearchController@search')->name('search.get');
 
 Route::get('user_list', 'ProfileController@list')->name('user.list');
 
 Route::get('/{slug}', 'ProfileController@index')->name('profile.index')->where('slug', '[0-9a-zA-Z-_]+');
+
 
 
 // Route::group(['prefix' => '{user_slug}'], function() {

@@ -80,6 +80,7 @@
         post
     } from '../../../api'
     import QrCode from './QRcode'
+    var config = require('../../../config')
     export default {
         props: ['slug'],
         components: {
@@ -90,7 +91,7 @@
         },
         methods: {
             get_user_data() {
-                get(`/api/v1/${this.slug}`)
+                get(`/${config.api.version}/${this.slug}`)
                     .then(resp => {
                         // console.log(resp);
                         this.$store.commit('add_profile_user_data', resp.data)

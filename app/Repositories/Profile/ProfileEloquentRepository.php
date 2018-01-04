@@ -25,7 +25,8 @@ class ProfileEloquentRepository extends EloquentRepository implements ProfileRep
         $user = $this->_model->with(['profile', 'products'])->where('id', $id)->first();
         $userData = $this->filterData($user);
         $userData['notifications'] = $user->notifications()->paginate(10);
-        return json_encode($userData);
+        $userData['can'] = $user->can;
+        return $userData;
     }
 
     public function filterData($user) {
@@ -36,6 +37,7 @@ class ProfileEloquentRepository extends EloquentRepository implements ProfileRep
             'email' => $user->email,
             'avatar' => $user->avatar,
             'gender' => $user->gender,
+            // 'can' => $user->can,
             'profile' => [
                 'about' => isset($user->profile->about) ? $user->profile->about : '',
                 'phone_number' => isset($user->profile->phone_number) ? $user->profile->phone_number : ''
@@ -48,7 +50,7 @@ class ProfileEloquentRepository extends EloquentRepository implements ProfileRep
             'followings' => $user->getFollowings(),
             'followers' => $user->getFollowers()
         ];
-        return $userData;
+        return collect($userData);
     }
 
 

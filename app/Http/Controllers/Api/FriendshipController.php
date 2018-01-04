@@ -27,11 +27,9 @@ class FriendshipController extends Controller
         $this->validate($request, [
             'user_slug' => 'required'
         ]);
-        $user = User::findBySlug($request->user_slug);
-        $user->notify(new AddFollow(Auth::user()));
-        if(Auth::user()->addFollowing($user->uid) == 1) {
-            // User::find($user->id)->notify(new \App\Notifications\AddFollow(Auth::user()));
-            
+        $user = User::findBySlug($request->user_slug);        
+        if($request->user()->addFollowing($user->uid) == 1) {
+            $user->notify(new AddFollow(Auth::user()));           
             return ['status' => 'following'];
         }
         return ['status' => 0];

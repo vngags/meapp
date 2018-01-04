@@ -17,6 +17,7 @@
     import Dropzone from 'dropzone/dist/dropzone.js'
     // import 'dropzone/dist/dropzone.css'
     import '../../../../../../public/plugins/vue2dropzone/vue2Dropzone.css'
+    var config = require('../../../config')
     export default {
         props: ['attachments_ids'],
         data() {
@@ -32,7 +33,7 @@
             async setup_dropzone() {
                 let vm = this
                 vm.myDropzone = new Dropzone(".dropzone", {
-                    url: '/api/v1/media/upload',
+                    url: `/${config.api.version}/media/upload`,
                     thumbnailWidth: 150,
                     thumbnailHeight: 150,
                     maxFilesize: 5,
@@ -73,7 +74,7 @@
                         });
 
                         this.on("removedfile", function (file) {
-                            post('/api/v1/media/delete', {
+                            post(`/${config.api.version}/media/delete`, {
                                 product_image: file.filename
                             })
                         });
@@ -100,7 +101,7 @@
                     dz.removeAllFiles() //clean all file before push new
                     this.attachments_ids.forEach((item) => {
                         vm.$emit('completed', item)
-                        get('/api/v1/media/get_image/' + item)
+                        get(`/${config.api.version}/media/get_image/${item}`)
                             .then(resp => {
                                 var thumb = {
                                     name: resp.data.name,

@@ -136,6 +136,307 @@ module.exports = function(arraybuffer, start, end) {
 
 /***/ }),
 
+/***/ "./node_modules/autosize/dist/autosize.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
+	Autosize 4.0.0
+	license: MIT
+	http://www.jacklmoore.com/autosize
+*/
+(function (global, factory) {
+	if (true) {
+		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, module], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	} else if (typeof exports !== 'undefined' && typeof module !== 'undefined') {
+		factory(exports, module);
+	} else {
+		var mod = {
+			exports: {}
+		};
+		factory(mod.exports, mod);
+		global.autosize = mod.exports;
+	}
+})(this, function (exports, module) {
+	'use strict';
+
+	var map = typeof Map === "function" ? new Map() : (function () {
+		var keys = [];
+		var values = [];
+
+		return {
+			has: function has(key) {
+				return keys.indexOf(key) > -1;
+			},
+			get: function get(key) {
+				return values[keys.indexOf(key)];
+			},
+			set: function set(key, value) {
+				if (keys.indexOf(key) === -1) {
+					keys.push(key);
+					values.push(value);
+				}
+			},
+			'delete': function _delete(key) {
+				var index = keys.indexOf(key);
+				if (index > -1) {
+					keys.splice(index, 1);
+					values.splice(index, 1);
+				}
+			}
+		};
+	})();
+
+	var createEvent = function createEvent(name) {
+		return new Event(name, { bubbles: true });
+	};
+	try {
+		new Event('test');
+	} catch (e) {
+		// IE does not support `new Event()`
+		createEvent = function (name) {
+			var evt = document.createEvent('Event');
+			evt.initEvent(name, true, false);
+			return evt;
+		};
+	}
+
+	function assign(ta) {
+		if (!ta || !ta.nodeName || ta.nodeName !== 'TEXTAREA' || map.has(ta)) return;
+
+		var heightOffset = null;
+		var clientWidth = ta.clientWidth;
+		var cachedHeight = null;
+
+		function init() {
+			var style = window.getComputedStyle(ta, null);
+
+			if (style.resize === 'vertical') {
+				ta.style.resize = 'none';
+			} else if (style.resize === 'both') {
+				ta.style.resize = 'horizontal';
+			}
+
+			if (style.boxSizing === 'content-box') {
+				heightOffset = -(parseFloat(style.paddingTop) + parseFloat(style.paddingBottom));
+			} else {
+				heightOffset = parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
+			}
+			// Fix when a textarea is not on document body and heightOffset is Not a Number
+			if (isNaN(heightOffset)) {
+				heightOffset = 0;
+			}
+
+			update();
+		}
+
+		function changeOverflow(value) {
+			{
+				// Chrome/Safari-specific fix:
+				// When the textarea y-overflow is hidden, Chrome/Safari do not reflow the text to account for the space
+				// made available by removing the scrollbar. The following forces the necessary text reflow.
+				var width = ta.style.width;
+				ta.style.width = '0px';
+				// Force reflow:
+				/* jshint ignore:start */
+				ta.offsetWidth;
+				/* jshint ignore:end */
+				ta.style.width = width;
+			}
+
+			ta.style.overflowY = value;
+		}
+
+		function getParentOverflows(el) {
+			var arr = [];
+
+			while (el && el.parentNode && el.parentNode instanceof Element) {
+				if (el.parentNode.scrollTop) {
+					arr.push({
+						node: el.parentNode,
+						scrollTop: el.parentNode.scrollTop
+					});
+				}
+				el = el.parentNode;
+			}
+
+			return arr;
+		}
+
+		function resize() {
+			var originalHeight = ta.style.height;
+			var overflows = getParentOverflows(ta);
+			var docTop = document.documentElement && document.documentElement.scrollTop; // Needed for Mobile IE (ticket #240)
+
+			ta.style.height = '';
+
+			var endHeight = ta.scrollHeight + heightOffset;
+
+			if (ta.scrollHeight === 0) {
+				// If the scrollHeight is 0, then the element probably has display:none or is detached from the DOM.
+				ta.style.height = originalHeight;
+				return;
+			}
+
+			ta.style.height = endHeight + 'px';
+
+			// used to check if an update is actually necessary on window.resize
+			clientWidth = ta.clientWidth;
+
+			// prevents scroll-position jumping
+			overflows.forEach(function (el) {
+				el.node.scrollTop = el.scrollTop;
+			});
+
+			if (docTop) {
+				document.documentElement.scrollTop = docTop;
+			}
+		}
+
+		function update() {
+			resize();
+
+			var styleHeight = Math.round(parseFloat(ta.style.height));
+			var computed = window.getComputedStyle(ta, null);
+
+			// Using offsetHeight as a replacement for computed.height in IE, because IE does not account use of border-box
+			var actualHeight = computed.boxSizing === 'content-box' ? Math.round(parseFloat(computed.height)) : ta.offsetHeight;
+
+			// The actual height not matching the style height (set via the resize method) indicates that
+			// the max-height has been exceeded, in which case the overflow should be allowed.
+			if (actualHeight !== styleHeight) {
+				if (computed.overflowY === 'hidden') {
+					changeOverflow('scroll');
+					resize();
+					actualHeight = computed.boxSizing === 'content-box' ? Math.round(parseFloat(window.getComputedStyle(ta, null).height)) : ta.offsetHeight;
+				}
+			} else {
+				// Normally keep overflow set to hidden, to avoid flash of scrollbar as the textarea expands.
+				if (computed.overflowY !== 'hidden') {
+					changeOverflow('hidden');
+					resize();
+					actualHeight = computed.boxSizing === 'content-box' ? Math.round(parseFloat(window.getComputedStyle(ta, null).height)) : ta.offsetHeight;
+				}
+			}
+
+			if (cachedHeight !== actualHeight) {
+				cachedHeight = actualHeight;
+				var evt = createEvent('autosize:resized');
+				try {
+					ta.dispatchEvent(evt);
+				} catch (err) {
+					// Firefox will throw an error on dispatchEvent for a detached element
+					// https://bugzilla.mozilla.org/show_bug.cgi?id=889376
+				}
+			}
+		}
+
+		var pageResize = function pageResize() {
+			if (ta.clientWidth !== clientWidth) {
+				update();
+			}
+		};
+
+		var destroy = (function (style) {
+			window.removeEventListener('resize', pageResize, false);
+			ta.removeEventListener('input', update, false);
+			ta.removeEventListener('keyup', update, false);
+			ta.removeEventListener('autosize:destroy', destroy, false);
+			ta.removeEventListener('autosize:update', update, false);
+
+			Object.keys(style).forEach(function (key) {
+				ta.style[key] = style[key];
+			});
+
+			map['delete'](ta);
+		}).bind(ta, {
+			height: ta.style.height,
+			resize: ta.style.resize,
+			overflowY: ta.style.overflowY,
+			overflowX: ta.style.overflowX,
+			wordWrap: ta.style.wordWrap
+		});
+
+		ta.addEventListener('autosize:destroy', destroy, false);
+
+		// IE9 does not fire onpropertychange or oninput for deletions,
+		// so binding to onkeyup to catch most of those events.
+		// There is no way that I know of to detect something like 'cut' in IE9.
+		if ('onpropertychange' in ta && 'oninput' in ta) {
+			ta.addEventListener('keyup', update, false);
+		}
+
+		window.addEventListener('resize', pageResize, false);
+		ta.addEventListener('input', update, false);
+		ta.addEventListener('autosize:update', update, false);
+		ta.style.overflowX = 'hidden';
+		ta.style.wordWrap = 'break-word';
+
+		map.set(ta, {
+			destroy: destroy,
+			update: update
+		});
+
+		init();
+	}
+
+	function destroy(ta) {
+		var methods = map.get(ta);
+		if (methods) {
+			methods.destroy();
+		}
+	}
+
+	function update(ta) {
+		var methods = map.get(ta);
+		if (methods) {
+			methods.update();
+		}
+	}
+
+	var autosize = null;
+
+	// Do nothing in Node.js environment and IE8 (or lower)
+	if (typeof window === 'undefined' || typeof window.getComputedStyle !== 'function') {
+		autosize = function (el) {
+			return el;
+		};
+		autosize.destroy = function (el) {
+			return el;
+		};
+		autosize.update = function (el) {
+			return el;
+		};
+	} else {
+		autosize = function (el, options) {
+			if (el) {
+				Array.prototype.forEach.call(el.length ? el : [el], function (x) {
+					return assign(x, options);
+				});
+			}
+			return el;
+		};
+		autosize.destroy = function (el) {
+			if (el) {
+				Array.prototype.forEach.call(el.length ? el : [el], destroy);
+			}
+			return el;
+		};
+		autosize.update = function (el) {
+			if (el) {
+				Array.prototype.forEach.call(el.length ? el : [el], update);
+			}
+			return el;
+		};
+	}
+
+	module.exports = autosize;
+});
+
+/***/ }),
+
 /***/ "./node_modules/axios/index.js":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1714,15 +2015,17 @@ Object.defineProperty(exports, "__esModule", {
 
 var _api = __webpack_require__("./resources/assets/js/api/index.js");
 
+var config = __webpack_require__("./resources/assets/js/config/index.js"); //
+
 exports.default = {
     mounted: function mounted() {
         var _this = this;
 
-        (0, _api.get)('/api/v1/user').then(function (resp) {
+        (0, _api.get)('/' + config.api.version + '/user').then(function (resp) {
             _this.$store.commit('add_auth_user_data', resp.data);
         });
     }
-}; //
+};
 
 /***/ }),
 
@@ -1868,6 +2171,258 @@ exports.default = {
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}],\"es2015\",\"es2017\"],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0&bustCache!./resources/assets/js/components/views/home/Index.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _api = __webpack_require__("./resources/assets/js/api/index.js");
+
+var _Pagination = __webpack_require__("./resources/assets/js/components/views/home/Pagination.vue");
+
+var _Pagination2 = _interopRequireDefault(_Pagination);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+var config = __webpack_require__("./resources/assets/js/config/index.js");
+exports.default = {
+    components: { Pagination: _Pagination2.default },
+    props: ['page'],
+    data: function data() {
+        return {
+            loading: true,
+            // products: [],
+            pagination: {
+                total: 0,
+                from: 1,
+                to: 0,
+                current_page: 1
+            },
+            offset: 4,
+            fetched_page: 0
+        };
+    },
+    mounted: function mounted() {
+        if (this.page) {
+            this.pagination.current_page = this.page;
+        }
+        this.getProducts(this.pagination.current_page);
+    },
+
+    methods: {
+        getProducts: function getProducts(page) {
+            var _this = this;
+
+            if (this.fetched_page != page) {
+                this.loading = true;
+                (0, _api.get)('/' + config.api.version + '/_get/products?page=' + page).then(function (resp) {
+                    _this.$store.commit('refresh_products', 0);
+                    resp.data.data.forEach(function (item) {
+                        _this.$store.commit('add_new_products', item);
+                    });
+                    // this.products = resp.data.products
+
+                    _this.pagination.total = resp.data.page.total;
+                    _this.pagination.last_page = resp.data.page.last_page;
+                    _this.pagination.current_page = resp.data.page.current_page;
+                    _this.pagination.from = resp.data.page.from;
+                    _this.pagination.to = resp.data.page.to;
+
+                    _this.fetched_page = resp.data.page.current_page;
+
+                    _this.loading = false;
+                    // $("html, body").animate({scrollTop: 0}, 0);
+                    if (_this.pagination.current_page > 1) {
+                        window.history.pushState("object or string", "Title", "/?page=" + resp.data.page.current_page);
+                    } else {
+                        window.history.pushState("object or string", "Title", "/");
+                    }
+                });
+            }
+        }
+    },
+    computed: {
+        products: function products() {
+            return this.$store.getters.get_all_products;
+        }
+    }
+};
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}],\"es2015\",\"es2017\"],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0&bustCache!./resources/assets/js/components/views/home/Pagination.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+exports.default = {
+    props: {
+        pagination: {
+            type: Object,
+            required: true
+        },
+        offset: {
+            type: Number,
+            default: 4
+        }
+    },
+    computed: {
+        pagesNumber: function pagesNumber() {
+            if (!this.pagination.to) {
+                return [];
+            }
+            var from = this.pagination.current_page - this.offset;
+            if (from < 1) {
+                from = 1;
+            }
+            var to = from + this.offset * 2;
+            if (to >= this.pagination.last_page) {
+                to = this.pagination.last_page;
+            }
+            var pagesArray = [];
+            for (from = 1; from <= to; from++) {
+                pagesArray.push(from);
+            }
+            return pagesArray;
+        }
+    },
+    methods: {
+        changePage: function changePage(page) {
+            this.pagination.current_page = page;
+        }
+    }
+};
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}],\"es2015\",\"es2017\"],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0&bustCache!./resources/assets/js/components/views/products/Dropzone.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1886,6 +2441,10 @@ var _dropzone2 = _interopRequireDefault(_dropzone);
 
 __webpack_require__("./public/plugins/vue2dropzone/vue2Dropzone.css");
 
+var _ImageModal = __webpack_require__("./resources/assets/js/components/views/products/ImageModal.vue");
+
+var _ImageModal2 = _interopRequireDefault(_ImageModal);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; } //
@@ -1901,12 +2460,26 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
 
+var config = __webpack_require__("./resources/assets/js/config/index.js");
 exports.default = {
+    components: {
+        ImageModal: _ImageModal2.default
+    },
     props: ['attachments_ids', 'params', 'maxfile'],
     data: function data() {
         return {
-            myDropzone: null
+            myDropzone: null,
+            dataImage: {
+                id: null,
+                url: null,
+                price: null,
+                caption: null
+            },
+            arrayImages: []
         };
     },
 
@@ -1914,18 +2487,61 @@ exports.default = {
         'attachments_ids': 'fetchImage'
     },
     mounted: function mounted() {
+        var vm = this;
         this.setup_dropzone();
         _dropzone2.default.autoDiscover = false;
         this.fetchImage();
+
+        $('.previews').delegate('.edit-image', 'click', function () {
+            var id = $(this).attr('data-id');
+            vm.show_modal_image(id);
+            $('#modal_image').modal({
+                backdrop: 'static',
+                keyboard: false
+            }).on('hidden.bs.modal', function (e) {
+                vm.clear_dataImage();
+            });
+        });
     },
 
     methods: {
+        clear_dataImage: function clear_dataImage() {
+            this.dataImage.id = null;
+            this.dataImage.url = null;
+            this.dataImage.price = null;
+            this.dataImage.caption = null;
+        },
+        show_modal_image: function show_modal_image(id) {
+            var vm = this;
+            var image = this.arrayImages.find(function (i) {
+                return i.dataId == id;
+            });
+            var index = this.arrayImages.indexOf(image);
+            this.dataImage.id = this.arrayImages[index].dataId;
+            this.dataImage.url = this.arrayImages[index].dataURL;
+            this.dataImage.price = this.arrayImages[index].dataPrice;
+            this.dataImage.caption = this.arrayImages[index].dataCaption;
+        },
+        fetchImageDetail: function fetchImageDetail() {
+            var vm = this;
+            (0, _api.post)('/' + config.api.version + '/_get/media_detail', {
+                dataId: vm.dataImage.id
+            }).then(function (resp) {
+                if (resp.data.status == 'success') {
+                    vm.dataImage.price = resp.data.data.price;
+                    vm.dataImage.caption = resp.data.data.caption;
+                } else {
+                    vm.dataImage.price = null;
+                    vm.dataImage.caption = null;
+                }
+            });
+        },
         setup_dropzone: function setup_dropzone() {
             var _ref;
 
             var vm = this;
             vm.myDropzone = new _dropzone2.default(".dropzone", (_ref = {
-                url: '/api/v1/media/upload',
+                url: '/' + config.api.version + '/media/upload',
                 thumbnailWidth: 150,
                 thumbnailHeight: 150,
                 maxFilesize: 5,
@@ -1950,11 +2566,37 @@ exports.default = {
                     file.dataURL = '/images/' + response.fullname;
                     file.id = response.id;
                     vm.$emit('completed', response.id);
+
+                    vm.arrayImages.push({
+                        dataURL: response.fullname,
+                        dataFileName: response.name,
+                        dataId: response.id,
+                        dataThumb: response.thumb,
+                        dataPrice: null,
+                        dataCaption: null
+                    });
+
+                    var button = document.createElement('button');
+                    button.innerHTML = '<i class="fa fa-cogs" aria-hidden="true"></i>';
+                    button.setAttribute("class", "edit-image btn btn-warning btn-xs btn-circle");
+                    button.setAttribute('data-tooltip', 'Thêm chi tiết');
+                    button.setAttribute('data-placement', 'top');
+                    button.setAttribute('data-id', response.id);
+                    button.setAttribute('data-url', response.fullname);
+                    file.previewTemplate.appendChild(button);
                 });
 
                 this.on("removedfile", function (file) {
-                    (0, _api.post)('/api/v1/media/delete', {
+                    (0, _api.post)('/' + config.api.version + '/media/delete', {
                         product_image: file.filename
+                    }).then(function (resp) {
+                        if (resp.data.status == 'deleted') {
+                            var image = vm.arrayImages.find(function (i) {
+                                return i.dataFileName == file.filename;
+                            });
+                            var index = vm.arrayImages.indexOf(image);
+                            vm.arrayImages.splice(index, 1);
+                        }
                     });
                 });
 
@@ -1972,33 +2614,438 @@ exports.default = {
             }), _ref));
         },
         fetchImage: function fetchImage() {
+            var _this2 = this;
+
             var dz = this.myDropzone;
             var vm = this;
-            if (this.attachments_ids && this.attachments_ids.length > 0) {
 
-                dz.removeAllFiles(); //clean all file before push new
-                this.attachments_ids.forEach(function (item) {
-                    vm.$emit('completed', item);
-                    (0, _api.get)('/api/v1/media/get_image/' + item).then(function (resp) {
+            if (this.attachments_ids && this.attachments_ids.length > 0) {
+                var ids = this.attachments_ids.join();
+                (0, _api.get)('/' + config.api.version + '/_get/get_images/?images=' + ids).then(function (resp) {
+                    resp.data.forEach(function (image) {
                         var thumb = {
-                            name: resp.data.name,
-                            size: resp.data.size,
-                            dataURL: '/images/' + resp.data.fullname,
-                            filename: resp.data.name,
-                            id: resp.data.id
+                            name: image.name,
+                            size: image.size,
+                            dataURL: '/images/' + image.fullname,
+                            filename: image.name,
+                            id: image.id
                         };
+                        _this2.arrayImages.push({
+                            dataURL: image.fullname,
+                            dataFileName: image.name,
+                            dataId: image.id,
+                            dataThumb: image.thumb,
+                            dataPrice: image.price,
+                            dataCaption: image.caption
+                        });
                         dz.files.push(thumb);
                         dz.emit('addedfile', thumb);
                         dz.createThumbnailFromUrl(thumb, dz.options.thumbnailWidth, dz.options.thumbnailHeight, dz.options.thumbnailMethod, true, function (thumbnail) {
                             dz.emit('thumbnail', thumb, thumbnail);
+                            var button = document.createElement('button');
+                            // var text = document.createTextNode('+ Thêm')
+                            // button.appendChild(text); 
+                            if (image.price || image.caption) {
+                                button.innerHTML = '<i class="fa fa-check" aria-hidden="true"></i>';
+                                button.setAttribute("class", "edit-image btn btn-success btn-xs btn-circle");
+                            } else {
+                                button.innerHTML = '<i class="fa fa-cogs" aria-hidden="true"></i>';
+                                button.setAttribute("class", "edit-image btn btn-warning btn-xs btn-circle");
+                            }
+
+                            button.setAttribute('data-tooltip', 'Thêm chi tiết');
+                            button.setAttribute('data-placement', 'top');
+                            button.setAttribute('data-id', image.id);
+                            button.setAttribute('data-url', image.fullname);
+                            thumb.previewTemplate.appendChild(button);
                         });
                         dz.emit('complete', thumb);
                     });
                 });
             } //endif
         }
+    }, //methods
+    computed: {
+        user: function user() {
+            return this.$store.getters.get_auth_user_data;
+        }
     }
+};
 
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}],\"es2015\",\"es2017\"],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0&bustCache!./resources/assets/js/components/views/products/ImageModal.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _regenerator = __webpack_require__("./node_modules/babel-runtime/regenerator/index.js");
+
+var _regenerator2 = _interopRequireDefault(_regenerator);
+
+var _jqueryScrollbar = __webpack_require__("./public/plugins/scrollbar/jquery.scrollbar.js");
+
+var _jqueryScrollbar2 = _interopRequireDefault(_jqueryScrollbar);
+
+__webpack_require__("./public/plugins/scrollbar/jquery.scrollbar.css");
+
+var _api = __webpack_require__("./resources/assets/js/api/index.js");
+
+var _autosize = __webpack_require__("./node_modules/autosize/dist/autosize.js");
+
+var _autosize2 = _interopRequireDefault(_autosize);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; } //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+var config = __webpack_require__("./resources/assets/js/config/index.js");
+exports.default = {
+    props: ['arrayImages', 'dataImage', 'type', 'author_uid'],
+    data: function data() {
+        return {
+            image_height: 422,
+            mode: this.type,
+            inputData: [],
+            btn_loading: false
+        };
+    },
+    mounted: function mounted() {
+        var vm = this;
+        window.addEventListener('keyup', function (event) {
+            // If down arrow was pressed...
+            if (event.keyCode == 39 && vm.mode == 'show') {
+                vm.nextImg(vm.dataImage.id, vm.dataImage.url);
+            }
+            if (event.keyCode == 37 && vm.mode == 'show') {
+                vm.prevImg(vm.dataImage.id, vm.dataImage.url);
+            }
+        });
+
+        $('#modal_image').on('shown.bs.modal', function () {
+            var image = vm.arrayImages.find(function (i) {
+                return i.dataId == vm.dataImage.id;
+            });
+            var index = vm.arrayImages.indexOf(image);
+            $('.scrollbar-macosx.modal-thumbnail').not('.scroll-wrapper').animate({
+                scrollTop: index * 47
+            }, 500);
+            var mode = function () {
+                var _ref = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee() {
+                    var textarea;
+                    return _regenerator2.default.wrap(function _callee$(_context) {
+                        while (1) {
+                            switch (_context.prev = _context.next) {
+                                case 0:
+                                    _context.next = 2;
+                                    return vm.dataImage.caption;
+
+                                case 2:
+                                    if (vm.mode == 'update') {
+                                        textarea = document.getElementById('product-detail-input');
+
+                                        textarea.style.display = 'none';
+                                        (0, _autosize2.default)(textarea);
+                                        textarea.style.display = '';
+                                        _autosize2.default.update(textarea);
+                                    }
+
+                                case 3:
+                                case 'end':
+                                    return _context.stop();
+                            }
+                        }
+                    }, _callee, this);
+                }));
+
+                return function mode() {
+                    return _ref.apply(this, arguments);
+                };
+            }();
+            mode();
+        }).on('show.bs.modal', function () {});
+        $('.scrollbar-macosx').scrollbar();
+    },
+
+    methods: {
+        isNumber: function isNumber(evt) {
+            var charCode = evt.which ? evt.which : evt.keyCode;
+            if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode !== 46) {
+                evt.preventDefault();
+            } else {
+                return true;
+            }
+        },
+        show_modal_image: function show_modal_image(id) {
+            var vm = this;
+            return new Promise(function (resolve, reject) {
+                var image = vm.arrayImages.find(function (i) {
+                    return i.dataId == id;
+                });
+                var index = vm.arrayImages.indexOf(image);
+                $('.scrollbar-macosx.modal-thumbnail').not('.scroll-wrapper').animate({
+                    scrollTop: index * 47
+                }, 500);
+                vm.dataImage.id = vm.arrayImages[index].dataId;
+                vm.dataImage.url = vm.arrayImages[index].dataURL;
+                vm.dataImage.price = vm.arrayImages[index].dataPrice;
+                vm.dataImage.caption = vm.arrayImages[index].dataCaption;
+                resolve(vm.dataImage);
+            });
+        },
+        nextImg: function nextImg() {
+            var _this = this;
+
+            var image = this.arrayImages.find(function (i) {
+                return i.dataId == _this.dataImage.id;
+            });
+            var index = this.arrayImages.indexOf(image);
+            if (index + 1 >= this.arrayImages.length) {
+                this.dataImage.id = this.arrayImages[0].dataId;
+                this.dataImage.url = this.arrayImages[0].dataURL;
+                this.dataImage.price = this.arrayImages[0].dataPrice;
+                this.dataImage.caption = this.arrayImages[0].dataCaption;
+                $('.scrollbar-macosx.modal-thumbnail').not('.scroll-wrapper').animate({
+                    scrollTop: 0
+                }, 500);
+            } else {
+                this.dataImage.id = this.arrayImages[index + 1].dataId;
+                this.dataImage.url = this.arrayImages[index + 1].dataURL;
+                this.dataImage.price = this.arrayImages[index + 1].dataPrice;
+                this.dataImage.caption = this.arrayImages[index + 1].dataCaption;
+                $('.scrollbar-macosx.modal-thumbnail').not('.scroll-wrapper').animate({
+                    scrollTop: (index + 1) * 47
+                }, 500);
+            }
+            // this.fetchImageDetail()
+        },
+        prevImg: function prevImg() {
+            var _this2 = this;
+
+            var image = this.arrayImages.find(function (i) {
+                return i.dataId == _this2.dataImage.id;
+            });
+            var index = this.arrayImages.indexOf(image);
+            if (index - 1 < 0) {
+                this.dataImage.id = this.arrayImages[this.arrayImages.length - 1].dataId;
+                this.dataImage.url = this.arrayImages[this.arrayImages.length - 1].dataURL;
+                this.dataImage.price = this.arrayImages[this.arrayImages.length - 1].dataPrice;
+                this.dataImage.caption = this.arrayImages[this.arrayImages.length - 1].dataCaption;
+                $('.scrollbar-macosx.modal-thumbnail').not('.scroll-wrapper').animate({
+                    scrollTop: (this.arrayImages.length - 1) * 47
+                }, 500);
+            } else {
+                this.dataImage.id = this.arrayImages[index - 1].dataId;
+                this.dataImage.url = this.arrayImages[index - 1].dataURL;
+                this.dataImage.price = this.arrayImages[index - 1].dataPrice;
+                this.dataImage.caption = this.arrayImages[index - 1].dataCaption;
+                $('.scrollbar-macosx.modal-thumbnail').not('.scroll-wrapper').animate({
+                    scrollTop: (index - 1) * 47
+                }, 500);
+            }
+            // this.fetchImageDetail()
+        },
+        saveImageDetail: function saveImageDetail() {
+            var vm = this;
+            if (this.inputData.caption > 0) {
+                this.btn_loading = true;
+                (0, _api.post)('/' + config.api.version + '/_post/media_detail', {
+                    dataId: this.dataImage.id,
+                    price: this.dataImage.price,
+                    caption: this.dataImage.caption
+                }).then(function (resp) {
+                    var image = vm.arrayImages.find(function (i) {
+                        return i.dataId == resp.data.media_id;
+                    });
+                    image.dataPrice = resp.data.media_price;
+                    image.dataCaption = resp.data.media_caption;
+                    vm.mode = 'show';
+                    vm.btn_loading = false;
+                });
+            }
+        }
+    },
+    computed: {
+        user: function user() {
+            return this.$store.getters.get_auth_user_data;
+        }
+    },
+    watch: {
+        'dataImage.caption': function dataImageCaption() {
+            if (this.dataImage.caption) {
+                //max length 255 characters
+                this.inputData.caption = parseInt(255 - this.dataImage.caption.length);
+            }
+        },
+        'mode': function () {
+            var _ref2 = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee2() {
+                var textarea;
+                return _regenerator2.default.wrap(function _callee2$(_context2) {
+                    while (1) {
+                        switch (_context2.prev = _context2.next) {
+                            case 0:
+                                _context2.next = 2;
+                                return this.dataImage.caption;
+
+                            case 2:
+                                if (this.mode == 'update') {
+                                    textarea = document.getElementById('product-detail-input');
+
+                                    textarea.style.display = 'none';
+                                    (0, _autosize2.default)(textarea);
+                                    textarea.style.display = '';
+                                    _autosize2.default.update(textarea);
+                                }
+
+                            case 3:
+                            case 'end':
+                                return _context2.stop();
+                        }
+                    }
+                }, _callee2, this);
+            }));
+
+            function mode() {
+                return _ref2.apply(this, arguments);
+            }
+
+            return mode;
+        }()
+    }
 };
 
 /***/ }),
@@ -2049,6 +3096,78 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+var config = __webpack_require__("./resources/assets/js/config/index.js");
 
 exports.default = {
     props: ['product_id'],
@@ -2059,19 +3178,27 @@ exports.default = {
         return {
             form: {
                 title: null,
+                slug: null,
                 body: null,
                 attachments: [],
-                id: null
+                id: null,
+                price: null,
+                start_price: null,
+                end_price: null,
+                new_price: null
             },
-            store_url: '/api/v1/post/store',
+            store_url: '/' + config.api.version + '/post/store',
             child_attachments: [],
-            loading: true
+            loading: true,
+            status_price: 0,
+            price_label: 'Giá sản phẩm',
+            dataAuthor: []
         };
     },
     mounted: function mounted() {
         if (this.product_id) {
             this.fetchData();
-            this.store_url = '/api/v1/post/update';
+            this.store_url = '/' + config.api.version + '/post/update';
             this.form.id = this.product_id;
         } else {
             this.loading = false;
@@ -2083,13 +3210,37 @@ exports.default = {
             var _this = this;
 
             this.loading = true;
-            (0, _api.post)('/api/v1/post/get_product', {
+            (0, _api.post)('/' + config.api.version + '/post/get_product', {
                 product_id: this.product_id
             }).then(function (resp) {
                 _this.form.title = resp.data.product.title;
                 _this.form.body = resp.data.product.body;
+                _this.form.slug = resp.data.product.slug;
                 _this.child_attachments = resp.data.attachments;
+                _this.dataAuthor = resp.data.user;
                 _this.loading = false;
+                if (resp.data.product.price || resp.data.product.new_price) {
+                    if (resp.data.product.price && resp.data.product.new_price) {
+                        _this.status_price = 1;
+                        _this.form.price = resp.data.product.price;
+                        _this.form.new_price = resp.data.product.new_price;
+                    } else {
+                        _this.status_price = 0;
+                        _this.form.price = resp.data.product.price;
+                    }
+                } else if (resp.data.product.price_start || resp.data.product.price_end) {
+                    if (resp.data.product.price_start && resp.data.product.price_end) {
+                        _this.form.start_price = resp.data.product.price_start;
+                        _this.form.end_price = resp.data.product.price_end;
+                    } else if (resp.data.product.price_start) {
+                        _this.form.start_price = resp.data.product.price_start;
+                    } else {
+                        _this.form.end_price = resp.data.product.price_end;
+                    }
+                    _this.status_price = 2;
+                } else {
+                    _this.status_price = 0;
+                }
             });
         },
         save: function save() {
@@ -2101,13 +3252,25 @@ exports.default = {
                         switch (_context.prev = _context.next) {
                             case 0:
                                 // await this.$refs.child.submited()
+                                if (_this2.form.price && _this2.form.price != null) {
+                                    _this2.form.price = _this2.form.price.replace('.', "");
+                                }
+                                if (_this2.form.new_price && _this2.form.new_price != null) {
+                                    _this2.form.new_price = _this2.form.new_price.replace('.', "");
+                                }
+                                if (_this2.form.start_price && _this2.form.start_price != null) {
+                                    _this2.form.start_price = _this2.form.start_price.replace('.', "");
+                                }
+                                if (_this2.form.end_price && _this2.form.end_price != null) {
+                                    _this2.form.end_price = _this2.form.end_price.replace('.', "");
+                                }
                                 (0, _api.post)(_this2.store_url, _this2.form).then(function (resp) {
                                     if (resp.data.status == 'success') {
                                         window.location.href = '/' + _this2.user.slug + '/post/' + resp.data.product.slug;
                                     }
                                 });
 
-                            case 1:
+                            case 5:
                             case 'end':
                                 return _context.stop();
                         }
@@ -2122,6 +3285,311 @@ exports.default = {
             //     console.log(image.id);
             // })
             this.form.attachments.push(data);
+        },
+        focusOut: function focusOut(type) {
+            if (type == 'price' && this.form.price && this.form.price != null) {
+                this.form.price = parseFloat(this.form.price).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1.");
+            }
+            if (type == 'new_price' && this.form.new_price && this.form.new_price != null) {
+                this.form.new_price = parseFloat(this.form.new_price).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1.");
+            }
+            if (type == 'start_price' && this.form.start_price && this.form.start_price != null) {
+                this.form.start_price = parseFloat(this.form.start_price).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1.");
+            }
+            if (type == 'end_price' && this.form.end_price && this.form.end_price != null) {
+                this.form.end_price = parseFloat(this.form.end_price).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1.");
+            }
+        },
+        focusIn: function focusIn(type) {
+            if (type == 'price' && this.form.price && this.form.price != null) {
+                this.form.price = this.form.price.replace('.', "");
+            }
+            if (type == 'new_price' && this.form.new_price && this.form.new_price != null) {
+                this.form.new_price = this.form.new_price.replace('.', "");
+            }
+            if (type == 'start_price' && this.form.start_price && this.form.start_price != null) {
+                this.form.start_price = this.form.start_price.replace('.', "");
+            }
+            if (type == 'end_price' && this.form.end_price && this.form.end_price != null) {
+                this.form.end_price = this.form.end_price.replace('.', "");
+            }
+        }
+    },
+    computed: {
+        user: function user() {
+            return this.$store.getters.get_auth_user_data;
+        }
+    },
+    watch: {
+        status_price: function status_price() {
+            if (this.status_price == 0) {
+                this.price_label = 'Giá sản phẩm';
+                this.form.start_price = null;
+                this.form.end_price = null;
+                this.form.new_price = null;
+            } else if (this.status_price == 1) {
+                this.price_label = 'Giá khuyến mãi';
+                this.form.start_price = null;
+                this.form.end_price = null;
+            } else {
+                this.price_label = 'Giá chỉ từ';
+                this.form.price = null;
+                this.form.new_price = null;
+            }
+        }
+    }
+};
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}],\"es2015\",\"es2017\"],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0&bustCache!./resources/assets/js/components/views/products/Show.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _regenerator = __webpack_require__("./node_modules/babel-runtime/regenerator/index.js");
+
+var _regenerator2 = _interopRequireDefault(_regenerator);
+
+var _api = __webpack_require__("./resources/assets/js/api/index.js");
+
+var _ImageModal = __webpack_require__("./resources/assets/js/components/views/products/ImageModal.vue");
+
+var _ImageModal2 = _interopRequireDefault(_ImageModal);
+
+var _jqueryScrollbar = __webpack_require__("./public/plugins/scrollbar/jquery.scrollbar.js");
+
+var _jqueryScrollbar2 = _interopRequireDefault(_jqueryScrollbar);
+
+__webpack_require__("./public/plugins/scrollbar/jquery.scrollbar.css");
+
+__webpack_require__("./public/plugins/prettify/prettify.js");
+
+__webpack_require__("./public/plugins/prettify/prettify.css");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; } //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+var config = __webpack_require__("./resources/assets/js/config/index.js");
+exports.default = {
+    components: {
+        ImageModal: _ImageModal2.default
+    },
+    props: ['slug'],
+    data: function data() {
+        return {
+            dataProduct: [],
+            loading: true,
+            dataImage: {
+                id: null,
+                url: null,
+                price: null,
+                caption: null
+            },
+            arrayImages: []
+        };
+    },
+    created: function created() {
+        var _this = this;
+
+        var data = function () {
+            var _ref = _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee() {
+                return _regenerator2.default.wrap(function _callee$(_context) {
+                    while (1) {
+                        switch (_context.prev = _context.next) {
+                            case 0:
+                                _context.next = 2;
+                                return _this.fetchData();
+
+                            case 2:
+                                $('.scrollbar-macosx').scrollbar({
+                                    "autoScrollSize": true
+                                });
+
+                            case 3:
+                            case 'end':
+                                return _context.stop();
+                        }
+                    }
+                }, _callee, _this);
+            }));
+
+            return function data() {
+                return _ref.apply(this, arguments);
+            };
+        }();
+        data();
+    },
+
+    methods: {
+        fetchData: function fetchData() {
+            var vm = this;
+            return new Promise(function (resolve, reject) {
+                vm.loading = true;
+                (0, _api.get)('/' + config.api.version + '/' + vm.slug).then(function (resp) {
+                    vm.dataProduct = resp.data;
+                    vm.loading = false;
+                    resp.data.attachments.forEach(function (image) {
+                        vm.arrayImages.push({
+                            dataURL: image.fullname,
+                            dataFileName: image.original_url,
+                            dataId: image.id,
+                            dataThumb: image.thumb,
+                            dataPrice: image.detail.price,
+                            dataCaption: image.detail.caption
+                        });
+                    });
+                    resolve(vm.arrayImages);
+                });
+            });
+        },
+        modal_image: function modal_image(id) {
+            var _this2 = this;
+
+            return _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee2() {
+                var vm;
+                return _regenerator2.default.wrap(function _callee2$(_context2) {
+                    while (1) {
+                        switch (_context2.prev = _context2.next) {
+                            case 0:
+                                vm = _this2;
+                                _context2.next = 3;
+                                return _this2.show_modal_image(id);
+
+                            case 3:
+                                $('#modal_image').modal({
+                                    keyboard: false
+                                }).on('hidden.bs.modal', function (e) {
+                                    vm.clear_dataImage();
+                                });
+
+                            case 4:
+                            case 'end':
+                                return _context2.stop();
+                        }
+                    }
+                }, _callee2, _this2);
+            }))();
+        },
+        clear_dataImage: function clear_dataImage() {
+            this.dataImage.id = null;
+            this.dataImage.url = null;
+            this.dataImage.price = null;
+            this.dataImage.caption = null;
+        },
+        show_modal_image: function show_modal_image(id) {
+            var _this3 = this;
+
+            return _asyncToGenerator( /*#__PURE__*/_regenerator2.default.mark(function _callee3() {
+                var image, index;
+                return _regenerator2.default.wrap(function _callee3$(_context3) {
+                    while (1) {
+                        switch (_context3.prev = _context3.next) {
+                            case 0:
+                                image = _this3.arrayImages.find(function (i) {
+                                    return i.dataId == id;
+                                });
+                                index = _this3.arrayImages.indexOf(image);
+
+
+                                _this3.dataImage.id = _this3.arrayImages[index].dataId;
+                                _this3.dataImage.url = _this3.arrayImages[index].dataURL;
+                                _this3.dataImage.price = _this3.arrayImages[index].dataPrice;
+                                _this3.dataImage.caption = _this3.arrayImages[index].dataCaption;
+
+                            case 6:
+                            case 'end':
+                                return _context3.stop();
+                        }
+                    }
+                }, _callee3, _this3);
+            }))();
+        },
+        delete_post: function delete_post() {
+            var _this4 = this;
+
+            swal({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonClass: 'btn btn-success',
+                cancelButtonClass: 'btn btn-danger',
+                buttonsStyling: false,
+                confirmButtonText: 'Yes, delete it!'
+            }).then(function (result) {
+                if (result) {
+                    (0, _api.post)('/' + config.api.version + '/_post/delete_post', {
+                        postId: _this4.dataProduct.id
+                    }).then(function (resp) {
+                        if (resp.data.status == 'deleted') {
+                            window.location.href = "/";
+                        }
+                    });
+                }
+            });
         }
     },
     computed: {
@@ -2145,6 +3613,25 @@ Object.defineProperty(exports, "__esModule", {
 
 var _api = __webpack_require__("./resources/assets/js/api/index.js");
 
+var config = __webpack_require__("./resources/assets/js/config/index.js"); //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
 exports.default = {
     props: ['slug'],
     data: function data() {
@@ -2161,48 +3648,63 @@ exports.default = {
         check_follow: function check_follow() {
             var _this = this;
 
-            (0, _api.post)('/api/v1/check_following', {
-                user_slug: this.slug
-            }).then(function (resp) {
-                if (resp.data.status == 0) {
-                    _this.status = 0;
-                }
-                if (resp.data.status == 'following') {
-                    _this.status = 'following';
-                }
-                _this.loading = false;
-            });
+            if (this.user.uid) {
+                (0, _api.post)('/' + config.api.version + '/check_following', {
+                    user_slug: this.slug
+                }).then(function (resp) {
+                    if (resp.data.status == 0) {
+                        _this.status = 0;
+                    }
+                    if (resp.data.status == 'following') {
+                        _this.status = 'following';
+                    }
+                    _this.loading = false;
+                });
+            } else {
+                this.status = 0;
+                this.loading = false;
+            }
         },
         addFollow: function addFollow() {
             var _this2 = this;
 
-            this.loading = true;
-            (0, _api.post)('/api/v1/add_following', {
-                user_slug: this.slug
-            }).then(function (resp) {
-                if (resp.data.status == 'following') {
-                    _this2.status = 'following';
-                    _this2.$store.commit('add_new_following', {
-                        slug: _this2.user.slug,
-                        avatar: _this2.user.avatar
-                    });
-                }
-                _this2.loading = false;
-            });
+            if (this.user.uid) {
+                this.loading = true;
+                (0, _api.post)('/' + config.api.version + '/add_following', {
+                    user_slug: this.slug
+                }).then(function (resp) {
+                    if (resp.data.status == 'following') {
+                        _this2.status = 'following';
+                        _this2.$store.commit('add_new_following', {
+                            slug: _this2.user.slug,
+                            avatar: _this2.user.avatar
+                        });
+                    }
+                    _this2.loading = false;
+                });
+            } else {
+                swal({
+                    html: '<div style="padding-bottom:10px !important">Vui lòng <strong><a href="/login">đăng nhập</a></strong> để sử dụng chức năng này</div>',
+                    showCancelButton: false,
+                    showConfirmButton: false
+                }); //end then swal
+            }
         },
         removeFollow: function removeFollow() {
             var _this3 = this;
 
-            this.loading = true;
-            (0, _api.post)('/api/v1/remove_following', {
-                user_slug: this.slug
-            }).then(function (resp) {
-                if (resp.data.status == 'removed') {
-                    _this3.status = 0;
-                    _this3.$store.commit('remove_following', _this3.user.slug);
-                }
-                _this3.loading = false;
-            });
+            if (this.user.uid) {
+                this.loading = true;
+                (0, _api.post)('/' + config.api.version + '/remove_following', {
+                    user_slug: this.slug
+                }).then(function (resp) {
+                    if (resp.data.status == 'removed') {
+                        _this3.status = 0;
+                        _this3.$store.commit('remove_following', _this3.user.slug);
+                    }
+                    _this3.loading = false;
+                });
+            }
         }
     },
     computed: {
@@ -2210,22 +3712,7 @@ exports.default = {
             return this.$store.getters.get_auth_user_data;
         }
     }
-}; //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+};
 
 /***/ }),
 
@@ -2416,6 +3903,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 //
 //
 
+var config = __webpack_require__("./resources/assets/js/config/index.js");
 exports.default = {
     props: ['slug'],
     components: {
@@ -2429,7 +3917,7 @@ exports.default = {
         get_user_data: function get_user_data() {
             var _this = this;
 
-            (0, _api.get)('/api/v1/' + this.slug).then(function (resp) {
+            (0, _api.get)('/' + config.api.version + '/' + this.slug).then(function (resp) {
                 // console.log(resp);
                 _this.$store.commit('add_profile_user_data', resp.data);
             });
@@ -2542,6 +4030,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 //
 //
 
+var config = __webpack_require__("./resources/assets/js/config/index.js");
 exports.default = {
     components: {
         UploadImage: _UploadImage2.default
@@ -2558,19 +4047,11 @@ exports.default = {
     },
 
     methods: {
-        // get_user_data() {
-        //     this.loading = true
-        //     get(`/api/v1/${this.slug}`)
-        //         .then(resp => {
-        //             this.profile_data = resp.data
-        //             this.loading = false
-        //         })
-        // },
         save: function save() {
             var _this = this;
 
             this.loading = true;
-            (0, _api.post)('/api/v1/update_profile', this.profile_data).then(function (resp) {
+            (0, _api.post)('/' + config.api.version + '/update_profile', this.profile_data).then(function (resp) {
                 _this.loading = false;
                 window.location.href = '/' + resp.data.slug;
                 // this.$store.commit('add_auth_user_data', resp.data)             
@@ -2757,6 +4238,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 // import 'dropzone/dist/dropzone.css'
 
 
+var config = __webpack_require__("./resources/assets/js/config/index.js");
 exports.default = {
     props: ['attachments_ids'],
     data: function data() {
@@ -2784,7 +4266,7 @@ exports.default = {
                                 vm = _this;
 
                                 vm.myDropzone = new _dropzone2.default(".dropzone", (_ref = {
-                                    url: '/api/v1/media/upload',
+                                    url: '/' + config.api.version + '/media/upload',
                                     thumbnailWidth: 150,
                                     thumbnailHeight: 150,
                                     maxFilesize: 5,
@@ -2816,7 +4298,7 @@ exports.default = {
                                     });
 
                                     this.on("removedfile", function (file) {
-                                        (0, _api.post)('/api/v1/media/delete', {
+                                        (0, _api.post)('/' + config.api.version + '/media/delete', {
                                             product_image: file.filename
                                         });
                                     });
@@ -2851,7 +4333,7 @@ exports.default = {
                 dz.removeAllFiles(); //clean all file before push new
                 this.attachments_ids.forEach(function (item) {
                     vm.$emit('completed', item);
-                    (0, _api.get)('/api/v1/media/get_image/' + item).then(function (resp) {
+                    (0, _api.get)('/' + config.api.version + '/media/get_image/' + item).then(function (resp) {
                         var thumb = {
                             name: resp.data.name,
                             size: resp.data.size,
@@ -5757,7 +7239,7 @@ exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/cs
 
 
 // module
-exports.push([module.i, "\n.size-lg .btn {\n    height: 40px !important;\n    border-radius: 20px;\n    font-size: 15px;\n    padding: 0 20px;\n}\n.size-sm .btn {\n    height: 28px !important;\n    border-radius: 14px;\n    font-size: 12px;\n    padding: 0 15px;\n}\n.size-xs .btn {\n    height: 22px !important;\n    border-radius: 11px;\n    font-size: 12px;\n    padding: 0 10px;\n}\n.follow button {\n    font-size: 13px;\n    min-width: 80px;\n    padding: 0 18px;\n    height: 36px;\n}\n.follow .dropdown-menu a {\n    font-size: 13px;\n}\n.follow .btn.disabled {\n    background: rgba(0,0,0,0.1);\n    cursor: default;\n    position: relative;\n}\n.follow .btn.disabled.loading {\n    height: 36px;\n}\n.follow .btn.disabled.loading.btn-sm {\n    height: 28px;\n}\n.follow .btn.disabled.loading .spinner {\n    text-align: center;\n    position: absolute;\n    top: 50%;\n    left: 50%;\n    width: 36px;\n    height: 12px;\n    margin: 0;\n    z-index: 1;\n    -webkit-transform: translate(-50%, -50%);\n    transform: translate(-50%, -50%);\n}\n.follow .btn.disabled.loading .spinner .bounce1 {\n    -webkit-animation-delay: -0.32s;\n    animation-delay: -0.32s;\n}\n.follow .btn.disabled.loading .spinner .bounce2 {\n    -webkit-animation-delay: -0.16s;\n    animation-delay: -0.16s;\n}\n.follow .btn.disabled.loading .spinner > div {\n    width: 12px;\n    height: 12px;\n    background-color: rgba(0, 0, 0, 0.3);\n    border-radius: 100%;\n    display: inline-block;\n    -webkit-animation: sk-bouncedelay 1.4s infinite ease-in-out both;\n    animation: sk-bouncedelay 1.4s infinite ease-in-out both;\n        -webkit-animation-delay: 0s;\n                animation-delay: 0s;\n    float: left;\n}\n", ""]);
+exports.push([module.i, "\n.size-lg .btn {\n    height: 40px !important;\n    border-radius: 20px;\n    font-size: 15px;\n    padding: 0 20px;\n}\n.size-sm .btn {\n    height: 28px !important;\n    border-radius: 14px;\n    font-size: 12px;\n    padding: 0 15px;\n}\n.size-xs .btn {\n    height: 22px !important;\n    border-radius: 11px;\n    font-size: 12px;\n    padding: 0 10px;\n}\n.follow button {\n    font-size: 13px;\n    min-width: 80px;\n    padding: 0 18px;\n    height: 36px;\n}\n.follow .dropdown-menu a {\n    font-size: 13px;\n}\n.follow .btn.disabled {\n    background: rgba(0, 0, 0, 0.1);\n    cursor: default;\n    position: relative;\n}\n.follow .btn.disabled.loading {\n    height: 36px;\n}\n.follow .btn.disabled.loading.btn-sm {\n    height: 28px;\n}\n.follow .btn.disabled.loading .spinner {\n    text-align: center;\n    position: absolute;\n    top: 50%;\n    left: 50%;\n    width: 36px;\n    height: 12px;\n    margin: 0;\n    z-index: 1;\n    -webkit-transform: translate(-50%, -50%);\n    transform: translate(-50%, -50%);\n}\n.follow .btn.disabled.loading .spinner .bounce1 {\n    -webkit-animation-delay: -0.32s;\n    animation-delay: -0.32s;\n}\n.follow .btn.disabled.loading .spinner .bounce2 {\n    -webkit-animation-delay: -0.16s;\n    animation-delay: -0.16s;\n}\n.follow .btn.disabled.loading .spinner>div {\n    width: 12px;\n    height: 12px;\n    background-color: rgba(0, 0, 0, 0.3);\n    border-radius: 100%;\n    display: inline-block;\n    -webkit-animation: sk-bouncedelay 1.4s infinite ease-in-out both;\n    animation: sk-bouncedelay 1.4s infinite ease-in-out both;\n    -webkit-animation-delay: 0s;\n            animation-delay: 0s;\n    float: left;\n}\n", ""]);
 
 // exports
 
@@ -5772,7 +7254,7 @@ exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/cs
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
 
 // exports
 
@@ -5787,7 +7269,7 @@ exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/cs
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
 
 // exports
 
@@ -5817,7 +7299,7 @@ exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/cs
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
 
 // exports
 
@@ -5832,7 +7314,67 @@ exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/cs
 
 
 // module
-exports.push([module.i, "\n#product_image {\n    width: 150px;\n    height: 150px;\n    display: inline-block;\n}\n.previews {\n    display: inline-block;\n    float: left;\n}\n.dz-default.dz-message {\n    margin: 0;\n    width: 100%;\n    height: 100%;\n    border: 2px dashed rgba(0, 0, 0, 0.1);\n    background: rgba(0, 0, 0, 0.01);\n    color: #838383;\n    -webkit-transition: all 0.3s linear;\n    transition: all 0.3s linear;\n    position: relative;\n    border-radius: 20px;\n}\n.dz-default.dz-message>span::before {\n    content: \"\\F093\";\n    font-family: FontAwesome;\n    font-size: 44px;\n    line-height: 110px;\n    color: rgba(0, 0, 0, 0.18);\n    -webkit-transition: all 0.3s linear;\n    transition: all 0.3s linear;\n}\n.dz-default.dz-message>span::after {\n    content: \"Upload Images\";\n    display: block;\n    position: absolute;\n    bottom: 10px;\n    font-weight: bold;\n    text-align: center;\n    width: 100%;\n    font-size: 12px;\n}\n#product_image:hover .dz-default span::before {\n    color: rgba(0, 0, 0, 0.2);\n}\n#product_image:hover .dz-default {\n    border-color: rgba(0, 0, 0, 0.1);\n    background: rgba(0, 0, 0, 0.05);\n}\n", ""]);
+exports.push([module.i, "\n#product_image {\n    width: 150px;\n    height: 150px;\n    display: inline-block;\n}\n.previews {\n    display: inline-block;\n    float: left;\n}\n.dz-default.dz-message {\n    margin: 0;\n    width: 100%;\n    height: 100%;\n    border: 2px dashed rgba(0, 0, 0, 0.1);\n    background: rgba(0, 0, 0, 0.01);\n    color: #838383;\n    -webkit-transition: all 0.3s linear;\n    transition: all 0.3s linear;\n    position: relative;\n    border-radius: 20px;\n}\n.dz-default.dz-message>span::before {\n    content: \"\\F093\";\n    font-family: FontAwesome;\n    font-size: 44px;\n    line-height: 110px;\n    color: rgba(0, 0, 0, 0.18);\n    -webkit-transition: all 0.3s linear;\n    transition: all 0.3s linear;\n}\n.dz-default.dz-message>span::after {\n    content: \"Upload Images\";\n    display: block;\n    position: absolute;\n    bottom: 10px;\n    font-weight: bold;\n    text-align: center;\n    width: 100%;\n    font-size: 12px;\n}\n#product_image:hover .dz-default span::before {\n    color: rgba(0, 0, 0, 0.2);\n}\n#product_image:hover .dz-default {\n    border-color: rgba(0, 0, 0, 0.1);\n    background: rgba(0, 0, 0, 0.05);\n}\n::-webkit-input-placeholder {\n    /* WebKit browsers */\n    color: #999;\n}\n:-moz-placeholder {\n    /* Mozilla Firefox 4 to 18 */\n    color: #999;\n}\n::-moz-placeholder {\n    /* Mozilla Firefox 19+ */\n    color: #999;\n}\n:-ms-input-placeholder {\n    /* Internet Explorer 10+ */\n    color: #999;\n}\n\n\n", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-a60c6ad6\",\"scoped\":false,\"hasInlineConfig\":true}!./node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./resources/assets/js/components/views/products/ImageModal.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/css-base.js")(undefined);
+// imports
+
+
+// module
+exports.push([module.i, "\n#product-price h4,\n#image-caption h4 {\n    text-align: left;\n    font-size: 14px;\n    font-weight: bold;\n}\n.modal-thumbnail {\n    margin: 0;\n    padding: 0;\n    list-style: none;\n    position: absolute !important;\n    top: 0;\n    left: 0;\n    right: 10px;\n    bottom: 0;\n}\n.modal-thumbnail li {\n    border: 2px solid rgba(0, 0, 0, 0.1);\n    margin-bottom: 5px;\n    opacity: .7;\n    -webkit-transition: all 0.3s linear;\n    transition: all 0.3s linear;\n}\n.modal-thumbnail li:hover {\n    opacity: 1;\n}\n.modal-thumbnail li.active {\n    border: 2px solid rgb(255, 168, 94);\n    opacity: 1;\n    -webkit-transition: all 0.3s linear;\n    transition: all 0.3s linear;\n}\n.thumb-slide {\n    padding-right: 0;\n    /* max-height: 422px; */\n    /* min-height: 324px; */\n}\n.modal-body-wrapper {\n    position: relative;\n    display: -webkit-box;\n    display: -ms-flexbox;\n    display: flex;\n}\n.modal-body-wrapper .col-md-2 {\n    position: absolute;\n    height: 100%;\n    display: block;\n    top: 0;\n    left: 10px;\n    bottom: 10px;\n    right: 10px;\n}\n.scrollbar-macosx.scroll-scrolly_visible {\n    overflow-x: hidden !important;\n    overflow-y: scroll !important;\n}\n.product-image-detail {\n    margin-bottom: 50px;\n}\n.modal-body-message {\n    position: absolute;\n    bottom: 0;\n    right: 10px;\n    left: 10px;\n}\n.dropdown.edit-action-btn {\n    position: absolute;\n    top: 0;\n    right: 10px;\n    list-style: none;\n    margin: 0;\n    padding: 0;\n}\n#product-detail-input {\n    resize: none;\n}\n#image-caption .caption {\n    white-space: pre-wrap;\n    line-height: 1.4em;\n}\n#image-caption span {\n    font-size: 11px;\n}\n#image-caption span.error {\n    color: #CC0000;\n}\n#product-detail-input.error {\n    border-color: #CC0000;\n    background: #FFDFDF;\n}\n.modal-footer-alert {\n    font-size: 13px;\n    font-style: italic;\n    color: #999;\n}\n.loading {\n    height: 29px;\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js!./public/plugins/prettify/prettify.css":
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/css-base.js")(undefined);
+// imports
+
+
+// module
+exports.push([module.i, ".pln{color:#000}@media screen{.str{color:#080}.kwd{color:#008}.com{color:#800}.typ{color:#606}.lit{color:#066}.pun,.opn,.clo{color:#660}.tag{color:#008}.atn{color:#606}.atv{color:#080}.dec,.var{color:#606}.fun{color:red}}@media print,projection{.str{color:#060}.kwd{color:#006;font-weight:bold}.com{color:#600;font-style:italic}.typ{color:#404;font-weight:bold}.lit{color:#044}.pun,.opn,.clo{color:#440}.tag{color:#006;font-weight:bold}.atn{color:#404}.atv{color:#060}}pre.prettyprint{padding:2px;border:1px solid #888}ol.linenums{margin-top:0;margin-bottom:0}li.L0,li.L1,li.L2,li.L3,li.L5,li.L6,li.L7,li.L8{list-style-type:none}li.L1,li.L3,li.L5,li.L7,li.L9{background:#eee}", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js!./public/plugins/progress-bar/progress.css":
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/css-base.js")(undefined);
+// imports
+
+
+// module
+exports.push([module.i, "/* Make clicks pass-through */\n#progress {\n  pointer-events: none;\n}\n\n#progress .bar {\n  background: #ea6f5a;\n\n  position: fixed;\n  z-index: 9001;\n  top: 0;\n  left: 0;\n\n  width: 100%;\n  height: 2px;\n}\n\n/* Fancy blur effect */\n#progress .peg {\n  display: block;\n  position: absolute;\n  right: 0px;\n  width: 100px;\n  height: 100%;\n  box-shadow: 0 0 10px #FF5722, 0 0 5px #F44336;\n  opacity: 1.0;\n\n  -webkit-transform: rotate(3deg) translate(0px, -4px);\n      -ms-transform: rotate(3deg) translate(0px, -4px);\n          transform: rotate(3deg) translate(0px, -4px);\n}\n\n/* Remove these to get rid of the spinner */\n#progress .spinner {\n  display: block;\n  position: fixed;\n  z-index: 1031;\n  top: 15px;\n  right: 15px;\n}\n\n#progress .spinner-icon {\n  width: 18px;\n  height: 18px;\n  box-sizing: border-box;\n\n  border: solid 2px transparent;\n  border-top-color: #29d;\n  border-left-color: #29d;\n  border-radius: 50%;\n\n  -webkit-animation: progress-spinner 400ms linear infinite;\n          animation: progress-spinner 400ms linear infinite;\n}\n\n.progress-custom-parent {\n  overflow: hidden;\n  position: relative;\n}\n\n.progress-custom-parent #progress .spinner,\n.progress-custom-parent #progress .bar {\n  position: absolute;\n}\n\n@-webkit-keyframes progress-spinner {\n  0%   { -webkit-transform: rotate(0deg); }\n  100% { -webkit-transform: rotate(360deg); }\n}\n@keyframes progress-spinner {\n  0%   { transform: rotate(0deg); }\n  100% { transform: rotate(360deg); }\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js!./public/plugins/scrollbar/jquery.scrollbar.css":
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/css-base.js")(undefined);
+// imports
+
+
+// module
+exports.push([module.i, "/*************** SCROLLBAR BASE CSS ***************/\n\n.scroll-wrapper {\n    overflow: hidden !important;\n    padding: 0 !important;\n    position: relative;\n}\n\n.scroll-wrapper > .scroll-content {\n    border: none !important;\n    box-sizing: content-box !important;\n    height: auto;\n    left: 0;\n    margin: 0;\n    max-height: none;\n    max-width: none !important;\n    overflow: scroll !important;\n    padding: 0;\n    position: relative !important;\n    top: 0;\n    width: auto !important;\n}\n\n.scroll-wrapper > .scroll-content::-webkit-scrollbar {\n    height: 0;\n    width: 0;\n}\n\n.scroll-element {\n    display: none;\n}\n.scroll-element, .scroll-element div {\n    box-sizing: content-box;\n}\n\n.scroll-element.scroll-x.scroll-scrollx_visible,\n.scroll-element.scroll-y.scroll-scrolly_visible {\n    display: block;\n}\n\n.scroll-element .scroll-bar,\n.scroll-element .scroll-arrow {\n    cursor: default;\n}\n\n.scroll-textarea {\n    border: 1px solid #cccccc;\n    border-top-color: #999999;\n}\n.scroll-textarea > .scroll-content {\n    overflow: hidden !important;\n}\n.scroll-textarea > .scroll-content > textarea {\n    border: none !important;\n    box-sizing: border-box;\n    height: 100% !important;\n    margin: 0;\n    max-height: none !important;\n    max-width: none !important;\n    overflow: scroll !important;\n    outline: none;\n    padding: 2px;\n    position: relative !important;\n    top: 0;\n    width: 100% !important;\n}\n.scroll-textarea > .scroll-content > textarea::-webkit-scrollbar {\n    height: 0;\n    width: 0;\n}\n\n\n\n\n\n\n\n\n\n/*************** SIMPLE INNER SCROLLBAR ***************/\n\n.scrollbar-inner > .scroll-element,\n.scrollbar-inner > .scroll-element div\n{\n    border: none;\n    margin: 0;\n    padding: 0;\n    position: absolute;\n    z-index: 10;\n}\n\n.scrollbar-inner > .scroll-element div {\n    display: block;\n    height: 100%;\n    left: 0;\n    top: 0;\n    width: 100%;\n}\n\n.scrollbar-inner > .scroll-element.scroll-x {\n    bottom: 2px;\n    height: 8px;\n    left: 0;\n    width: 100%;\n}\n\n.scrollbar-inner > .scroll-element.scroll-y {\n    height: 100%;\n    right: 2px;\n    top: 0;\n    width: 8px;\n}\n\n.scrollbar-inner > .scroll-element .scroll-element_outer {\n    overflow: hidden;\n}\n\n.scrollbar-inner > .scroll-element .scroll-element_outer,\n.scrollbar-inner > .scroll-element .scroll-element_track,\n.scrollbar-inner > .scroll-element .scroll-bar {\n    -webkit-border-radius: 8px;\n    -moz-border-radius: 8px;\n    border-radius: 8px;\n}\n\n.scrollbar-inner > .scroll-element .scroll-element_track,\n.scrollbar-inner > .scroll-element .scroll-bar {\n    -ms-filter:\"progid:DXImageTransform.Microsoft.Alpha(Opacity=40)\";\n    filter: alpha(opacity=40);\n    opacity: 0.4;\n}\n\n.scrollbar-inner > .scroll-element .scroll-element_track { background-color: #e0e0e0; }\n.scrollbar-inner > .scroll-element .scroll-bar { background-color: #c2c2c2; }\n.scrollbar-inner > .scroll-element:hover .scroll-bar { background-color: #919191; }\n.scrollbar-inner > .scroll-element.scroll-draggable .scroll-bar { background-color: #919191; }\n\n\n/* update scrollbar offset if both scrolls are visible */\n\n.scrollbar-inner > .scroll-element.scroll-x.scroll-scrolly_visible .scroll-element_track { left: -12px; }\n.scrollbar-inner > .scroll-element.scroll-y.scroll-scrollx_visible .scroll-element_track { top: -12px; }\n\n\n.scrollbar-inner > .scroll-element.scroll-x.scroll-scrolly_visible .scroll-element_size { left: -12px; }\n.scrollbar-inner > .scroll-element.scroll-y.scroll-scrollx_visible .scroll-element_size { top: -12px; }\n\n\n\n\n\n\n\n\n\n\n/*************** SIMPLE OUTER SCROLLBAR ***************/\n\n.scrollbar-outer > .scroll-element,\n.scrollbar-outer > .scroll-element div\n{\n    border: none;\n    margin: 0;\n    padding: 0;\n    position: absolute;\n    z-index: 10;\n}\n\n.scrollbar-outer > .scroll-element {\n    background-color: #ffffff;\n}\n\n.scrollbar-outer > .scroll-element div {\n    display: block;\n    height: 100%;\n    left: 0;\n    top: 0;\n    width: 100%;\n}\n\n.scrollbar-outer > .scroll-element.scroll-x {\n    bottom: 0;\n    height: 12px;\n    left: 0;\n    width: 100%;\n}\n\n.scrollbar-outer > .scroll-element.scroll-y {\n    height: 100%;\n    right: 0;\n    top: 0;\n    width: 12px;\n}\n\n.scrollbar-outer > .scroll-element.scroll-x .scroll-element_outer { height: 8px; top: 2px; }\n.scrollbar-outer > .scroll-element.scroll-y .scroll-element_outer { left: 2px; width: 8px; }\n\n.scrollbar-outer > .scroll-element .scroll-element_outer { overflow: hidden; }\n.scrollbar-outer > .scroll-element .scroll-element_track { background-color: #eeeeee; }\n\n.scrollbar-outer > .scroll-element .scroll-element_outer,\n.scrollbar-outer > .scroll-element .scroll-element_track,\n.scrollbar-outer > .scroll-element .scroll-bar {\n    -webkit-border-radius: 8px;\n    -moz-border-radius: 8px;\n    border-radius: 8px;\n}\n\n.scrollbar-outer > .scroll-element .scroll-bar { background-color: #d9d9d9; }\n.scrollbar-outer > .scroll-element .scroll-bar:hover { background-color: #c2c2c2; }\n.scrollbar-outer > .scroll-element.scroll-draggable .scroll-bar { background-color: #919191; }\n\n\n/* scrollbar height/width & offset from container borders */\n\n.scrollbar-outer > .scroll-content.scroll-scrolly_visible { left: -12px; margin-left: 12px; }\n.scrollbar-outer > .scroll-content.scroll-scrollx_visible { top:  -12px; margin-top:  12px; }\n\n.scrollbar-outer > .scroll-element.scroll-x .scroll-bar { min-width: 10px; }\n.scrollbar-outer > .scroll-element.scroll-y .scroll-bar { min-height: 10px; }\n\n\n/* update scrollbar offset if both scrolls are visible */\n\n.scrollbar-outer > .scroll-element.scroll-x.scroll-scrolly_visible .scroll-element_track { left: -14px; }\n.scrollbar-outer > .scroll-element.scroll-y.scroll-scrollx_visible .scroll-element_track { top: -14px; }\n\n.scrollbar-outer > .scroll-element.scroll-x.scroll-scrolly_visible .scroll-element_size { left: -14px; }\n.scrollbar-outer > .scroll-element.scroll-y.scroll-scrollx_visible .scroll-element_size { top: -14px; }\n\n\n\n\n\n\n\n\n\n\n/*************** SCROLLBAR MAC OS X ***************/\n\n.scrollbar-macosx > .scroll-element,\n.scrollbar-macosx > .scroll-element div\n{\n    background: none;\n    border: none;\n    margin: 0;\n    padding: 0;\n    position: absolute;\n    z-index: 10;\n}\n\n.scrollbar-macosx > .scroll-element div {\n    display: block;\n    height: 100%;\n    left: 0;\n    top: 0;\n    width: 100%;\n}\n\n.scrollbar-macosx > .scroll-element .scroll-element_track { display: none; }\n.scrollbar-macosx > .scroll-element .scroll-bar {\n    background-color: #6C6E71;\n    display: block;\n\n    -ms-filter:\"progid:DXImageTransform.Microsoft.Alpha(Opacity=0)\";\n    filter: alpha(opacity=0);\n    opacity: 0;\n\n    -webkit-border-radius: 7px;\n    -moz-border-radius: 7px;\n    border-radius: 7px;\n\n    -webkit-transition: opacity 0.2s linear;\n    -moz-transition: opacity 0.2s linear;\n    -o-transition: opacity 0.2s linear;\n    -ms-transition: opacity 0.2s linear;\n    transition: opacity 0.2s linear;\n}\n.scrollbar-macosx:hover > .scroll-element .scroll-bar,\n.scrollbar-macosx > .scroll-element.scroll-draggable .scroll-bar {\n    -ms-filter:\"progid:DXImageTransform.Microsoft.Alpha(Opacity=70)\";\n    filter: alpha(opacity=70);\n    opacity: 0.7;\n}\n\n\n.scrollbar-macosx > .scroll-element.scroll-x {\n    bottom: 0px;\n    height: 0px;\n    left: 0;\n    min-width: 100%;\n    overflow: visible;\n    width: 100%;\n}\n\n.scrollbar-macosx > .scroll-element.scroll-y {\n    height: 100%;\n    min-height: 100%;\n    right: 0px;\n    top: 0;\n    width: 0px;\n}\n\n/* scrollbar height/width & offset from container borders */\n.scrollbar-macosx > .scroll-element.scroll-x .scroll-bar { height: 7px; min-width: 10px; top: -9px; }\n.scrollbar-macosx > .scroll-element.scroll-y .scroll-bar { left: -7px; min-height: 10px; width: 7px; }\n\n.scrollbar-macosx > .scroll-element.scroll-x .scroll-element_outer { left: 2px; }\n.scrollbar-macosx > .scroll-element.scroll-x .scroll-element_size { left: -4px; }\n\n.scrollbar-macosx > .scroll-element.scroll-y .scroll-element_outer { top: 2px; }\n.scrollbar-macosx > .scroll-element.scroll-y .scroll-element_size { top: -4px; }\n\n/* update scrollbar offset if both scrolls are visible */\n.scrollbar-macosx > .scroll-element.scroll-x.scroll-scrolly_visible .scroll-element_size { left: -11px; }\n.scrollbar-macosx > .scroll-element.scroll-y.scroll-scrollx_visible .scroll-element_size { top: -11px; }\n\n\n\n\n\n\n\n\n\n\n/*************** SCROLLBAR LIGHT ***************/\n\n.scrollbar-light > .scroll-element,\n.scrollbar-light > .scroll-element div {\n    border: none;\n    margin: 0;\n    overflow: hidden;\n    padding: 0;\n    position: absolute;\n    z-index: 10;\n}\n\n.scrollbar-light > .scroll-element {\n    background-color: #ffffff;\n}\n\n.scrollbar-light > .scroll-element div {\n    display: block;\n    height: 100%;\n    left: 0;\n    top: 0;\n    width: 100%;\n}\n\n.scrollbar-light > .scroll-element .scroll-element_outer {\n    -webkit-border-radius: 10px;\n    -moz-border-radius: 10px;\n    border-radius: 10px;\n}\n\n.scrollbar-light > .scroll-element .scroll-element_size {\n    background: #dbdbdb;\n    background: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2RiZGJkYiIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNlOGU4ZTgiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+');\n    background: -moz-linear-gradient(left, #dbdbdb 0%, #e8e8e8 100%);\n    background: -webkit-gradient(linear, left top, right top, color-stop(0%,#dbdbdb), color-stop(100%,#e8e8e8));\n    background: -webkit-linear-gradient(left, #dbdbdb 0%,#e8e8e8 100%);\n    background: -o-linear-gradient(left, #dbdbdb 0%,#e8e8e8 100%);\n    background: -ms-linear-gradient(left, #dbdbdb 0%,#e8e8e8 100%);\n    background: linear-gradient(to right, #dbdbdb 0%,#e8e8e8 100%);\n\n    -webkit-border-radius: 10px;\n    -moz-border-radius: 10px;\n    border-radius: 10px;\n}\n\n.scrollbar-light > .scroll-element.scroll-x {\n    bottom: 0;\n    height: 17px;\n    left: 0;\n    min-width: 100%;\n    width: 100%;\n}\n\n.scrollbar-light > .scroll-element.scroll-y {\n    height: 100%;\n    min-height: 100%;\n    right: 0;\n    top: 0;\n    width: 17px;\n}\n\n.scrollbar-light > .scroll-element .scroll-bar {\n    background: #fefefe;\n    background: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZlZmVmZSIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNmNWY1ZjUiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+');\n    background: -moz-linear-gradient(left, #fefefe 0%, #f5f5f5 100%);\n    background: -webkit-gradient(linear, left top, right top, color-stop(0%,#fefefe), color-stop(100%,#f5f5f5));\n    background: -webkit-linear-gradient(left, #fefefe 0%,#f5f5f5 100%);\n    background: -o-linear-gradient(left, #fefefe 0%,#f5f5f5 100%);\n    background: -ms-linear-gradient(left, #fefefe 0%,#f5f5f5 100%);\n    background: linear-gradient(to right, #fefefe 0%,#f5f5f5 100%);\n\n    border: 1px solid #dbdbdb;\n    -webkit-border-radius: 10px;\n    -moz-border-radius: 10px;\n    border-radius: 10px;\n}\n\n/* scrollbar height/width & offset from container borders */\n\n.scrollbar-light > .scroll-content.scroll-scrolly_visible { left: -17px; margin-left: 17px; }\n.scrollbar-light > .scroll-content.scroll-scrollx_visible { top:  -17px; margin-top:  17px; }\n\n.scrollbar-light > .scroll-element.scroll-x .scroll-bar { height: 10px; min-width: 10px; top: 0px; }\n.scrollbar-light > .scroll-element.scroll-y .scroll-bar { left: 0px; min-height: 10px; width: 10px; }\n\n.scrollbar-light > .scroll-element.scroll-x .scroll-element_outer { height: 12px; left: 2px; top: 2px; }\n.scrollbar-light > .scroll-element.scroll-x .scroll-element_size { left: -4px; }\n\n.scrollbar-light > .scroll-element.scroll-y .scroll-element_outer { left: 2px; top: 2px; width: 12px; }\n.scrollbar-light > .scroll-element.scroll-y .scroll-element_size { top: -4px; }\n\n/* update scrollbar offset if both scrolls are visible */\n\n.scrollbar-light > .scroll-element.scroll-x.scroll-scrolly_visible .scroll-element_size { left: -19px; }\n.scrollbar-light > .scroll-element.scroll-y.scroll-scrollx_visible .scroll-element_size { top: -19px; }\n\n.scrollbar-light > .scroll-element.scroll-x.scroll-scrolly_visible .scroll-element_track { left: -19px; }\n.scrollbar-light > .scroll-element.scroll-y.scroll-scrollx_visible .scroll-element_track { top: -19px; }\n\n\n\n\n\n\n\n\n\n\n/*************** SCROLLBAR RAIL ***************/\n\n.scrollbar-rail > .scroll-element,\n.scrollbar-rail > .scroll-element div\n{\n    border: none;\n    margin: 0;\n    overflow: hidden;\n    padding: 0;\n    position: absolute;\n    z-index: 10;\n}\n\n.scrollbar-rail > .scroll-element {\n    background-color: #ffffff;\n}\n\n.scrollbar-rail > .scroll-element div {\n    display: block;\n    height: 100%;\n    left: 0;\n    top: 0;\n    width: 100%;\n}\n\n.scrollbar-rail > .scroll-element .scroll-element_size {\n    background-color: #999;\n    background-color: rgba(0, 0, 0, 0.3);\n}\n\n.scrollbar-rail > .scroll-element .scroll-element_outer:hover .scroll-element_size {\n    background-color: #666;\n    background-color: rgba(0, 0, 0, 0.5);\n}\n\n.scrollbar-rail > .scroll-element.scroll-x {\n    bottom: 0;\n    height: 12px;\n    left: 0;\n    min-width: 100%;\n    padding: 3px 0 2px;\n    width: 100%;\n}\n\n.scrollbar-rail > .scroll-element.scroll-y {\n    height: 100%;\n    min-height: 100%;\n    padding: 0 2px 0 3px;\n    right: 0;\n    top: 0;\n    width: 12px;\n}\n\n.scrollbar-rail > .scroll-element .scroll-bar {\n    background-color: #d0b9a0;\n\n    -webkit-border-radius: 2px;\n    -moz-border-radius: 2px;\n    border-radius: 2px;\n\n    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);\n}\n\n.scrollbar-rail > .scroll-element .scroll-element_outer:hover .scroll-bar {\n    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);\n}\n\n/* scrollbar height/width & offset from container borders */\n\n.scrollbar-rail > .scroll-content.scroll-scrolly_visible { left: -17px; margin-left: 17px; }\n.scrollbar-rail > .scroll-content.scroll-scrollx_visible { margin-top: 17px; top: -17px; }\n\n.scrollbar-rail > .scroll-element.scroll-x .scroll-bar { height: 10px; min-width: 10px; top: 1px; }\n.scrollbar-rail > .scroll-element.scroll-y .scroll-bar { left: 1px; min-height: 10px; width: 10px; }\n\n.scrollbar-rail > .scroll-element.scroll-x .scroll-element_outer { height: 15px; left: 5px; }\n.scrollbar-rail > .scroll-element.scroll-x .scroll-element_size { height: 2px; left: -10px; top: 5px; }\n\n.scrollbar-rail > .scroll-element.scroll-y .scroll-element_outer { top: 5px; width: 15px; }\n.scrollbar-rail > .scroll-element.scroll-y .scroll-element_size { left: 5px; top: -10px; width: 2px; }\n\n/* update scrollbar offset if both scrolls are visible */\n\n.scrollbar-rail > .scroll-element.scroll-x.scroll-scrolly_visible .scroll-element_size { left: -25px; }\n.scrollbar-rail > .scroll-element.scroll-y.scroll-scrollx_visible .scroll-element_size { top: -25px; }\n\n.scrollbar-rail > .scroll-element.scroll-x.scroll-scrolly_visible .scroll-element_track { left: -25px; }\n.scrollbar-rail > .scroll-element.scroll-y.scroll-scrollx_visible .scroll-element_track { top: -25px; }\n\n\n\n\n\n\n\n\n\n\n/*************** SCROLLBAR DYNAMIC ***************/\n\n.scrollbar-dynamic > .scroll-element,\n.scrollbar-dynamic > .scroll-element div\n{\n    background: none;\n    border: none;\n    margin: 0;\n    padding: 0;\n    position: absolute;\n    z-index: 10;\n}\n\n.scrollbar-dynamic > .scroll-element div {\n    display: block;\n    height: 100%;\n    left: 0;\n    top: 0;\n    width: 100%;\n}\n\n.scrollbar-dynamic > .scroll-element.scroll-x {\n    bottom: 2px;\n    height: 7px;\n    left: 0;\n    min-width: 100%;\n    width: 100%;\n}\n\n.scrollbar-dynamic > .scroll-element.scroll-y {\n    height: 100%;\n    min-height: 100%;\n    right: 2px;\n    top: 0;\n    width: 7px;\n}\n\n.scrollbar-dynamic > .scroll-element .scroll-element_outer {\n    opacity: 0.3;\n\n    -webkit-border-radius: 12px;\n    -moz-border-radius: 12px;\n    border-radius: 12px;\n}\n.scrollbar-dynamic > .scroll-element .scroll-element_size {\n    background-color: #cccccc;\n    opacity: 0;\n\n    -webkit-border-radius: 12px;\n    -moz-border-radius: 12px;\n    border-radius: 12px;\n\n    -webkit-transition: opacity 0.2s;\n    -moz-transition: opacity 0.2s;\n    -o-transition: opacity 0.2s;\n    -ms-transition: opacity 0.2s;\n    transition: opacity 0.2s;\n}\n\n.scrollbar-dynamic > .scroll-element .scroll-bar {\n    background-color: #6c6e71;\n\n    -webkit-border-radius: 7px;\n    -moz-border-radius: 7px;\n    border-radius: 7px;\n}\n\n/* scrollbar height/width & offset from container borders */\n\n.scrollbar-dynamic > .scroll-element.scroll-x .scroll-bar {\n    bottom: 0;\n    height: 7px;\n    min-width: 24px;\n    top: auto;\n}\n.scrollbar-dynamic > .scroll-element.scroll-y .scroll-bar {\n    left: auto;\n    min-height: 24px;\n    right: 0;\n    width: 7px;\n}\n\n.scrollbar-dynamic > .scroll-element.scroll-x .scroll-element_outer {\n    bottom: 0;\n    top: auto;\n    left: 2px;\n\n    -webkit-transition: height 0.2s;\n    -moz-transition: height 0.2s;\n    -o-transition: height 0.2s;\n    -ms-transition: height 0.2s;\n    transition: height 0.2s;\n}\n\n.scrollbar-dynamic > .scroll-element.scroll-y .scroll-element_outer {\n    left: auto;\n    right: 0;\n    top: 2px;\n\n    -webkit-transition: width 0.2s;\n    -moz-transition: width 0.2s;\n    -o-transition: width 0.2s;\n    -ms-transition: width 0.2s;\n    transition: width 0.2s;\n}\n\n.scrollbar-dynamic > .scroll-element.scroll-x .scroll-element_size { left: -4px; }\n.scrollbar-dynamic > .scroll-element.scroll-y .scroll-element_size { top: -4px; }\n\n\n/* update scrollbar offset if both scrolls are visible */\n\n.scrollbar-dynamic > .scroll-element.scroll-x.scroll-scrolly_visible .scroll-element_size { left: -11px; }\n.scrollbar-dynamic > .scroll-element.scroll-y.scroll-scrollx_visible .scroll-element_size { top: -11px; }\n\n\n/* hover & drag */\n\n.scrollbar-dynamic > .scroll-element:hover .scroll-element_outer,\n.scrollbar-dynamic > .scroll-element.scroll-draggable .scroll-element_outer {\n    overflow: hidden;\n\n    -ms-filter:\"progid:DXImageTransform.Microsoft.Alpha(Opacity=70)\";\n    filter: alpha(opacity=70);\n    opacity: 0.7;\n}\n.scrollbar-dynamic > .scroll-element:hover .scroll-element_outer .scroll-element_size,\n.scrollbar-dynamic > .scroll-element.scroll-draggable .scroll-element_outer .scroll-element_size {\n    opacity: 1;\n}\n.scrollbar-dynamic > .scroll-element:hover .scroll-element_outer .scroll-bar,\n.scrollbar-dynamic > .scroll-element.scroll-draggable .scroll-element_outer .scroll-bar {\n    height: 100%;\n    width: 100%;\n\n    -webkit-border-radius: 12px;\n    -moz-border-radius: 12px;\n    border-radius: 12px;\n}\n\n.scrollbar-dynamic > .scroll-element.scroll-x:hover .scroll-element_outer,\n.scrollbar-dynamic > .scroll-element.scroll-x.scroll-draggable .scroll-element_outer {\n    height: 20px;\n    min-height: 7px;\n}\n.scrollbar-dynamic > .scroll-element.scroll-y:hover .scroll-element_outer,\n.scrollbar-dynamic > .scroll-element.scroll-y.scroll-draggable .scroll-element_outer {\n    min-width: 7px;\n    width: 20px;\n}\n\n\n\n\n\n\n\n\n\n\n/*************** SCROLLBAR GOOGLE CHROME ***************/\n\n.scrollbar-chrome > .scroll-element,\n.scrollbar-chrome > .scroll-element div\n{\n    border: none;\n    margin: 0;\n    overflow: hidden;\n    padding: 0;\n    position: absolute;\n    z-index: 10;\n}\n\n.scrollbar-chrome > .scroll-element {\n    background-color: #ffffff;\n}\n\n.scrollbar-chrome > .scroll-element div {\n    display: block;\n    height: 100%;\n    left: 0;\n    top: 0;\n    width: 100%;\n}\n\n.scrollbar-chrome > .scroll-element .scroll-element_outer {}\n\n.scrollbar-chrome > .scroll-element .scroll-element_track {\n    background: #f1f1f1;\n    border: 1px solid #dbdbdb;\n}\n\n.scrollbar-chrome > .scroll-element.scroll-x {\n    bottom: 0;\n    height: 16px;\n    left: 0;\n    min-width: 100%;\n    width: 100%;\n}\n\n.scrollbar-chrome > .scroll-element.scroll-y {\n    height: 100%;\n    min-height: 100%;\n    right: 0;\n    top: 0;\n    width: 16px;\n}\n\n.scrollbar-chrome > .scroll-element .scroll-bar {\n    background-color: #d9d9d9;\n    border: 1px solid #bdbdbd;\n    cursor: default;\n\n    -webkit-border-radius: 2px;\n    -moz-border-radius: 2px;\n    border-radius: 2px;\n}\n\n.scrollbar-chrome > .scroll-element .scroll-bar:hover {\n    background-color: #c2c2c2;\n    border-color: #a9a9a9;\n}\n\n.scrollbar-chrome > .scroll-element.scroll-draggable .scroll-bar {\n    background-color: #919191;\n    border-color: #7e7e7e;\n}\n\n/* scrollbar height/width & offset from container borders */\n\n.scrollbar-chrome > .scroll-content.scroll-scrolly_visible { left: -16px; margin-left: 16px; }\n.scrollbar-chrome > .scroll-content.scroll-scrollx_visible { top:  -16px; margin-top:  16px; }\n\n.scrollbar-chrome > .scroll-element.scroll-x .scroll-bar { height: 8px; min-width: 10px; top: 3px; }\n.scrollbar-chrome > .scroll-element.scroll-y .scroll-bar { left: 3px; min-height: 10px; width: 8px; }\n\n.scrollbar-chrome > .scroll-element.scroll-x .scroll-element_outer { border-left: 1px solid #dbdbdb; }\n.scrollbar-chrome > .scroll-element.scroll-x .scroll-element_track { height: 14px; left: -3px; }\n.scrollbar-chrome > .scroll-element.scroll-x .scroll-element_size { height: 14px; left: -4px; }\n\n.scrollbar-chrome > .scroll-element.scroll-y .scroll-element_outer { border-top: 1px solid #dbdbdb; }\n.scrollbar-chrome > .scroll-element.scroll-y .scroll-element_track { top: -3px; width: 14px; }\n.scrollbar-chrome > .scroll-element.scroll-y .scroll-element_size { top: -4px; width: 14px; }\n\n/* update scrollbar offset if both scrolls are visible */\n\n.scrollbar-chrome > .scroll-element.scroll-x.scroll-scrolly_visible .scroll-element_size { left: -19px; }\n.scrollbar-chrome > .scroll-element.scroll-y.scroll-scrollx_visible .scroll-element_size { top: -19px; }\n\n.scrollbar-chrome > .scroll-element.scroll-x.scroll-scrolly_visible .scroll-element_track { left: -19px; }\n.scrollbar-chrome > .scroll-element.scroll-y.scroll-scrollx_visible .scroll-element_track { top: -19px; }\n\n\n\n\n\n\n\n", ""]);
 
 // exports
 
@@ -5847,7 +7389,7 @@ exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/cs
 
 
 // module
-exports.push([module.i, "/*\n * The MIT License\n * Copyright (c) 2012 Matias Meno <m@tias.me>\n */\n@-webkit-keyframes passing-through {\n  0% {\n    opacity: 0;\n    -webkit-transform: translateY(40px);\n    -moz-transform: translateY(40px);\n    -ms-transform: translateY(40px);\n    -o-transform: translateY(40px);\n    transform: translateY(40px); }\n  30%, 70% {\n    opacity: 1;\n    -webkit-transform: translateY(0px);\n    -moz-transform: translateY(0px);\n    -ms-transform: translateY(0px);\n    -o-transform: translateY(0px);\n    transform: translateY(0px); }\n  100% {\n    opacity: 0;\n    -webkit-transform: translateY(-40px);\n    -moz-transform: translateY(-40px);\n    -ms-transform: translateY(-40px);\n    -o-transform: translateY(-40px);\n    transform: translateY(-40px); } }\n@-moz-keyframes passing-through {\n  0% {\n    opacity: 0;\n    -webkit-transform: translateY(40px);\n    -moz-transform: translateY(40px);\n    -ms-transform: translateY(40px);\n    -o-transform: translateY(40px);\n    transform: translateY(40px); }\n  30%, 70% {\n    opacity: 1;\n    -webkit-transform: translateY(0px);\n    -moz-transform: translateY(0px);\n    -ms-transform: translateY(0px);\n    -o-transform: translateY(0px);\n    transform: translateY(0px); }\n  100% {\n    opacity: 0;\n    -webkit-transform: translateY(-40px);\n    -moz-transform: translateY(-40px);\n    -ms-transform: translateY(-40px);\n    -o-transform: translateY(-40px);\n    transform: translateY(-40px); } }\n@keyframes passing-through {\n  0% {\n    opacity: 0;\n    -webkit-transform: translateY(40px);\n    -moz-transform: translateY(40px);\n    -ms-transform: translateY(40px);\n    -o-transform: translateY(40px);\n    transform: translateY(40px); }\n  30%, 70% {\n    opacity: 1;\n    -webkit-transform: translateY(0px);\n    -moz-transform: translateY(0px);\n    -ms-transform: translateY(0px);\n    -o-transform: translateY(0px);\n    transform: translateY(0px); }\n  100% {\n    opacity: 0;\n    -webkit-transform: translateY(-40px);\n    -moz-transform: translateY(-40px);\n    -ms-transform: translateY(-40px);\n    -o-transform: translateY(-40px);\n    transform: translateY(-40px); } }\n@-webkit-keyframes slide-in {\n  0% {\n    opacity: 0;\n    -webkit-transform: translateY(40px);\n    -moz-transform: translateY(40px);\n    -ms-transform: translateY(40px);\n    -o-transform: translateY(40px);\n    transform: translateY(40px); }\n  30% {\n    opacity: 1;\n    -webkit-transform: translateY(0px);\n    -moz-transform: translateY(0px);\n    -ms-transform: translateY(0px);\n    -o-transform: translateY(0px);\n    transform: translateY(0px); } }\n@-moz-keyframes slide-in {\n  0% {\n    opacity: 0;\n    -webkit-transform: translateY(40px);\n    -moz-transform: translateY(40px);\n    -ms-transform: translateY(40px);\n    -o-transform: translateY(40px);\n    transform: translateY(40px); }\n  30% {\n    opacity: 1;\n    -webkit-transform: translateY(0px);\n    -moz-transform: translateY(0px);\n    -ms-transform: translateY(0px);\n    -o-transform: translateY(0px);\n    transform: translateY(0px); } }\n@keyframes slide-in {\n  0% {\n    opacity: 0;\n    -webkit-transform: translateY(40px);\n    -moz-transform: translateY(40px);\n    -ms-transform: translateY(40px);\n    -o-transform: translateY(40px);\n    transform: translateY(40px); }\n  30% {\n    opacity: 1;\n    -webkit-transform: translateY(0px);\n    -moz-transform: translateY(0px);\n    -ms-transform: translateY(0px);\n    -o-transform: translateY(0px);\n    transform: translateY(0px); } }\n@-webkit-keyframes pulse {\n  0% {\n    -webkit-transform: scale(1);\n    -moz-transform: scale(1);\n    -ms-transform: scale(1);\n    -o-transform: scale(1);\n    transform: scale(1); }\n  10% {\n    -webkit-transform: scale(1.1);\n    -moz-transform: scale(1.1);\n    -ms-transform: scale(1.1);\n    -o-transform: scale(1.1);\n    transform: scale(1.1); }\n  20% {\n    -webkit-transform: scale(1);\n    -moz-transform: scale(1);\n    -ms-transform: scale(1);\n    -o-transform: scale(1);\n    transform: scale(1); } }\n@-moz-keyframes pulse {\n  0% {\n    -webkit-transform: scale(1);\n    -moz-transform: scale(1);\n    -ms-transform: scale(1);\n    -o-transform: scale(1);\n    transform: scale(1); }\n  10% {\n    -webkit-transform: scale(1.1);\n    -moz-transform: scale(1.1);\n    -ms-transform: scale(1.1);\n    -o-transform: scale(1.1);\n    transform: scale(1.1); }\n  20% {\n    -webkit-transform: scale(1);\n    -moz-transform: scale(1);\n    -ms-transform: scale(1);\n    -o-transform: scale(1);\n    transform: scale(1); } }\n@keyframes pulse {\n  0% {\n    -webkit-transform: scale(1);\n    -moz-transform: scale(1);\n    -ms-transform: scale(1);\n    -o-transform: scale(1);\n    transform: scale(1); }\n  10% {\n    -webkit-transform: scale(1.1);\n    -moz-transform: scale(1.1);\n    -ms-transform: scale(1.1);\n    -o-transform: scale(1.1);\n    transform: scale(1.1); }\n  20% {\n    -webkit-transform: scale(1);\n    -moz-transform: scale(1);\n    -ms-transform: scale(1);\n    -o-transform: scale(1);\n    transform: scale(1); } }\n.dropzone, .dropzone * {\n  box-sizing: border-box; }\n\n.dropzone {\n  min-height: 150px;\n  background: white;\n  padding: 16px; }\n  .dropzone.dz-clickable {\n    cursor: pointer; }\n    .dropzone.dz-clickable * {\n      cursor: default; }\n    .dropzone.dz-clickable .dz-message, .dropzone.dz-clickable .dz-message * {\n      cursor: pointer; }\n  .dropzone.dz-started .dz-message {\n    display: none; }\n  .dropzone.dz-drag-hover {\n    border-style: solid; }\n    .dropzone.dz-drag-hover .dz-message {\n      opacity: 0.5; }\n  .dropzone .dz-message {\n    text-align: center;\n    margin: 2em 0; }\n  .dropzone .dz-preview,\n  .previews .dz-preview {\n    position: relative;\n    display: inline-block;\n    vertical-align: top;\n    margin: 16px;\n    border-radius: 10px;\n    min-height: 100px; }\n    .dropzone .dz-preview:hover,\n    .previews .dz-preview:hover {\n      z-index: 1000; }\n      .dropzone .dz-preview:hover .dz-details,\n      .previews .dz-preview:hover .dz-details {\n        opacity: 1; }\n    .dropzone .dz-preview.dz-file-preview .dz-image,\n    .previews .dz-preview.dz-file-preview .dz-image {\n      border-radius: 20px;\n      background: #999;\n      background: linear-gradient(to bottom, #eee, #ddd); }\n    .dropzone .dz-preview.dz-file-preview .dz-details,\n    .previews .dz-preview.dz-file-preview .dz-details {\n      opacity: 1; }\n    .dropzone .dz-preview.dz-image-preview,\n    .previews .dz-preview.dz-image-preview {\n      background: white; }\n      .dropzone .dz-preview.dz-image-preview .dz-details,\n      .previews .dz-preview.dz-image-preview .dz-details {\n        -webkit-transition: opacity 0.2s linear;\n        -moz-transition: opacity 0.2s linear;\n        -ms-transition: opacity 0.2s linear;\n        -o-transition: opacity 0.2s linear;\n        transition: opacity 0.2s linear; }\n    .dropzone .dz-preview .dz-remove,\n    .previews .dz-preview .dz-remove {\n      font-size: 14px;\n      text-align: center;\n      display: block;\n      cursor: pointer;\n      border: none; }\n      .dropzone .dz-preview .dz-remove:hover,\n      .previews .dz-preview .dz-remove:hover {\n        text-decoration: underline; }\n    .dropzone .dz-preview:hover .dz-details,\n    .previews .dz-preview:hover .dz-details {\n      opacity: 1; }\n    .dropzone .dz-preview .dz-details,\n    .previews .dz-preview .dz-details {\n      z-index: 20;\n      position: absolute;\n      top: 0;\n      left: 0;\n      opacity: 0;\n      font-size: 13px;\n      min-width: 100%;\n      max-width: 100%;\n      padding: 2em 1em;\n      text-align: center;\n      color: rgba(0, 0, 0, 0.9);\n      line-height: 150%; }\n      .dropzone .dz-preview .dz-details .dz-size,\n      .previews .dz-preview .dz-details .dz-size {\n        margin-bottom: 1em;\n        font-size: 16px; }\n      .dropzone .dz-preview .dz-details .dz-filename,\n      .previews .dz-preview .dz-details .dz-filename {\n        white-space: nowrap; }\n        .dropzone .dz-preview .dz-details .dz-filename:hover span,\n        .previews .dz-preview .dz-details .dz-filename:hover span {\n          border: 1px solid rgba(200, 200, 200, 0.8);\n          background-color: rgba(255, 255, 255, 0.8); }\n        .dropzone .dz-preview .dz-details .dz-filename:not(:hover),\n        .previews .dz-preview .dz-details .dz-filename:not(:hover) {\n          overflow: hidden;\n          text-overflow: ellipsis; }\n          .dropzone .dz-preview .dz-details .dz-filename:not(:hover) span,\n          .previews .dz-preview .dz-details .dz-filename:not(:hover) span {\n            border: 1px solid transparent; }\n      .dropzone .dz-preview .dz-details .dz-filename span, \n      .dropzone .dz-preview .dz-details .dz-size span,\n      .previews .dz-preview .dz-details .dz-filename span,\n      .previews .dz-preview .dz-details .dz-size span {\n        background-color: rgba(255, 255, 255, 0.4);\n        padding: 0 0.4em;\n        border-radius: 3px; }\n    .dropzone .dz-preview:hover .dz-image img,\n    .previews .dz-preview:hover .dz-image img {\n      -webkit-transform: scale(1.05, 1.05);\n      -moz-transform: scale(1.05, 1.05);\n      -ms-transform: scale(1.05, 1.05);\n      -o-transform: scale(1.05, 1.05);\n      transform: scale(1.05, 1.05);\n      -webkit-filter: blur(8px);\n      filter: blur(8px); }\n    .dropzone .dz-preview .dz-image,\n    .previews .dz-preview .dz-image {\n      border-radius: 20px;\n      overflow: hidden;\n      width: 120px;\n      height: 120px;\n      position: relative;\n      display: block;\n      z-index: 10; }\n      .dropzone .dz-preview .dz-image img,\n      .previews .dz-preview .dz-image img {\n        display: block; }\n    .dropzone .dz-preview.dz-success .dz-success-mark,\n    .previews .dz-preview.dz-sussess .dz-success-mark {\n      -webkit-animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1);\n      -moz-animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1);\n      -ms-animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1);\n      -o-animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1);\n      animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1); }\n    .dropzone .dz-preview.dz-error .dz-error-mark,\n    .previews .dz-preview.dz-error .dz-error-mark {\n      opacity: 1;\n      -webkit-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);\n      -moz-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);\n      -ms-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);\n      -o-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);\n      animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1); }\n    .dropzone .dz-preview .dz-success-mark, \n    .dropzone .dz-preview .dz-error-mark,\n    .previews .dz-preview .dz-success-mark,\n    .previews .dz-preview .dz-error-mark {\n      pointer-events: none;\n      opacity: 0;\n      z-index: 500;\n      position: absolute;\n      display: block;\n      top: 50%;\n      left: 50%;\n      margin-left: -27px;\n      margin-top: -27px; }\n      .dropzone .dz-preview .dz-success-mark svg, \n      .dropzone .dz-preview .dz-error-mark svg,\n      .previews .dz-preview .dz-success-mark svg,\n      .previews .dz-preview .dz-error-mark svg {\n        display: block;\n        width: 54px;\n        height: 54px; }\n    .dropzone .dz-preview.dz-processing .dz-progress,\n    .previews .dz-preview.dz-processing .dz-progress {\n      opacity: 1;\n      -webkit-transition: all 0.2s linear;\n      -moz-transition: all 0.2s linear;\n      -ms-transition: all 0.2s linear;\n      -o-transition: all 0.2s linear;\n      transition: all 0.2s linear; }\n    .dropzone .dz-preview.dz-complete .dz-progress,\n    .previews .dz-preview.dz-complete .dz-progress {\n      opacity: 0;\n      -webkit-transition: opacity 0.4s ease-in;\n      -moz-transition: opacity 0.4s ease-in;\n      -ms-transition: opacity 0.4s ease-in;\n      -o-transition: opacity 0.4s ease-in;\n      transition: opacity 0.4s ease-in; }\n    .dropzone .dz-preview:not(.dz-processing) .dz-progress,\n    .previews .dz-preview:not(.dz-processing) .dz-progress {\n      -webkit-animation: pulse 6s ease infinite;\n      -moz-animation: pulse 6s ease infinite;\n      -ms-animation: pulse 6s ease infinite;\n      -o-animation: pulse 6s ease infinite;\n      animation: pulse 6s ease infinite; }\n    .dropzone .dz-preview .dz-progress,\n    .previews .dz-preview .dz-progress {\n      opacity: 1;\n      z-index: 1000;\n      pointer-events: none;\n      position: absolute;\n      height: 16px;\n      left: 50%;\n      top: 50%;\n      margin-top: -8px;\n      width: 80px;\n      margin-left: -40px;\n      background: rgba(255, 255, 255, 0.9);\n      -webkit-transform: scale(1);\n      border-radius: 8px;\n      overflow: hidden; }\n      .dropzone .dz-preview .dz-progress .dz-upload,\n      .previews .dz-preview .dz-progress .dz-upload {\n        background: #333;\n        background: linear-gradient(to bottom, #666, #444);\n        position: absolute;\n        top: 0;\n        left: 0;\n        bottom: 0;\n        width: 0;\n        -webkit-transition: width 300ms ease-in-out;\n        -moz-transition: width 300ms ease-in-out;\n        -ms-transition: width 300ms ease-in-out;\n        -o-transition: width 300ms ease-in-out;\n        transition: width 300ms ease-in-out; }\n    .dropzone .dz-preview.dz-error .dz-error-message,\n    .previews .dz-preview.dz-error .dz-error-message {\n      display: block; \n      opacity: 1;\n    }\n    .dropzone .dz-preview.dz-error:hover .dz-error-message,\n    .previews .dz-preview.dz-error:hover .dz-error-message {\n      opacity: 1;\n      pointer-events: auto; }\n    .dropzone .dz-preview .dz-error-message,\n    .previews .dz-preview .dz-error-message {\n      pointer-events: none;\n      z-index: 1000;\n      position: absolute;\n      display: block;\n      display: none;\n      opacity: 0;\n      -webkit-transition: opacity 0.3s ease;\n      -moz-transition: opacity 0.3s ease;\n      -ms-transition: opacity 0.3s ease;\n      -o-transition: opacity 0.3s ease;\n      transition: opacity 0.3s ease;\n      border-radius: 8px;\n      font-size: 13px;\n      top: 130px;\n      left: -10px;\n      width: 140px;\n      background: #be2626;\n      background: linear-gradient(to bottom, #be2626, #a92222);\n      padding: 0.5em 1.2em;\n      color: white; }\n      .dropzone .dz-preview .dz-error-message:after,\n      .previews .dz-preview .dz-error-message:after {\n        content: '';\n        position: absolute;\n        top: -6px;\n        left: 64px;\n        width: 0;\n        height: 0;\n        border-left: 6px solid transparent;\n        border-right: 6px solid transparent;\n        border-bottom: 6px solid #be2626; }\n\n.previews .dz-preview .dz-remove {\n  position: absolute;\n  z-index: 30;\n  color: white;\n  top: 5px;\n  right: 5px;\n  text-decoration: none !important;\n  font-size: 0.8rem;\n  font-weight: 800;\n  opacity: 0;\n  width: 24px;\n  height: 24px;\n  line-height: 24px;\n  text-align: center;\n  background: #000;\n  border-radius: 50%;\n  z-index: 9999;  \n}\n.previews .dz-preview .dz-remove:before {\n  content: \"\\F00D\";\n  font-family: FontAwesome;\n  font-size: 12px;\n}\n.previews .dz-preview:hover .dz-remove {\n  opacity: 1;\n}\n\n\n/* \n.vue-dropzone {\n  border: 2px solid #E5E5E5;\n  font-family: 'Arial', sans-serif;\n  letter-spacing: 0.2px;\n  color: #777;\n  transition: background-color 0.2s linear;\n}\n.vue-dropzone:hover {\n  background-color: #F6F6F6;\n}\n.vue-dropzone i {\n  color: #CCC;\n}\n.vue-dropzone .dz-preview .dz-image {\n  border-radius: 0;\n  width: 100%;\n  height: 100%;\n}\n.vue-dropzone .dz-preview .dz-image img:not([src]) {\n  width: 200px;\n  height: 200px;\n}\n.vue-dropzone .dz-preview .dz-image:hover img {\n  transform: none;\n  -webkit-filter: none;\n}\n.vue-dropzone .dz-preview .dz-details {\n  bottom: 0;\n  top: 0;\n  color: white;\n  background-color: rgba(33, 150, 243, 0.8);\n  transition: opacity .2s linear;\n  text-align: left;\n}\n.vue-dropzone .dz-preview .dz-details .dz-filename {\n  overflow: hidden;\n}\n.vue-dropzone .dz-preview .dz-details .dz-filename span,\n.vue-dropzone .dz-preview .dz-details .dz-size span {\n  background-color: transparent;\n}\n.vue-dropzone .dz-preview .dz-details .dz-filename:not(:hover) span {\n  border: none;\n}\n.vue-dropzone .dz-preview .dz-details .dz-filename:hover span {\n  background-color: transparent;\n  border: none;\n}\n.vue-dropzone .dz-preview .dz-progress .dz-upload {\n  background: #cccccc;\n}\n.vue-dropzone .dz-preview .dz-remove {\n  position: absolute;\n  z-index: 30;\n  color: white;\n  top: 5px;\n  right: 5px;\n  text-decoration: none !important;\n  font-size: 0.8rem;\n  font-weight: 800;\n  opacity: 0;\n  width: 24px;\n  height: 24px;\n  line-height: 24px;\n  text-align: center;\n  background: #000;\n  border-radius: 50%;\n  z-index: 9999;  \n}\n.vue-dropzone .dz-preview .dz-remove:before {\n  content: \"\\f00d\";\n  font-family: FontAwesome;\n  font-size: 12px;\n}\n.vue-dropzone .dz-preview:hover .dz-remove {\n  opacity: 1;\n}\n.vue-dropzone .dz-preview .dz-success-mark,\n.vue-dropzone .dz-preview .dz-error-mark {\n  margin-left: auto;\n  margin-top: auto;\n  width: 100%;\n  top: 35%;\n  left: 0;\n}\n.vue-dropzone .dz-preview .dz-success-mark svg,\n.vue-dropzone .dz-preview .dz-error-mark svg {\n  margin-left: auto;\n  margin-right: auto;\n}\n.vue-dropzone .dz-preview .dz-error-message {\n  top: calc(15%);\n  margin-left: auto;\n  margin-right: auto;\n  left: 0;\n  width: 100%;\n}\n.vue-dropzone .dz-preview .dz-error-message:after {\n  bottom: -6px;\n  top: initial;\n  border-top: 6px solid #a92222;\n  border-bottom: none;\n} */\n\n", ""]);
+exports.push([module.i, "/*\n * The MIT License\n * Copyright (c) 2012 Matias Meno <m@tias.me>\n */\n@-webkit-keyframes passing-through {\n  0% {\n    opacity: 0;\n    -webkit-transform: translateY(40px);\n    -moz-transform: translateY(40px);\n    -ms-transform: translateY(40px);\n    -o-transform: translateY(40px);\n    transform: translateY(40px); }\n  30%, 70% {\n    opacity: 1;\n    -webkit-transform: translateY(0px);\n    -moz-transform: translateY(0px);\n    -ms-transform: translateY(0px);\n    -o-transform: translateY(0px);\n    transform: translateY(0px); }\n  100% {\n    opacity: 0;\n    -webkit-transform: translateY(-40px);\n    -moz-transform: translateY(-40px);\n    -ms-transform: translateY(-40px);\n    -o-transform: translateY(-40px);\n    transform: translateY(-40px); } }\n@-moz-keyframes passing-through {\n  0% {\n    opacity: 0;\n    -webkit-transform: translateY(40px);\n    -moz-transform: translateY(40px);\n    -ms-transform: translateY(40px);\n    -o-transform: translateY(40px);\n    transform: translateY(40px); }\n  30%, 70% {\n    opacity: 1;\n    -webkit-transform: translateY(0px);\n    -moz-transform: translateY(0px);\n    -ms-transform: translateY(0px);\n    -o-transform: translateY(0px);\n    transform: translateY(0px); }\n  100% {\n    opacity: 0;\n    -webkit-transform: translateY(-40px);\n    -moz-transform: translateY(-40px);\n    -ms-transform: translateY(-40px);\n    -o-transform: translateY(-40px);\n    transform: translateY(-40px); } }\n@keyframes passing-through {\n  0% {\n    opacity: 0;\n    -webkit-transform: translateY(40px);\n    -moz-transform: translateY(40px);\n    -ms-transform: translateY(40px);\n    -o-transform: translateY(40px);\n    transform: translateY(40px); }\n  30%, 70% {\n    opacity: 1;\n    -webkit-transform: translateY(0px);\n    -moz-transform: translateY(0px);\n    -ms-transform: translateY(0px);\n    -o-transform: translateY(0px);\n    transform: translateY(0px); }\n  100% {\n    opacity: 0;\n    -webkit-transform: translateY(-40px);\n    -moz-transform: translateY(-40px);\n    -ms-transform: translateY(-40px);\n    -o-transform: translateY(-40px);\n    transform: translateY(-40px); } }\n@-webkit-keyframes slide-in {\n  0% {\n    opacity: 0;\n    -webkit-transform: translateY(40px);\n    -moz-transform: translateY(40px);\n    -ms-transform: translateY(40px);\n    -o-transform: translateY(40px);\n    transform: translateY(40px); }\n  30% {\n    opacity: 1;\n    -webkit-transform: translateY(0px);\n    -moz-transform: translateY(0px);\n    -ms-transform: translateY(0px);\n    -o-transform: translateY(0px);\n    transform: translateY(0px); } }\n@-moz-keyframes slide-in {\n  0% {\n    opacity: 0;\n    -webkit-transform: translateY(40px);\n    -moz-transform: translateY(40px);\n    -ms-transform: translateY(40px);\n    -o-transform: translateY(40px);\n    transform: translateY(40px); }\n  30% {\n    opacity: 1;\n    -webkit-transform: translateY(0px);\n    -moz-transform: translateY(0px);\n    -ms-transform: translateY(0px);\n    -o-transform: translateY(0px);\n    transform: translateY(0px); } }\n@keyframes slide-in {\n  0% {\n    opacity: 0;\n    -webkit-transform: translateY(40px);\n    -moz-transform: translateY(40px);\n    -ms-transform: translateY(40px);\n    -o-transform: translateY(40px);\n    transform: translateY(40px); }\n  30% {\n    opacity: 1;\n    -webkit-transform: translateY(0px);\n    -moz-transform: translateY(0px);\n    -ms-transform: translateY(0px);\n    -o-transform: translateY(0px);\n    transform: translateY(0px); } }\n@-webkit-keyframes pulse {\n  0% {\n    -webkit-transform: scale(1);\n    -moz-transform: scale(1);\n    -ms-transform: scale(1);\n    -o-transform: scale(1);\n    transform: scale(1); }\n  10% {\n    -webkit-transform: scale(1.1);\n    -moz-transform: scale(1.1);\n    -ms-transform: scale(1.1);\n    -o-transform: scale(1.1);\n    transform: scale(1.1); }\n  20% {\n    -webkit-transform: scale(1);\n    -moz-transform: scale(1);\n    -ms-transform: scale(1);\n    -o-transform: scale(1);\n    transform: scale(1); } }\n@-moz-keyframes pulse {\n  0% {\n    -webkit-transform: scale(1);\n    -moz-transform: scale(1);\n    -ms-transform: scale(1);\n    -o-transform: scale(1);\n    transform: scale(1); }\n  10% {\n    -webkit-transform: scale(1.1);\n    -moz-transform: scale(1.1);\n    -ms-transform: scale(1.1);\n    -o-transform: scale(1.1);\n    transform: scale(1.1); }\n  20% {\n    -webkit-transform: scale(1);\n    -moz-transform: scale(1);\n    -ms-transform: scale(1);\n    -o-transform: scale(1);\n    transform: scale(1); } }\n@keyframes pulse {\n  0% {\n    -webkit-transform: scale(1);\n    -moz-transform: scale(1);\n    -ms-transform: scale(1);\n    -o-transform: scale(1);\n    transform: scale(1); }\n  10% {\n    -webkit-transform: scale(1.1);\n    -moz-transform: scale(1.1);\n    -ms-transform: scale(1.1);\n    -o-transform: scale(1.1);\n    transform: scale(1.1); }\n  20% {\n    -webkit-transform: scale(1);\n    -moz-transform: scale(1);\n    -ms-transform: scale(1);\n    -o-transform: scale(1);\n    transform: scale(1); } }\n.dropzone, .dropzone * {\n  box-sizing: border-box; }\n\n.dropzone {\n  min-height: 150px;\n  background: white;\n  padding: 16px; }\n  .dropzone.dz-clickable {\n    cursor: pointer; }\n    .dropzone.dz-clickable * {\n      cursor: default; }\n    .dropzone.dz-clickable .dz-message, .dropzone.dz-clickable .dz-message * {\n      cursor: pointer; }\n  .dropzone.dz-started .dz-message {\n    display: none; }\n  .dropzone.dz-drag-hover {\n    border-style: solid; }\n    .dropzone.dz-drag-hover .dz-message {\n      opacity: 0.5; }\n  .dropzone .dz-message {\n    text-align: center;\n    margin: 2em 0; }\n  .dropzone .dz-preview,\n  .previews .dz-preview {\n    position: relative;\n    display: inline-block;\n    vertical-align: top;\n    margin: 16px;\n    border-radius: 20px;\n    min-height: 100px; }\n    .dropzone .dz-preview:hover,\n    .previews .dz-preview:hover {\n      z-index: 1000; }\n      .dropzone .dz-preview:hover .dz-details,\n      .previews .dz-preview:hover .dz-details {\n        opacity: 1; }\n    .dropzone .dz-preview.dz-file-preview .dz-image,\n    .previews .dz-preview.dz-file-preview .dz-image {\n      border-radius: 20px;\n      background: #999;\n      background: linear-gradient(to bottom, #eee, #ddd); }\n    .dropzone .dz-preview.dz-file-preview .dz-details,\n    .previews .dz-preview.dz-file-preview .dz-details {\n      opacity: 1; }\n    .dropzone .dz-preview.dz-image-preview,\n    .previews .dz-preview.dz-image-preview {\n      background: white; }\n      .dropzone .dz-preview.dz-image-preview .dz-details,\n      .previews .dz-preview.dz-image-preview .dz-details {\n        -webkit-transition: opacity 0.2s linear;\n        -moz-transition: opacity 0.2s linear;\n        -ms-transition: opacity 0.2s linear;\n        -o-transition: opacity 0.2s linear;\n        transition: opacity 0.2s linear; }\n    .dropzone .dz-preview .dz-remove,\n    .previews .dz-preview .dz-remove {\n      font-size: 14px;\n      text-align: center;\n      display: block;\n      cursor: pointer;\n      border: none; }\n      .dropzone .dz-preview .dz-remove:hover,\n      .previews .dz-preview .dz-remove:hover {\n        text-decoration: underline; }\n    .dropzone .dz-preview:hover .dz-details,\n    .previews .dz-preview:hover .dz-details {\n      opacity: 1; }\n    .dropzone .dz-preview .dz-details,\n    .previews .dz-preview .dz-details {\n      z-index: 20;\n      position: absolute;\n      top: 0;\n      left: 0;\n      opacity: 0;\n      font-size: 13px;\n      min-width: 100%;\n      max-width: 100%;\n      padding: 2em 1em;\n      text-align: center;\n      color: rgba(0, 0, 0, 0.9);\n      line-height: 150%; }\n      .dropzone .dz-preview .dz-details .dz-size,\n      .previews .dz-preview .dz-details .dz-size {\n        margin-bottom: 1em;\n        font-size: 16px; }\n      .dropzone .dz-preview .dz-details .dz-filename,\n      .previews .dz-preview .dz-details .dz-filename {\n        display: none;\n        white-space: nowrap; }\n        .dropzone .dz-preview .dz-details .dz-filename:hover span,\n        .previews .dz-preview .dz-details .dz-filename:hover span {\n          border: 1px solid rgba(200, 200, 200, 0.8);\n          background-color: rgba(255, 255, 255, 0.8); }\n        .dropzone .dz-preview .dz-details .dz-filename:not(:hover),\n        .previews .dz-preview .dz-details .dz-filename:not(:hover) {\n          overflow: hidden;\n          text-overflow: ellipsis; }\n          .dropzone .dz-preview .dz-details .dz-filename:not(:hover) span,\n          .previews .dz-preview .dz-details .dz-filename:not(:hover) span {\n            border: 1px solid transparent; }\n      .dropzone .dz-preview .dz-details .dz-filename span, \n      .dropzone .dz-preview .dz-details .dz-size span,\n      .previews .dz-preview .dz-details .dz-filename span,\n      .previews .dz-preview .dz-details .dz-size span {\n        background-color: rgba(255, 255, 255, 0.4);\n        padding: 0 0.4em;\n        border-radius: 3px; }\n    .dropzone .dz-preview:hover .dz-image img,\n    .previews .dz-preview:hover .dz-image img {\n      -webkit-transform: scale(1.05, 1.05);\n      -moz-transform: scale(1.05, 1.05);\n      -ms-transform: scale(1.05, 1.05);\n      -o-transform: scale(1.05, 1.05);\n      transform: scale(1.05, 1.05);\n      -webkit-filter: blur(8px);\n      filter: blur(8px); }\n    .dropzone .dz-preview .dz-image,\n    .previews .dz-preview .dz-image {\n      border-radius: 20px;\n      overflow: hidden;\n      width: 120px;\n      height: 120px;\n      position: relative;\n      display: block;\n      z-index: 10; }\n      .dropzone .dz-preview .dz-image img,\n      .previews .dz-preview .dz-image img {\n        display: block; }\n    .dropzone .dz-preview.dz-success .dz-success-mark,\n    .previews .dz-preview.dz-sussess .dz-success-mark {\n      -webkit-animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1);\n      -moz-animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1);\n      -ms-animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1);\n      -o-animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1);\n      animation: passing-through 3s cubic-bezier(0.77, 0, 0.175, 1); }\n    .dropzone .dz-preview.dz-error .dz-error-mark,\n    .previews .dz-preview.dz-error .dz-error-mark {\n      opacity: 1;\n      -webkit-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);\n      -moz-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);\n      -ms-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);\n      -o-animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1);\n      animation: slide-in 3s cubic-bezier(0.77, 0, 0.175, 1); }\n    .dropzone .dz-preview .dz-success-mark, \n    .dropzone .dz-preview .dz-error-mark,\n    .previews .dz-preview .dz-success-mark,\n    .previews .dz-preview .dz-error-mark {\n      pointer-events: none;\n      opacity: 0;\n      z-index: 500;\n      position: absolute;\n      display: block;\n      top: 50%;\n      left: 50%;\n      margin-left: -27px;\n      margin-top: -27px; }\n      .dropzone .dz-preview .dz-success-mark svg, \n      .dropzone .dz-preview .dz-error-mark svg,\n      .previews .dz-preview .dz-success-mark svg,\n      .previews .dz-preview .dz-error-mark svg {\n        display: block;\n        width: 54px;\n        height: 54px; }\n    .dropzone .dz-preview.dz-processing .dz-progress,\n    .previews .dz-preview.dz-processing .dz-progress {\n      opacity: 1;\n      -webkit-transition: all 0.2s linear;\n      -moz-transition: all 0.2s linear;\n      -ms-transition: all 0.2s linear;\n      -o-transition: all 0.2s linear;\n      transition: all 0.2s linear; }\n    .dropzone .dz-preview.dz-complete .dz-progress,\n    .previews .dz-preview.dz-complete .dz-progress {\n      opacity: 0;\n      -webkit-transition: opacity 0.4s ease-in;\n      -moz-transition: opacity 0.4s ease-in;\n      -ms-transition: opacity 0.4s ease-in;\n      -o-transition: opacity 0.4s ease-in;\n      transition: opacity 0.4s ease-in; }\n    .dropzone .dz-preview:not(.dz-processing) .dz-progress,\n    .previews .dz-preview:not(.dz-processing) .dz-progress {\n      -webkit-animation: pulse 6s ease infinite;\n      -moz-animation: pulse 6s ease infinite;\n      -ms-animation: pulse 6s ease infinite;\n      -o-animation: pulse 6s ease infinite;\n      animation: pulse 6s ease infinite; }\n    .dropzone .dz-preview .dz-progress,\n    .previews .dz-preview .dz-progress {\n      opacity: 1;\n      z-index: 1000;\n      pointer-events: none;\n      position: absolute;\n      height: 16px;\n      left: 50%;\n      top: 50%;\n      margin-top: -8px;\n      width: 80px;\n      margin-left: -40px;\n      background: rgba(255, 255, 255, 0.9);\n      -webkit-transform: scale(1);\n      border-radius: 8px;\n      overflow: hidden; }\n      .dropzone .dz-preview .dz-progress .dz-upload,\n      .previews .dz-preview .dz-progress .dz-upload {\n        background: #333;\n        background: linear-gradient(to bottom, #666, #444);\n        position: absolute;\n        top: 0;\n        left: 0;\n        bottom: 0;\n        width: 0;\n        -webkit-transition: width 300ms ease-in-out;\n        -moz-transition: width 300ms ease-in-out;\n        -ms-transition: width 300ms ease-in-out;\n        -o-transition: width 300ms ease-in-out;\n        transition: width 300ms ease-in-out; }\n    .dropzone .dz-preview.dz-error .dz-error-message,\n    .previews .dz-preview.dz-error .dz-error-message {\n      display: block; \n      opacity: 1;\n    }\n    .dropzone .dz-preview.dz-error:hover .dz-error-message,\n    .previews .dz-preview.dz-error:hover .dz-error-message {\n      opacity: 1;\n      pointer-events: auto; }\n    .dropzone .dz-preview .dz-error-message,\n    .previews .dz-preview .dz-error-message {\n      pointer-events: none;\n      z-index: 1000;\n      position: absolute;\n      display: block;\n      display: none;\n      opacity: 0;\n      -webkit-transition: opacity 0.3s ease;\n      -moz-transition: opacity 0.3s ease;\n      -ms-transition: opacity 0.3s ease;\n      -o-transition: opacity 0.3s ease;\n      transition: opacity 0.3s ease;\n      border-radius: 8px;\n      font-size: 13px;\n      top: 130px;\n      left: -10px;\n      width: 140px;\n      background: #be2626;\n      background: linear-gradient(to bottom, #be2626, #a92222);\n      padding: 0.5em 1.2em;\n      color: white; }\n      .dropzone .dz-preview .dz-error-message:after,\n      .previews .dz-preview .dz-error-message:after {\n        content: '';\n        position: absolute;\n        top: -6px;\n        left: 64px;\n        width: 0;\n        height: 0;\n        border-left: 6px solid transparent;\n        border-right: 6px solid transparent;\n        border-bottom: 6px solid #be2626; }\n.previews .dz-preview .edit-image {\n  position: absolute;\n  bottom: 5px;\n  right: 5px;\n  z-index: 99;\n  width: 25px;\n  height: 25px;\n  line-height: 25px;\n  text-align: center;\n  padding: 0;\n}\n\n\n\n.previews .dz-preview .dz-remove {\n  position: absolute;\n  z-index: 30;\n  color: white;\n  top: 5px;\n  right: 5px;\n  text-decoration: none !important;\n  font-size: 0.8rem;\n  font-weight: 800;\n  opacity: 0;\n  width: 24px;\n  height: 24px;\n  line-height: 24px;\n  text-align: center;\n  background: #000;\n  border-radius: 50%;\n  z-index: 9999;  \n}\n.previews .dz-preview .dz-remove:before {\n  content: \"\\F00D\";\n  font-family: FontAwesome;\n  font-size: 12px;\n}\n.previews .dz-preview:hover .dz-remove {\n  opacity: 1;\n}\n\n\n/* \n.vue-dropzone {\n  border: 2px solid #E5E5E5;\n  font-family: 'Arial', sans-serif;\n  letter-spacing: 0.2px;\n  color: #777;\n  transition: background-color 0.2s linear;\n}\n.vue-dropzone:hover {\n  background-color: #F6F6F6;\n}\n.vue-dropzone i {\n  color: #CCC;\n}\n.vue-dropzone .dz-preview .dz-image {\n  border-radius: 0;\n  width: 100%;\n  height: 100%;\n}\n.vue-dropzone .dz-preview .dz-image img:not([src]) {\n  width: 200px;\n  height: 200px;\n}\n.vue-dropzone .dz-preview .dz-image:hover img {\n  transform: none;\n  -webkit-filter: none;\n}\n.vue-dropzone .dz-preview .dz-details {\n  bottom: 0;\n  top: 0;\n  color: white;\n  background-color: rgba(33, 150, 243, 0.8);\n  transition: opacity .2s linear;\n  text-align: left;\n}\n.vue-dropzone .dz-preview .dz-details .dz-filename {\n  overflow: hidden;\n}\n.vue-dropzone .dz-preview .dz-details .dz-filename span,\n.vue-dropzone .dz-preview .dz-details .dz-size span {\n  background-color: transparent;\n}\n.vue-dropzone .dz-preview .dz-details .dz-filename:not(:hover) span {\n  border: none;\n}\n.vue-dropzone .dz-preview .dz-details .dz-filename:hover span {\n  background-color: transparent;\n  border: none;\n}\n.vue-dropzone .dz-preview .dz-progress .dz-upload {\n  background: #cccccc;\n}\n.vue-dropzone .dz-preview .dz-remove {\n  position: absolute;\n  z-index: 30;\n  color: white;\n  top: 5px;\n  right: 5px;\n  text-decoration: none !important;\n  font-size: 0.8rem;\n  font-weight: 800;\n  opacity: 0;\n  width: 24px;\n  height: 24px;\n  line-height: 24px;\n  text-align: center;\n  background: #000;\n  border-radius: 50%;\n  z-index: 9999;  \n}\n.vue-dropzone .dz-preview .dz-remove:before {\n  content: \"\\f00d\";\n  font-family: FontAwesome;\n  font-size: 12px;\n}\n.vue-dropzone .dz-preview:hover .dz-remove {\n  opacity: 1;\n}\n.vue-dropzone .dz-preview .dz-success-mark,\n.vue-dropzone .dz-preview .dz-error-mark {\n  margin-left: auto;\n  margin-top: auto;\n  width: 100%;\n  top: 35%;\n  left: 0;\n}\n.vue-dropzone .dz-preview .dz-success-mark svg,\n.vue-dropzone .dz-preview .dz-error-mark svg {\n  margin-left: auto;\n  margin-right: auto;\n}\n.vue-dropzone .dz-preview .dz-error-message {\n  top: calc(15%);\n  margin-left: auto;\n  margin-right: auto;\n  left: 0;\n  width: 100%;\n}\n.vue-dropzone .dz-preview .dz-error-message:after {\n  bottom: -6px;\n  top: initial;\n  border-top: 6px solid #a92222;\n  border-bottom: none;\n} */\n\n", ""]);
 
 // exports
 
@@ -46071,6 +47613,267 @@ if (false) {
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-1cb37342\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0&bustCache!./resources/assets/js/components/views/home/Pagination.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "ul",
+    { staticClass: "pagination" },
+    [
+      _vm.pagination.current_page > 1
+        ? _c("li", [
+            _c(
+              "a",
+              {
+                attrs: { "aria-label": "Previous" },
+                on: {
+                  click: function($event) {
+                    $event.preventDefault()
+                    _vm.changePage(_vm.pagination.current_page - 1)
+                  }
+                }
+              },
+              [_c("span", { attrs: { "aria-hidden": "true" } }, [_vm._v("«")])]
+            )
+          ])
+        : _vm._e(),
+      _vm._v(" "),
+      _vm._l(_vm.pagesNumber, function(page) {
+        return _c(
+          "li",
+          { class: { active: page == _vm.pagination.current_page } },
+          [
+            _c(
+              "a",
+              {
+                on: {
+                  click: function($event) {
+                    $event.preventDefault()
+                    _vm.changePage(page)
+                  }
+                }
+              },
+              [_vm._v(_vm._s(page))]
+            )
+          ]
+        )
+      }),
+      _vm._v(" "),
+      _vm.pagination.current_page < _vm.pagination.last_page
+        ? _c("li", [
+            _c(
+              "a",
+              {
+                attrs: { "aria-label": "Next" },
+                on: {
+                  click: function($event) {
+                    $event.preventDefault()
+                    _vm.changePage(_vm.pagination.current_page + 1)
+                  }
+                }
+              },
+              [_c("span", { attrs: { "aria-hidden": "true" } }, [_vm._v("»")])]
+            )
+          ])
+        : _vm._e()
+    ],
+    2
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-1cb37342", module.exports)
+  }
+}
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-2082fb80\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0&bustCache!./resources/assets/js/components/views/products/Show.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    { staticClass: "white-bg" },
+    [
+      _vm.loading
+        ? _c("page-loading")
+        : _c(
+            "div",
+            { staticClass: "panel panel-default" },
+            [
+              _c("div", { staticClass: "panel-heading clearfix" }, [
+                _vm._v("\n            Product Detail\n            "),
+                _vm.user.uid
+                  ? _c("div", { staticClass: "pull-right" }, [
+                      _vm.user &&
+                      _vm.user.can["edit-post"] &&
+                      _vm.user.uid === _vm.dataProduct.user.uid
+                        ? _c(
+                            "span",
+                            { staticStyle: { "margin-left": "10px" } },
+                            [
+                              _c(
+                                "a",
+                                {
+                                  staticClass: "btn btn-sm btn-primary",
+                                  attrs: {
+                                    href:
+                                      "/" +
+                                      _vm.dataProduct.user.slug +
+                                      "/post/" +
+                                      _vm.dataProduct.slug +
+                                      "/edit"
+                                  }
+                                },
+                                [_vm._v("Chỉnh sửa")]
+                              )
+                            ]
+                          )
+                        : _vm._e(),
+                      _vm._v(" "),
+                      _vm.user &&
+                      _vm.user.can["delete-post"] &&
+                      _vm.user.uid === _vm.dataProduct.user.uid
+                        ? _c("span", [
+                            _c(
+                              "a",
+                              {
+                                staticClass: "btn btn-sm btn-danger",
+                                on: { click: _vm.delete_post }
+                              },
+                              [_vm._v("Xóa")]
+                            )
+                          ])
+                        : _vm._e()
+                    ])
+                  : _vm._e()
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "panel-body" }, [
+                _c("h1", [_vm._v(_vm._s(_vm.dataProduct.title))]),
+                _vm._v(" "),
+                _c("small", [
+                  _c(
+                    "a",
+                    { attrs: { href: "/" + _vm.dataProduct.user.slug } },
+                    [_vm._v(_vm._s(_vm.dataProduct.user.name))]
+                  )
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "form-group" }, [
+                  _c("p", [
+                    _vm._v(
+                      "\n                    " +
+                        _vm._s(_vm.dataProduct.body) +
+                        "\n                "
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "product-price" })
+                ]),
+                _vm._v(" "),
+                _c("h4", [
+                  _vm._v("Hình ảnh sản phẩm\n                "),
+                  _c("small", { staticClass: "badge" }, [
+                    _vm._v(_vm._s(_vm.dataProduct.attachments.length))
+                  ])
+                ]),
+                _vm._v(" "),
+                _c(
+                  "ul",
+                  {
+                    staticClass:
+                      "scroller scrollbar-macosx product-images list-inline"
+                  },
+                  _vm._l(_vm.dataProduct.attachments, function(attachment) {
+                    return _c(
+                      "li",
+                      { staticClass: "col-lg-6 col-md-6 col-sm-6 col-xs-6" },
+                      [
+                        _c(
+                          "a",
+                          {
+                            staticClass: "border-outline _ibi",
+                            attrs: { href: "" },
+                            on: {
+                              click: function($event) {
+                                $event.preventDefault()
+                                _vm.modal_image(attachment.id)
+                              }
+                            }
+                          },
+                          [
+                            _c("img", {
+                              attrs: { src: "/images/" + attachment.large }
+                            }),
+                            _vm._v(" "),
+                            attachment.detail.price
+                              ? _c("div", { staticClass: "image-price" }, [
+                                  _c("span", [
+                                    _vm._v(
+                                      _vm._s(attachment.detail.price) + ".000 đ"
+                                    )
+                                  ])
+                                ])
+                              : _vm._e()
+                          ]
+                        )
+                      ]
+                    )
+                  })
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "panel-footer" }, [
+                _c(
+                  "a",
+                  {
+                    staticClass: "btn btn-sm btn-default",
+                    attrs: { href: "/" }
+                  },
+                  [_vm._v("Back to home")]
+                )
+              ]),
+              _vm._v(" "),
+              _c("image-modal", {
+                attrs: {
+                  arrayImages: _vm.arrayImages,
+                  dataImage: _vm.dataImage,
+                  type: "show",
+                  author_uid: _vm.dataProduct.user.uid
+                }
+              })
+            ],
+            1
+          )
+    ],
+    1
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-2082fb80", module.exports)
+  }
+}
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-2134da65\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0&bustCache!./resources/assets/js/components/views/PageLoading.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -46515,6 +48318,392 @@ if (false) {
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-61069b4c\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0&bustCache!./resources/assets/js/components/views/home/Index.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    { staticClass: "articles" },
+    [
+      _vm.loading ? _c("page-loading") : _vm._e(),
+      _vm._v(" "),
+      !_vm.loading && _vm.products.length > 0
+        ? _c(
+            "div",
+            { staticClass: "content clearfix" },
+            _vm._l(_vm.products, function(product) {
+              return _c(
+                "div",
+                {
+                  staticClass:
+                    "col-lg-8 col-md-8 col-sm-8 col-xs-12 col-sx-24 product-item"
+                },
+                [
+                  _c("div", { staticClass: "white-bg" }, [
+                    _c("div", { staticClass: "product-item-image" }, [
+                      product.attachments.length >= 3
+                        ? _c(
+                            "ul",
+                            { staticClass: "list-inline attachments clearfix" },
+                            [
+                              _c("li", { staticClass: "large-image" }, [
+                                _c(
+                                  "a",
+                                  {
+                                    staticClass: "border-outline",
+                                    attrs: {
+                                      href:
+                                        "/" +
+                                        product.user[0].slug +
+                                        "/post/" +
+                                        product.slug,
+                                      title: product.title
+                                    }
+                                  },
+                                  [
+                                    _c("img", {
+                                      attrs: {
+                                        src:
+                                          "/images/" +
+                                          product.user[0].uid +
+                                          "/" +
+                                          product.attachments[0].large,
+                                        title: product.title,
+                                        alt: product.title
+                                      }
+                                    })
+                                  ]
+                                )
+                              ]),
+                              _vm._v(" "),
+                              _c("li", { staticClass: "small-image" }, [
+                                _c(
+                                  "a",
+                                  {
+                                    staticClass: "border-outline",
+                                    attrs: {
+                                      href:
+                                        "/" +
+                                        product.user[0].slug +
+                                        "/post/" +
+                                        product.slug,
+                                      title: product.title
+                                    }
+                                  },
+                                  [
+                                    _c("img", {
+                                      attrs: {
+                                        src:
+                                          "/images/" +
+                                          product.user[0].uid +
+                                          "/" +
+                                          product.attachments[1].small,
+                                        title: product.title,
+                                        alt: product.title
+                                      }
+                                    })
+                                  ]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "a",
+                                  {
+                                    staticClass: "border-outline",
+                                    attrs: {
+                                      href:
+                                        "/" +
+                                        product.user[0].slug +
+                                        "/post/" +
+                                        product.slug,
+                                      title: product.title
+                                    }
+                                  },
+                                  [
+                                    _c("img", {
+                                      attrs: {
+                                        src:
+                                          "/images/" +
+                                          product.user[0].uid +
+                                          "/" +
+                                          product.attachments[2].small,
+                                        title: product.title,
+                                        alt: product.title
+                                      }
+                                    }),
+                                    _vm._v(" "),
+                                    product.attachments.length > 3
+                                      ? _c(
+                                          "div",
+                                          { staticClass: "image-count" },
+                                          [
+                                            _c("span", [
+                                              _vm._v(
+                                                _vm._s(
+                                                  "+" +
+                                                    (product.attachments
+                                                      .length -
+                                                      3)
+                                                )
+                                              )
+                                            ])
+                                          ]
+                                        )
+                                      : _vm._e()
+                                  ]
+                                )
+                              ])
+                            ]
+                          )
+                        : _vm._e(),
+                      _vm._v(" "),
+                      product.attachments.length == 2
+                        ? _c(
+                            "ul",
+                            { staticClass: "list-inline attachments clearfix" },
+                            _vm._l(product.attachments, function(attachment) {
+                              return _c("li", { staticClass: "half-image" }, [
+                                _c(
+                                  "a",
+                                  {
+                                    staticClass: "border-outline",
+                                    attrs: {
+                                      href:
+                                        "/" +
+                                        product.user[0].slug +
+                                        "/post/" +
+                                        product.slug,
+                                      title: product.title
+                                    }
+                                  },
+                                  [
+                                    _c("img", {
+                                      attrs: {
+                                        src:
+                                          "/images/" +
+                                          product.user[0].uid +
+                                          "/" +
+                                          attachment.half,
+                                        title: product.title,
+                                        alt: product.title
+                                      }
+                                    })
+                                  ]
+                                )
+                              ])
+                            })
+                          )
+                        : _vm._e(),
+                      _vm._v(" "),
+                      product.attachments.length == 1
+                        ? _c(
+                            "ul",
+                            { staticClass: "list-inline attachments clearfix" },
+                            _vm._l(product.attachments, function(attachment) {
+                              return _c("li", { staticClass: "full-image" }, [
+                                _c(
+                                  "a",
+                                  {
+                                    staticClass: "border-outline",
+                                    attrs: {
+                                      href:
+                                        "/" +
+                                        product.user[0].slug +
+                                        "/post/" +
+                                        product.slug,
+                                      title: product.title
+                                    }
+                                  },
+                                  [
+                                    _c("img", {
+                                      attrs: {
+                                        src:
+                                          "/images/" +
+                                          product.user[0].uid +
+                                          "/" +
+                                          attachment.full,
+                                        title: product.title,
+                                        alt: product.title
+                                      }
+                                    })
+                                  ]
+                                )
+                              ])
+                            })
+                          )
+                        : _vm._e(),
+                      _vm._v(" "),
+                      product.attachments.length == 0
+                        ? _c(
+                            "ul",
+                            { staticClass: "list-inline attachments clearfix" },
+                            [
+                              _c("li", { staticClass: "full-image" }, [
+                                _c(
+                                  "a",
+                                  {
+                                    staticClass: "border-outline",
+                                    attrs: {
+                                      href:
+                                        "/" +
+                                        product.user[0].slug +
+                                        "/post/" +
+                                        product.slug,
+                                      title: product.title
+                                    }
+                                  },
+                                  [
+                                    _c("img", {
+                                      attrs: {
+                                        src: "/images/no-image.png",
+                                        title: product.title,
+                                        alt: product.title
+                                      }
+                                    })
+                                  ]
+                                )
+                              ])
+                            ]
+                          )
+                        : _vm._e()
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "product-item-body" }, [
+                      _c("h3", [
+                        _c(
+                          "a",
+                          {
+                            attrs: {
+                              href:
+                                "/" +
+                                product.user[0].slug +
+                                "/post/" +
+                                product.slug,
+                              title: product.title
+                            }
+                          },
+                          [
+                            _vm._v(
+                              "\n                            " +
+                                _vm._s(product.title) +
+                                "\n                        "
+                            )
+                          ]
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("span", { staticClass: "product-body" }, [
+                        _vm._v(_vm._s(product.body))
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "product-item-footer" }, [
+                      _c("div", { staticClass: "author" }, [
+                        _c(
+                          "a",
+                          { attrs: { href: "/" + product.user[0].slug } },
+                          [
+                            _c(
+                              "div",
+                              {
+                                staticClass:
+                                  "img-circle border-outline _ib outline-circle"
+                              },
+                              [
+                                _c("img", {
+                                  staticClass: "img-circle",
+                                  attrs: {
+                                    src: product.user[0].avatar,
+                                    width: "24"
+                                  }
+                                })
+                              ]
+                            )
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "a",
+                          {
+                            staticClass: "user_name",
+                            attrs: { href: "/" + product.user[0].slug }
+                          },
+                          [_vm._v(_vm._s(product.user[0].name))]
+                        ),
+                        _vm._v(" "),
+                        _vm._m(0, true)
+                      ])
+                    ])
+                  ])
+                ]
+              )
+            })
+          )
+        : _vm._e(),
+      _vm._v(" "),
+      _vm.products.length == 0
+        ? _c("div", [
+            _c("p", { staticClass: "text-center" }, [
+              _vm._v("\n            Khong tim thay noi dung phu hop\n        ")
+            ])
+          ])
+        : _vm._e(),
+      _vm._v(" "),
+      _vm.products.length > 0
+        ? _c("pagination", {
+            attrs: { pagination: _vm.pagination, offset: 4 },
+            nativeOn: {
+              click: function($event) {
+                _vm.getProducts(_vm.pagination.current_page)
+              }
+            }
+          })
+        : _vm._e()
+    ],
+    1
+  )
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "ul",
+      { staticClass: "coccoc-product-item-btn list-inline pull-right" },
+      [
+        _c("li", [
+          _c("a", { attrs: { href: "" } }, [
+            _c("i", { staticClass: "fa fa-comment" }),
+            _vm._v(" 6")
+          ])
+        ]),
+        _vm._v(" "),
+        _c("li", [
+          _c(
+            "a",
+            { staticClass: "btn btn-default btn-xs", attrs: { href: "" } },
+            [_c("i", { staticClass: "fa fa-bookmark" }), _vm._v(" Lưu")]
+          )
+        ])
+      ]
+    )
+  }
+]
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-61069b4c", module.exports)
+  }
+}
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-6a2593b1\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0&bustCache!./resources/assets/js/components/UnreadNotification.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -46823,7 +49012,7 @@ var render = function() {
                   ref: "child",
                   attrs: {
                     attachments_ids: _vm.child_attachments,
-                    maxfile: 10,
+                    maxfile: 30,
                     params: { type: "image" }
                   },
                   on: { completed: _vm.get_images }
@@ -46858,15 +49047,393 @@ var render = function() {
               })
             ]),
             _vm._v(" "),
-            _c(
-              "button",
-              {
-                staticClass: "btn btn-sm btn-primary",
-                attrs: { type: "button" },
-                on: { click: _vm.save }
-              },
-              [_vm._v("Upload")]
-            )
+            _c("div", { staticClass: "form-group clearfix row" }, [
+              _c("div", { staticClass: "col-md-12" }, [
+                _c("div", { staticClass: "form-group" }, [
+                  _c("div", { staticClass: "btn-group btn-group-sm" }, [
+                    _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-default dropdown-toggle",
+                        attrs: {
+                          type: "button",
+                          "data-toggle": "dropdown",
+                          "aria-haspopup": "true",
+                          "aria-expanded": "false"
+                        }
+                      },
+                      [
+                        _vm._v(
+                          "\n                            " +
+                            _vm._s(_vm.price_label) +
+                            "\n                            "
+                        ),
+                        _c("span", { staticClass: "caret" })
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _c("ul", { staticClass: "dropdown-menu" }, [
+                      _c("li", [
+                        _c(
+                          "a",
+                          {
+                            on: {
+                              click: function($event) {
+                                _vm.status_price = 0
+                              }
+                            }
+                          },
+                          [_vm._v("Giá sản phẩm")]
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("li", [
+                        _c(
+                          "a",
+                          {
+                            on: {
+                              click: function($event) {
+                                _vm.status_price = 2
+                              }
+                            }
+                          },
+                          [_vm._v("Giá chỉ từ")]
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("li", [
+                        _c(
+                          "a",
+                          {
+                            on: {
+                              click: function($event) {
+                                _vm.status_price = 1
+                              }
+                            }
+                          },
+                          [_vm._v("Giá khuyến mãi")]
+                        )
+                      ])
+                    ])
+                  ])
+                ]),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass: "input-group",
+                    attrs: { id: "product-price" }
+                  },
+                  [
+                    _vm.status_price == 2
+                      ? _c("div", [
+                          _c("label", [_vm._v("Giá thấp nhất")]),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "input-group" }, [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.form.start_price,
+                                  expression: "form.start_price"
+                                }
+                              ],
+                              staticClass: "form-control",
+                              attrs: {
+                                type: "text",
+                                placeholder: "Nhập giá thấp nhất"
+                              },
+                              domProps: { value: _vm.form.start_price },
+                              on: {
+                                blur: function($event) {
+                                  _vm.focusOut("start_price")
+                                },
+                                focus: function($event) {
+                                  _vm.focusIn("start_price")
+                                },
+                                input: function($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.form,
+                                    "start_price",
+                                    $event.target.value
+                                  )
+                                }
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c("span", { staticClass: "input-group-addon" }, [
+                              _vm._v(".000 đ")
+                            ])
+                          ]),
+                          _vm._v(" "),
+                          _c("label", [_vm._v("Giá cao nhất")]),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "input-group" }, [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.form.end_price,
+                                  expression: "form.end_price"
+                                }
+                              ],
+                              staticClass: "form-control",
+                              attrs: {
+                                type: "text",
+                                placeholder: "Nhập giá cao nhất"
+                              },
+                              domProps: { value: _vm.form.end_price },
+                              on: {
+                                blur: function($event) {
+                                  _vm.focusOut("end_price")
+                                },
+                                focus: function($event) {
+                                  _vm.focusIn("end_price")
+                                },
+                                input: function($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.form,
+                                    "end_price",
+                                    $event.target.value
+                                  )
+                                }
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c("span", { staticClass: "input-group-addon" }, [
+                              _vm._v(".000 đ")
+                            ])
+                          ])
+                        ])
+                      : _vm._e(),
+                    _vm._v(" "),
+                    _vm.status_price == 1
+                      ? _c("div", [
+                          _c("label", [_vm._v("Giá cũ")]),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "input-group" }, [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.form.price,
+                                  expression: "form.price"
+                                }
+                              ],
+                              staticClass: "form-control",
+                              attrs: {
+                                type: "text",
+                                placeholder: "Nhập giá cũ"
+                              },
+                              domProps: { value: _vm.form.price },
+                              on: {
+                                blur: function($event) {
+                                  _vm.focusOut("price")
+                                },
+                                focus: function($event) {
+                                  _vm.focusIn("price")
+                                },
+                                input: function($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.form,
+                                    "price",
+                                    $event.target.value
+                                  )
+                                }
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c("span", { staticClass: "input-group-addon" }, [
+                              _vm._v(".000 đ")
+                            ])
+                          ]),
+                          _vm._v(" "),
+                          _c("label", [_vm._v("Giá khuyến mãi")]),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "input-group" }, [
+                            _c("input", {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.form.new_price,
+                                  expression: "form.new_price"
+                                }
+                              ],
+                              staticClass: "form-control",
+                              attrs: {
+                                type: "text",
+                                placeholder: "Nhập giá khuyến mãi"
+                              },
+                              domProps: { value: _vm.form.new_price },
+                              on: {
+                                blur: function($event) {
+                                  _vm.focusOut("new_price")
+                                },
+                                focus: function($event) {
+                                  _vm.focusIn("new_price")
+                                },
+                                input: function($event) {
+                                  if ($event.target.composing) {
+                                    return
+                                  }
+                                  _vm.$set(
+                                    _vm.form,
+                                    "new_price",
+                                    $event.target.value
+                                  )
+                                }
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c("span", { staticClass: "input-group-addon" }, [
+                              _vm._v(".000 đ")
+                            ])
+                          ]),
+                          _vm._v(" "),
+                          _vm.form.old_price && _vm.form.new_price
+                            ? _c("label", { staticClass: "price-alert" }, [
+                                _vm._v(
+                                  "\n                            " +
+                                    _vm._s(
+                                      parseInt(
+                                        _vm.form.new_price.replace(".", "")
+                                      ) -
+                                        parseInt(
+                                          _vm.form.old_price.replace(".", "")
+                                        ) <
+                                      0
+                                        ? "Giảm: " +
+                                          Math.abs(
+                                            Math.round(
+                                              (parseInt(
+                                                _vm.form.new_price.replace(
+                                                  ".",
+                                                  ""
+                                                )
+                                              ) -
+                                                parseInt(
+                                                  _vm.form.old_price.replace(
+                                                    ".",
+                                                    ""
+                                                  )
+                                                )) /
+                                                parseInt(
+                                                  _vm.form.old_price.replace(
+                                                    ".",
+                                                    ""
+                                                  )
+                                                ) *
+                                                100
+                                            )
+                                          ) +
+                                          "%"
+                                        : "Lỗi: Giá KM phải thấp hơn giá cũ"
+                                    ) +
+                                    "\n                        "
+                                )
+                              ])
+                            : _vm._e()
+                        ])
+                      : _vm._e(),
+                    _vm._v(" "),
+                    _vm.status_price == 0
+                      ? _c("div", { staticClass: "input-group" }, [
+                          _c("input", {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.form.price,
+                                expression: "form.price"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            attrs: {
+                              type: "text",
+                              placeholder: "Nhập giá sản phẩm"
+                            },
+                            domProps: { value: _vm.form.price },
+                            on: {
+                              blur: function($event) {
+                                _vm.focusOut("price")
+                              },
+                              focus: function($event) {
+                                _vm.focusIn("price")
+                              },
+                              input: function($event) {
+                                if ($event.target.composing) {
+                                  return
+                                }
+                                _vm.$set(_vm.form, "price", $event.target.value)
+                              }
+                            }
+                          }),
+                          _vm._v(" "),
+                          _c("span", { staticClass: "input-group-addon" }, [
+                            _vm._v(".000 đ")
+                          ])
+                        ])
+                      : _vm._e()
+                  ]
+                )
+              ])
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "form-group" }, [
+              _c("div", { staticClass: "pull-right" }, [
+                _vm.product_id
+                  ? _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-sm btn-primary",
+                        attrs: { type: "button" },
+                        on: { click: _vm.save }
+                      },
+                      [_vm._v("Cập nhật")]
+                    )
+                  : _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-sm btn-primary",
+                        attrs: { type: "button" },
+                        on: { click: _vm.save }
+                      },
+                      [_vm._v("Đăng tin")]
+                    )
+              ]),
+              _vm._v(" "),
+              _vm.dataAuthor.slug
+                ? _c("div", { staticClass: "pull-left" }, [
+                    _c(
+                      "a",
+                      {
+                        staticClass: "btn btn-sm btn-default",
+                        attrs: {
+                          href:
+                            "/" + _vm.dataAuthor.slug + "/post/" + _vm.form.slug
+                        }
+                      },
+                      [
+                        _c("i", { staticClass: "fa fa-mail-reply" }),
+                        _vm._v(" Quay lại bài viết")
+                      ]
+                    )
+                  ])
+                : _vm._e()
+            ])
           ])
     ],
     1
@@ -46906,7 +49473,16 @@ var render = function() {
           attrs: { id: "product_image" }
         },
         [_vm._m(0)]
-      )
+      ),
+      _vm._v(" "),
+      _c("image-modal", {
+        attrs: {
+          arrayImages: _vm.arrayImages,
+          dataImage: _vm.dataImage,
+          type: "show",
+          author_uid: _vm.user.uid
+        }
+      })
     ],
     1
   )
@@ -46955,6 +49531,531 @@ if (false) {
   module.hot.accept()
   if (module.hot.data) {
     require("vue-hot-reload-api")      .rerender("data-v-a5fb9daa", module.exports)
+  }
+}
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-a60c6ad6\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0&bustCache!./resources/assets/js/components/views/products/ImageModal.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    {
+      staticClass: "modal fade",
+      attrs: {
+        id: "modal_image",
+        tabindex: "-1",
+        role: "dialog",
+        "aria-labelledby": "ImageLabel"
+      }
+    },
+    [
+      _c(
+        "div",
+        { staticClass: "modal-dialog modal-md", attrs: { role: "document" } },
+        [
+          _c("div", { staticClass: "modal-content" }, [
+            _c("div", { staticClass: "modal-header" }, [
+              _c(
+                "button",
+                {
+                  staticClass: "close",
+                  attrs: {
+                    type: "button",
+                    "data-dismiss": "modal",
+                    "aria-label": "Close"
+                  },
+                  on: {
+                    click: function($event) {
+                      _vm.mode = "show"
+                    }
+                  }
+                },
+                [
+                  _c("span", { attrs: { "aria-hidden": "true" } }, [
+                    _vm._v("×")
+                  ])
+                ]
+              ),
+              _vm._v(" "),
+              _c(
+                "h4",
+                { staticClass: "modal-title", attrs: { id: "ImageLabel" } },
+                [_vm._v("Chi tiết mặt hàng")]
+              )
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "modal-body" }, [
+              _c("div", { staticClass: "modal-body-wrapper row clearfix" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "col-lg-2 col-md-2 col-sm-2 col-xs-2",
+                    staticStyle: { "padding-right": "0" },
+                    attrs: { id: "thumb-wrapper" }
+                  },
+                  [
+                    _c("transition", { attrs: { name: "fade" } }, [
+                      _vm.arrayImages
+                        ? _c(
+                            "ul",
+                            {
+                              staticClass:
+                                "modal-thumbnail thumb-slide scrollbar-macosx scroller"
+                            },
+                            _vm._l(_vm.arrayImages, function(thumb) {
+                              return _c(
+                                "li",
+                                {
+                                  class: {
+                                    active: _vm.dataImage.id == thumb.dataId
+                                  },
+                                  attrs: {
+                                    "data-id": thumb.dataId,
+                                    "data-url": thumb.dataURL
+                                  },
+                                  on: {
+                                    click: function($event) {
+                                      _vm.show_modal_image(thumb.dataId)
+                                    }
+                                  }
+                                },
+                                [
+                                  _c("img", {
+                                    attrs: { src: "/" + thumb.dataThumb }
+                                  })
+                                ]
+                              )
+                            })
+                          )
+                        : _vm._e()
+                    ])
+                  ],
+                  1
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "col-md-12 col-md-offset-2 col-lg-12 col-lg-offset-2 col-sm-12 col-sm-offset-2 col-xs-12 col-xs-offset-2"
+                  },
+                  [
+                    _c("transition", { attrs: { name: "fade" } }, [
+                      _vm.dataImage.url
+                        ? _c("img", {
+                            attrs: {
+                              id: "large-image",
+                              src: "/images/" + _vm.dataImage.url
+                            }
+                          })
+                        : _vm._e()
+                    ])
+                  ],
+                  1
+                ),
+                _vm._v(" "),
+                _vm.mode == "update"
+                  ? _c(
+                      "div",
+                      {
+                        staticClass: "col-lg-10 col-md-10 col-sm-10 col-xs-10"
+                      },
+                      [
+                        _c(
+                          "div",
+                          {
+                            staticClass: "input-group clearfix",
+                            attrs: { id: "product-price" }
+                          },
+                          [
+                            _c("h4", [_vm._v("Giá bán (tùy chọn)")]),
+                            _vm._v(" "),
+                            _c("div", { staticClass: "input-group" }, [
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model",
+                                    value: _vm.dataImage.price,
+                                    expression: "dataImage.price"
+                                  }
+                                ],
+                                staticClass: "form-control",
+                                attrs: {
+                                  id: "product-price-input",
+                                  type: "text",
+                                  placeholder: "Nhập giá sản phẩm",
+                                  autofocus: ""
+                                },
+                                domProps: { value: _vm.dataImage.price },
+                                on: {
+                                  keypress: _vm.isNumber,
+                                  input: function($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.$set(
+                                      _vm.dataImage,
+                                      "price",
+                                      $event.target.value
+                                    )
+                                  }
+                                }
+                              }),
+                              _vm._v(" "),
+                              _c("span", { staticClass: "input-group-addon" }, [
+                                _vm._v(".000 đ")
+                              ])
+                            ])
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "div",
+                          {
+                            staticClass: "clearfix",
+                            attrs: { id: "image-caption" }
+                          },
+                          [
+                            _c("h4", [_vm._v("Mô tả (tùy chọn)")]),
+                            _vm._v(" "),
+                            _c("transition", { attrs: { name: "fade" } }, [
+                              _vm.dataImage
+                                ? _c("textarea", {
+                                    directives: [
+                                      {
+                                        name: "model",
+                                        rawName: "v-model",
+                                        value: _vm.dataImage.caption,
+                                        expression: "dataImage.caption"
+                                      }
+                                    ],
+                                    staticClass: "form-control",
+                                    class: {
+                                      error: parseInt(_vm.inputData.caption) < 0
+                                    },
+                                    attrs: {
+                                      id: "product-detail-input",
+                                      rows: "2",
+                                      cols: "80",
+                                      placeholder: "Viết vài dòng mô tả"
+                                    },
+                                    domProps: { value: _vm.dataImage.caption },
+                                    on: {
+                                      input: function($event) {
+                                        if ($event.target.composing) {
+                                          return
+                                        }
+                                        _vm.$set(
+                                          _vm.dataImage,
+                                          "caption",
+                                          $event.target.value
+                                        )
+                                      }
+                                    }
+                                  })
+                                : _vm._e()
+                            ]),
+                            _vm._v(" "),
+                            _c(
+                              "span",
+                              {
+                                staticClass: "pull-right",
+                                class: {
+                                  error: parseInt(_vm.inputData.caption) < 0
+                                }
+                              },
+                              [_vm._v(_vm._s(_vm.inputData.caption))]
+                            )
+                          ],
+                          1
+                        ),
+                        _vm._v(" "),
+                        _c("div", { staticClass: "modal-body-alert" }, [
+                          _vm._v(
+                            "\n                            Mẹo: Bạn có thể thêm giá bán và mô tả chi tiết cho mỗi hình ảnh mặt hàng\n                        "
+                          )
+                        ])
+                      ]
+                    )
+                  : _c(
+                      "div",
+                      {
+                        staticClass: "col-lg-10 col-md-10 col-sm-10 col-xs-10"
+                      },
+                      [
+                        _c("div", { staticClass: "product-image-detail" }, [
+                          _vm.author_uid &&
+                          _vm.user.uid == _vm.author_uid &&
+                          _vm.user.can["edit-post"]
+                            ? _c(
+                                "ul",
+                                { staticClass: "dropdown edit-action-btn" },
+                                [
+                                  _c("li", [
+                                    _vm._m(0),
+                                    _vm._v(" "),
+                                    _c(
+                                      "ul",
+                                      {
+                                        staticClass:
+                                          "dropdown-menu dropdown-menu-right"
+                                      },
+                                      [
+                                        _c("li", [
+                                          _c(
+                                            "a",
+                                            {
+                                              attrs: { href: "#" },
+                                              on: {
+                                                click: function($event) {
+                                                  _vm.mode = "update"
+                                                }
+                                              }
+                                            },
+                                            [_vm._v("Chỉnh sửa")]
+                                          )
+                                        ]),
+                                        _vm._v(" "),
+                                        _vm._m(1)
+                                      ]
+                                    )
+                                  ])
+                                ]
+                              )
+                            : _vm._e(),
+                          _vm._v(" "),
+                          _c(
+                            "div",
+                            {
+                              staticClass: "clearfix",
+                              attrs: { id: "product-price" }
+                            },
+                            [
+                              _c("h4", [_vm._v("Giá bán")]),
+                              _vm._v(" "),
+                              _vm.dataImage.price
+                                ? _c("h4", { staticClass: "price" }, [
+                                    _vm._v(
+                                      "\n                                    " +
+                                        _vm._s(_vm.dataImage.price) +
+                                        ".000 đ\n                                "
+                                    )
+                                  ])
+                                : _c("h4", { staticClass: "price" }, [
+                                    _vm._v("Đang cập nhật")
+                                  ])
+                            ]
+                          ),
+                          _vm._v(" "),
+                          _c(
+                            "div",
+                            {
+                              staticClass: "clearfix",
+                              attrs: { id: "image-caption" }
+                            },
+                            [
+                              _c("h4", [_vm._v("Mô tả")]),
+                              _vm._v(" "),
+                              _vm.dataImage.caption
+                                ? _c("h5", { staticClass: "caption" }, [
+                                    _vm._v(_vm._s(_vm.dataImage.caption))
+                                  ])
+                                : _c("h5", { staticClass: "caption" }, [
+                                    _vm._v("Đang cập nhật")
+                                  ])
+                            ]
+                          )
+                        ]),
+                        _vm._v(" "),
+                        _vm.author_uid && _vm.user.uid != _vm.author_uid
+                          ? _c("div", { staticClass: "modal-body-message" }, [
+                              _vm._m(2)
+                            ])
+                          : _vm._e()
+                      ]
+                    )
+              ])
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "modal-footer" }, [
+              _c("div", { staticClass: "btn-group pull-left" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-default btn-sm",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        _vm.prevImg(_vm.dataImage.id, _vm.dataImage.url)
+                      }
+                    }
+                  },
+                  [
+                    _c("i", { staticClass: "fa fa-arrow-left" }),
+                    _vm._v(" Ảnh trước")
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-default btn-sm",
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        _vm.nextImg(_vm.dataImage.id, _vm.dataImage.url)
+                      }
+                    }
+                  },
+                  [
+                    _vm._v("Ảnh sau\n                        "),
+                    _c("i", { staticClass: "fa fa-arrow-right" })
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _vm.mode == "show"
+                ? _c("div", { staticClass: "modal-footer-alert" }, [
+                    _vm._v(
+                      "\n                    Mẹo: Sử dụng phím\n                    "
+                    ),
+                    _c("i", { staticClass: "fa fa-long-arrow-left" }),
+                    _vm._v(" hoặc\n                    "),
+                    _c("i", { staticClass: "fa fa-long-arrow-right" }),
+                    _vm._v(" để chuyển đổi hình ảnh\n                ")
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.mode == "update"
+                ? _c("div", [
+                    _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-danger btn-sm",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            _vm.mode = "show"
+                          }
+                        }
+                      },
+                      [_c("i", { staticClass: "fa fa-times" }), _vm._v(" Hủy")]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "button",
+                      {
+                        directives: [
+                          {
+                            name: "show",
+                            rawName: "v-show",
+                            value: _vm.btn_loading,
+                            expression: "btn_loading"
+                          }
+                        ],
+                        staticClass:
+                          "btn button-primary disabled minw60 relative loading",
+                        attrs: { type: "button" }
+                      },
+                      [_vm._m(3)]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "button",
+                      {
+                        directives: [
+                          {
+                            name: "show",
+                            rawName: "v-show",
+                            value: !_vm.btn_loading,
+                            expression: "!btn_loading"
+                          }
+                        ],
+                        staticClass: "btn btn-primary btn-sm",
+                        class: {
+                          disabled: parseInt(_vm.inputData.caption) < 0
+                        },
+                        attrs: { type: "button" },
+                        on: { click: _vm.saveImageDetail }
+                      },
+                      [_c("i", { staticClass: "fa fa-save" }), _vm._v(" Lưu")]
+                    )
+                  ])
+                : _vm._e()
+            ])
+          ])
+        ]
+      )
+    ]
+  )
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "a",
+      {
+        attrs: {
+          "data-toggle": "dropdown",
+          role: "button",
+          "aria-expanded": "false",
+          "aria-haspopup": "true"
+        }
+      },
+      [
+        _c("img", {
+          attrs: { src: "/images/svg/three-dots-menu.svg", alt: "" }
+        })
+      ]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("li", [_c("a", { attrs: { href: "#" } }, [_vm._v("Xóa")])])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "button",
+      { staticClass: "btn btn-lg btn-primary btn-circle btn-block" },
+      [
+        _c("i", { staticClass: "fa fa-comment" }),
+        _vm._v(" Nhắn tin cho người bán")
+      ]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "spinner" }, [
+      _c("div", { staticClass: "bounce1" }),
+      _vm._v(" "),
+      _c("div", { staticClass: "bounce2" }),
+      _vm._v(" "),
+      _c("div", { staticClass: "bounce3" })
+    ])
+  }
+]
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-a60c6ad6", module.exports)
   }
 }
 
@@ -47310,6 +50411,33 @@ if(false) {
  if(!content.locals) {
    module.hot.accept("!!../../../../../../node_modules/css-loader/index.js!../../../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-96e5c444\",\"scoped\":false,\"hasInlineConfig\":true}!../../../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./Dropzone.vue", function() {
      var newContent = require("!!../../../../../../node_modules/css-loader/index.js!../../../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-96e5c444\",\"scoped\":false,\"hasInlineConfig\":true}!../../../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./Dropzone.vue");
+     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+     update(newContent);
+   });
+ }
+ // When the module is disposed, remove the <style> tags
+ module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+
+/***/ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-a60c6ad6\",\"scoped\":false,\"hasInlineConfig\":true}!./node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./resources/assets/js/components/views/products/ImageModal.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__("./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-a60c6ad6\",\"scoped\":false,\"hasInlineConfig\":true}!./node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./resources/assets/js/components/views/products/ImageModal.vue");
+if(typeof content === 'string') content = [[module.i, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var update = __webpack_require__("./node_modules/vue-style-loader/lib/addStylesClient.js")("24c1c991", content, false);
+// Hot Module Replacement
+if(false) {
+ // When the styles change, update the <style> tags
+ if(!content.locals) {
+   module.hot.accept("!!../../../../../../node_modules/css-loader/index.js!../../../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-a60c6ad6\",\"scoped\":false,\"hasInlineConfig\":true}!../../../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./ImageModal.vue", function() {
+     var newContent = require("!!../../../../../../node_modules/css-loader/index.js!../../../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-a60c6ad6\",\"scoped\":false,\"hasInlineConfig\":true}!../../../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./ImageModal.vue");
      if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
      update(newContent);
    });
@@ -59483,6 +62611,16 @@ var index_esm = {
 
 /***/ }),
 
+/***/ "./node_modules/webpack/buildin/amd-options.js":
+/***/ (function(module, exports) {
+
+/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {/* globals __webpack_amd_options__ */
+module.exports = __webpack_amd_options__;
+
+/* WEBPACK VAR INJECTION */}.call(exports, {}))
+
+/***/ }),
+
 /***/ "./node_modules/webpack/buildin/global.js":
 /***/ (function(module, exports) {
 
@@ -59613,6 +62751,827 @@ yeast.encode = encode;
 yeast.decode = decode;
 module.exports = yeast;
 
+
+/***/ }),
+
+/***/ "./public/plugins/prettify/prettify.css":
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__("./node_modules/css-loader/index.js!./public/plugins/prettify/prettify.css");
+if(typeof content === 'string') content = [[module.i, content, '']];
+// Prepare cssTransformation
+var transform;
+
+var options = {}
+options.transform = transform
+// add the styles to the DOM
+var update = __webpack_require__("./node_modules/style-loader/lib/addStyles.js")(content, options);
+if(content.locals) module.exports = content.locals;
+// Hot Module Replacement
+if(false) {
+	// When the styles change, update the <style> tags
+	if(!content.locals) {
+		module.hot.accept("!!../../../node_modules/css-loader/index.js!./prettify.css", function() {
+			var newContent = require("!!../../../node_modules/css-loader/index.js!./prettify.css");
+			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+			update(newContent);
+		});
+	}
+	// When the module is disposed, remove the <style> tags
+	module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+
+/***/ "./public/plugins/prettify/prettify.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
+
+!function () {
+  var q = null;window.PR_SHOULD_USE_CONTINUATION = !0;
+  (function () {
+    function S(a) {
+      function d(e) {
+        var b = e.charCodeAt(0);if (b !== 92) return b;var a = e.charAt(1);return (b = r[a]) ? b : "0" <= a && a <= "7" ? parseInt(e.substring(1), 8) : a === "u" || a === "x" ? parseInt(e.substring(2), 16) : e.charCodeAt(1);
+      }function g(e) {
+        if (e < 32) return (e < 16 ? "\\x0" : "\\x") + e.toString(16);e = String.fromCharCode(e);return e === "\\" || e === "-" || e === "]" || e === "^" ? "\\" + e : e;
+      }function b(e) {
+        var b = e.substring(1, e.length - 1).match(/\\u[\dA-Fa-f]{4}|\\x[\dA-Fa-f]{2}|\\[0-3][0-7]{0,2}|\\[0-7]{1,2}|\\[\S\s]|[^\\]/g),
+            e = [],
+            a = b[0] === "^",
+            c = ["["];a && c.push("^");for (var a = a ? 1 : 0, f = b.length; a < f; ++a) {
+          var h = b[a];if (/\\[bdsw]/i.test(h)) c.push(h);else {
+            var h = d(h),
+                l;a + 2 < f && "-" === b[a + 1] ? (l = d(b[a + 2]), a += 2) : l = h;e.push([h, l]);l < 65 || h > 122 || (l < 65 || h > 90 || e.push([Math.max(65, h) | 32, Math.min(l, 90) | 32]), l < 97 || h > 122 || e.push([Math.max(97, h) & -33, Math.min(l, 122) & -33]));
+          }
+        }e.sort(function (e, a) {
+          return e[0] - a[0] || a[1] - e[1];
+        });b = [];f = [];for (a = 0; a < e.length; ++a) {
+          h = e[a], h[0] <= f[1] + 1 ? f[1] = Math.max(f[1], h[1]) : b.push(f = h);
+        }for (a = 0; a < b.length; ++a) {
+          h = b[a], c.push(g(h[0])), h[1] > h[0] && (h[1] + 1 > h[0] && c.push("-"), c.push(g(h[1])));
+        }c.push("]");return c.join("");
+      }function s(e) {
+        for (var a = e.source.match(/\[(?:[^\\\]]|\\[\S\s])*]|\\u[\dA-Fa-f]{4}|\\x[\dA-Fa-f]{2}|\\\d+|\\[^\dux]|\(\?[!:=]|[()^]|[^()[\\^]+/g), c = a.length, d = [], f = 0, h = 0; f < c; ++f) {
+          var l = a[f];l === "(" ? ++h : "\\" === l.charAt(0) && (l = +l.substring(1)) && (l <= h ? d[l] = -1 : a[f] = g(l));
+        }for (f = 1; f < d.length; ++f) {
+          -1 === d[f] && (d[f] = ++x);
+        }for (h = f = 0; f < c; ++f) {
+          l = a[f], l === "(" ? (++h, d[h] || (a[f] = "(?:")) : "\\" === l.charAt(0) && (l = +l.substring(1)) && l <= h && (a[f] = "\\" + d[l]);
+        }for (f = 0; f < c; ++f) {
+          "^" === a[f] && "^" !== a[f + 1] && (a[f] = "");
+        }if (e.ignoreCase && m) for (f = 0; f < c; ++f) {
+          l = a[f], e = l.charAt(0), l.length >= 2 && e === "[" ? a[f] = b(l) : e !== "\\" && (a[f] = l.replace(/[A-Za-z]/g, function (a) {
+            a = a.charCodeAt(0);return "[" + String.fromCharCode(a & -33, a | 32) + "]";
+          }));
+        }return a.join("");
+      }for (var x = 0, m = !1, j = !1, k = 0, c = a.length; k < c; ++k) {
+        var i = a[k];if (i.ignoreCase) j = !0;else if (/[a-z]/i.test(i.source.replace(/\\u[\da-f]{4}|\\x[\da-f]{2}|\\[^UXux]/gi, ""))) {
+          m = !0;j = !1;break;
+        }
+      }for (var r = { b: 8, t: 9, n: 10, v: 11,
+        f: 12, r: 13 }, n = [], k = 0, c = a.length; k < c; ++k) {
+        i = a[k];if (i.global || i.multiline) throw Error("" + i);n.push("(?:" + s(i) + ")");
+      }return RegExp(n.join("|"), j ? "gi" : "g");
+    }function T(a, d) {
+      function g(a) {
+        var c = a.nodeType;if (c == 1) {
+          if (!b.test(a.className)) {
+            for (c = a.firstChild; c; c = c.nextSibling) {
+              g(c);
+            }c = a.nodeName.toLowerCase();if ("br" === c || "li" === c) s[j] = "\n", m[j << 1] = x++, m[j++ << 1 | 1] = a;
+          }
+        } else if (c == 3 || c == 4) c = a.nodeValue, c.length && (c = d ? c.replace(/\r\n?/g, "\n") : c.replace(/[\t\n\r ]+/g, " "), s[j] = c, m[j << 1] = x, x += c.length, m[j++ << 1 | 1] = a);
+      }var b = /(?:^|\s)nocode(?:\s|$)/,
+          s = [],
+          x = 0,
+          m = [],
+          j = 0;g(a);return { a: s.join("").replace(/\n$/, ""), d: m };
+    }function H(a, d, g, b) {
+      d && (a = { a: d, e: a }, g(a), b.push.apply(b, a.g));
+    }function U(a) {
+      for (var d = void 0, g = a.firstChild; g; g = g.nextSibling) {
+        var b = g.nodeType,
+            d = b === 1 ? d ? a : g : b === 3 ? V.test(g.nodeValue) ? a : d : d;
+      }return d === a ? void 0 : d;
+    }function C(a, d) {
+      function g(a) {
+        for (var j = a.e, k = [j, "pln"], c = 0, i = a.a.match(s) || [], r = {}, n = 0, e = i.length; n < e; ++n) {
+          var z = i[n],
+              w = r[z],
+              t = void 0,
+              f;if (typeof w === "string") f = !1;else {
+            var h = b[z.charAt(0)];
+            if (h) t = z.match(h[1]), w = h[0];else {
+              for (f = 0; f < x; ++f) {
+                if (h = d[f], t = z.match(h[1])) {
+                  w = h[0];break;
+                }
+              }t || (w = "pln");
+            }if ((f = w.length >= 5 && "lang-" === w.substring(0, 5)) && !(t && typeof t[1] === "string")) f = !1, w = "src";f || (r[z] = w);
+          }h = c;c += z.length;if (f) {
+            f = t[1];var l = z.indexOf(f),
+                B = l + f.length;t[2] && (B = z.length - t[2].length, l = B - f.length);w = w.substring(5);H(j + h, z.substring(0, l), g, k);H(j + h + l, f, I(w, f), k);H(j + h + B, z.substring(B), g, k);
+          } else k.push(j + h, w);
+        }a.g = k;
+      }var b = {},
+          s;(function () {
+        for (var g = a.concat(d), j = [], k = {}, c = 0, i = g.length; c < i; ++c) {
+          var r = g[c],
+              n = r[3];if (n) for (var e = n.length; --e >= 0;) {
+            b[n.charAt(e)] = r;
+          }r = r[1];n = "" + r;k.hasOwnProperty(n) || (j.push(r), k[n] = q);
+        }j.push(/[\S\s]/);s = S(j);
+      })();var x = d.length;return g;
+    }function v(a) {
+      var d = [],
+          g = [];a.tripleQuotedStrings ? d.push(["str", /^(?:'''(?:[^'\\]|\\[\S\s]|''?(?=[^']))*(?:'''|$)|"""(?:[^"\\]|\\[\S\s]|""?(?=[^"]))*(?:"""|$)|'(?:[^'\\]|\\[\S\s])*(?:'|$)|"(?:[^"\\]|\\[\S\s])*(?:"|$))/, q, "'\""]) : a.multiLineStrings ? d.push(["str", /^(?:'(?:[^'\\]|\\[\S\s])*(?:'|$)|"(?:[^"\\]|\\[\S\s])*(?:"|$)|`(?:[^\\`]|\\[\S\s])*(?:`|$))/, q, "'\"`"]) : d.push(["str", /^(?:'(?:[^\n\r'\\]|\\.)*(?:'|$)|"(?:[^\n\r"\\]|\\.)*(?:"|$))/, q, "\"'"]);a.verbatimStrings && g.push(["str", /^@"(?:[^"]|"")*(?:"|$)/, q]);var b = a.hashComments;b && (a.cStyleComments ? (b > 1 ? d.push(["com", /^#(?:##(?:[^#]|#(?!##))*(?:###|$)|.*)/, q, "#"]) : d.push(["com", /^#(?:(?:define|e(?:l|nd)if|else|error|ifn?def|include|line|pragma|undef|warning)\b|[^\n\r]*)/, q, "#"]), g.push(["str", /^<(?:(?:(?:\.\.\/)*|\/?)(?:[\w-]+(?:\/[\w-]+)+)?[\w-]+\.h(?:h|pp|\+\+)?|[a-z]\w*)>/, q])) : d.push(["com", /^#[^\n\r]*/, q, "#"]));a.cStyleComments && (g.push(["com", /^\/\/[^\n\r]*/, q]), g.push(["com", /^\/\*[\S\s]*?(?:\*\/|$)/, q]));if (b = a.regexLiterals) {
+        var s = (b = b > 1 ? "" : "\n\r") ? "." : "[\\S\\s]";g.push(["lang-regex", RegExp("^(?:^^\\.?|[+-]|[!=]=?=?|\\#|%=?|&&?=?|\\(|\\*=?|[+\\-]=|->|\\/=?|::?|<<?=?|>>?>?=?|,|;|\\?|@|\\[|~|{|\\^\\^?=?|\\|\\|?=?|break|case|continue|delete|do|else|finally|instanceof|return|throw|try|typeof)\\s*(" + ("/(?=[^/*" + b + "])(?:[^/\\x5B\\x5C" + b + "]|\\x5C" + s + "|\\x5B(?:[^\\x5C\\x5D" + b + "]|\\x5C" + s + ")*(?:\\x5D|$))+/") + ")")]);
+      }(b = a.types) && g.push(["typ", b]);b = ("" + a.keywords).replace(/^ | $/g, "");b.length && g.push(["kwd", RegExp("^(?:" + b.replace(/[\s,]+/g, "|") + ")\\b"), q]);d.push(["pln", /^\s+/, q, " \r\n\t\xA0"]);b = "^.[^\\s\\w.$@'\"`/\\\\]*";a.regexLiterals && (b += "(?!s*/)");g.push(["lit", /^@[$_a-z][\w$@]*/i, q], ["typ", /^(?:[@_]?[A-Z]+[a-z][\w$@]*|\w+_t\b)/, q], ["pln", /^[$_a-z][\w$@]*/i, q], ["lit", /^(?:0x[\da-f]+|(?:\d(?:_\d+)*\d*(?:\.\d*)?|\.\d\+)(?:e[+-]?\d+)?)[a-z]*/i, q, "0123456789"], ["pln", /^\\[\S\s]?/, q], ["pun", RegExp(b), q]);return C(d, g);
+    }function J(a, d, g) {
+      function b(a) {
+        var c = a.nodeType;if (c == 1 && !x.test(a.className)) {
+          if ("br" === a.nodeName) s(a), a.parentNode && a.parentNode.removeChild(a);else for (a = a.firstChild; a; a = a.nextSibling) {
+            b(a);
+          }
+        } else if ((c == 3 || c == 4) && g) {
+          var d = a.nodeValue,
+              i = d.match(m);if (i) c = d.substring(0, i.index), a.nodeValue = c, (d = d.substring(i.index + i[0].length)) && a.parentNode.insertBefore(j.createTextNode(d), a.nextSibling), s(a), c || a.parentNode.removeChild(a);
+        }
+      }function s(a) {
+        function b(a, c) {
+          var d = c ? a.cloneNode(!1) : a,
+              e = a.parentNode;if (e) {
+            var e = b(e, 1),
+                g = a.nextSibling;e.appendChild(d);for (var i = g; i; i = g) {
+              g = i.nextSibling, e.appendChild(i);
+            }
+          }return d;
+        }for (; !a.nextSibling;) {
+          if (a = a.parentNode, !a) return;
+        }for (var a = b(a.nextSibling, 0), d; (d = a.parentNode) && d.nodeType === 1;) {
+          a = d;
+        }c.push(a);
+      }for (var x = /(?:^|\s)nocode(?:\s|$)/, m = /\r\n?|\n/, j = a.ownerDocument, k = j.createElement("li"); a.firstChild;) {
+        k.appendChild(a.firstChild);
+      }for (var c = [k], i = 0; i < c.length; ++i) {
+        b(c[i]);
+      }d === (d | 0) && c[0].setAttribute("value", d);var r = j.createElement("ol");
+      r.className = "linenums";for (var d = Math.max(0, d - 1 | 0) || 0, i = 0, n = c.length; i < n; ++i) {
+        k = c[i], k.className = "L" + (i + d) % 10, k.firstChild || k.appendChild(j.createTextNode("\xA0")), r.appendChild(k);
+      }a.appendChild(r);
+    }function p(a, d) {
+      for (var g = d.length; --g >= 0;) {
+        var b = d[g];F.hasOwnProperty(b) ? D.console && console.warn("cannot override language handler %s", b) : F[b] = a;
+      }
+    }function I(a, d) {
+      if (!a || !F.hasOwnProperty(a)) a = /^\s*</.test(d) ? "default-markup" : "default-code";return F[a];
+    }function K(a) {
+      var d = a.h;try {
+        var g = T(a.c, a.i),
+            b = g.a;
+        a.a = b;a.d = g.d;a.e = 0;I(d, b)(a);var s = /\bMSIE\s(\d+)/.exec(navigator.userAgent),
+            s = s && +s[1] <= 8,
+            d = /\n/g,
+            x = a.a,
+            m = x.length,
+            g = 0,
+            j = a.d,
+            k = j.length,
+            b = 0,
+            c = a.g,
+            i = c.length,
+            r = 0;c[i] = m;var n, e;for (e = n = 0; e < i;) {
+          c[e] !== c[e + 2] ? (c[n++] = c[e++], c[n++] = c[e++]) : e += 2;
+        }i = n;for (e = n = 0; e < i;) {
+          for (var p = c[e], w = c[e + 1], t = e + 2; t + 2 <= i && c[t + 1] === w;) {
+            t += 2;
+          }c[n++] = p;c[n++] = w;e = t;
+        }c.length = n;var f = a.c,
+            h;if (f) h = f.style.display, f.style.display = "none";try {
+          for (; b < k;) {
+            var l = j[b + 2] || m,
+                B = c[r + 2] || m,
+                t = Math.min(l, B),
+                A = j[b + 1],
+                G;if (A.nodeType !== 1 && (G = x.substring(g, t))) {
+              s && (G = G.replace(d, "\r"));A.nodeValue = G;var L = A.ownerDocument,
+                  o = L.createElement("span");o.className = c[r + 1];var v = A.parentNode;v.replaceChild(o, A);o.appendChild(A);g < l && (j[b + 1] = A = L.createTextNode(x.substring(t, l)), v.insertBefore(A, o.nextSibling));
+            }g = t;g >= l && (b += 2);g >= B && (r += 2);
+          }
+        } finally {
+          if (f) f.style.display = h;
+        }
+      } catch (u) {
+        D.console && console.log(u && u.stack || u);
+      }
+    }var D = window,
+        y = ["break,continue,do,else,for,if,return,while"],
+        E = [[y, "auto,case,char,const,default,double,enum,extern,float,goto,inline,int,long,register,short,signed,sizeof,static,struct,switch,typedef,union,unsigned,void,volatile"], "catch,class,delete,false,import,new,operator,private,protected,public,this,throw,true,try,typeof"],
+        M = [E, "alignof,align_union,asm,axiom,bool,concept,concept_map,const_cast,constexpr,decltype,delegate,dynamic_cast,explicit,export,friend,generic,late_check,mutable,namespace,nullptr,property,reinterpret_cast,static_assert,static_cast,template,typeid,typename,using,virtual,where"],
+        N = [E, "abstract,assert,boolean,byte,extends,final,finally,implements,import,instanceof,interface,null,native,package,strictfp,super,synchronized,throws,transient"],
+        O = [N, "as,base,by,checked,decimal,delegate,descending,dynamic,event,fixed,foreach,from,group,implicit,in,internal,into,is,let,lock,object,out,override,orderby,params,partial,readonly,ref,sbyte,sealed,stackalloc,string,select,uint,ulong,unchecked,unsafe,ushort,var,virtual,where"],
+        E = [E, "debugger,eval,export,function,get,null,set,undefined,var,with,Infinity,NaN"],
+        P = [y, "and,as,assert,class,def,del,elif,except,exec,finally,from,global,import,in,is,lambda,nonlocal,not,or,pass,print,raise,try,with,yield,False,True,None"],
+        Q = [y, "alias,and,begin,case,class,def,defined,elsif,end,ensure,false,in,module,next,nil,not,or,redo,rescue,retry,self,super,then,true,undef,unless,until,when,yield,BEGIN,END"],
+        W = [y, "as,assert,const,copy,drop,enum,extern,fail,false,fn,impl,let,log,loop,match,mod,move,mut,priv,pub,pure,ref,self,static,struct,true,trait,type,unsafe,use"],
+        y = [y, "case,done,elif,esac,eval,fi,function,in,local,set,then,until"],
+        R = /^(DIR|FILE|vector|(de|priority_)?queue|list|stack|(const_)?iterator|(multi)?(set|map)|bitset|u?(int|float)\d*)\b/,
+        V = /\S/,
+        X = v({ keywords: [M, O, E, "caller,delete,die,do,dump,elsif,eval,exit,foreach,for,goto,if,import,last,local,my,next,no,our,print,package,redo,require,sub,undef,unless,until,use,wantarray,while,BEGIN,END", P, Q, y], hashComments: !0, cStyleComments: !0, multiLineStrings: !0, regexLiterals: !0 }),
+        F = {};p(X, ["default-code"]);p(C([], [["pln", /^[^<?]+/], ["dec", /^<!\w[^>]*(?:>|$)/], ["com", /^<\!--[\S\s]*?(?:--\>|$)/], ["lang-", /^<\?([\S\s]+?)(?:\?>|$)/], ["lang-", /^<%([\S\s]+?)(?:%>|$)/], ["pun", /^(?:<[%?]|[%?]>)/], ["lang-", /^<xmp\b[^>]*>([\S\s]+?)<\/xmp\b[^>]*>/i], ["lang-js", /^<script\b[^>]*>([\S\s]*?)(<\/script\b[^>]*>)/i], ["lang-css", /^<style\b[^>]*>([\S\s]*?)(<\/style\b[^>]*>)/i], ["lang-in.tag", /^(<\/?[a-z][^<>]*>)/i]]), ["default-markup", "htm", "html", "mxml", "xhtml", "xml", "xsl"]);p(C([["pln", /^\s+/, q, " \t\r\n"], ["atv", /^(?:"[^"]*"?|'[^']*'?)/, q, "\"'"]], [["tag", /^^<\/?[a-z](?:[\w-.:]*\w)?|\/?>$/i], ["atn", /^(?!style[\s=]|on)[a-z](?:[\w:-]*\w)?/i], ["lang-uq.val", /^=\s*([^\s"'>]*(?:[^\s"'/>]|\/(?=\s)))/], ["pun", /^[/<->]+/], ["lang-js", /^on\w+\s*=\s*"([^"]+)"/i], ["lang-js", /^on\w+\s*=\s*'([^']+)'/i], ["lang-js", /^on\w+\s*=\s*([^\s"'>]+)/i], ["lang-css", /^style\s*=\s*"([^"]+)"/i], ["lang-css", /^style\s*=\s*'([^']+)'/i], ["lang-css", /^style\s*=\s*([^\s"'>]+)/i]]), ["in.tag"]);p(C([], [["atv", /^[\S\s]+/]]), ["uq.val"]);p(v({ keywords: M, hashComments: !0, cStyleComments: !0, types: R }), ["c", "cc", "cpp", "cxx", "cyc", "m"]);p(v({ keywords: "null,true,false" }), ["json"]);p(v({ keywords: O, hashComments: !0, cStyleComments: !0, verbatimStrings: !0, types: R }), ["cs"]);p(v({ keywords: N, cStyleComments: !0 }), ["java"]);p(v({ keywords: y, hashComments: !0, multiLineStrings: !0 }), ["bash", "bsh", "csh", "sh"]);p(v({ keywords: P, hashComments: !0, multiLineStrings: !0, tripleQuotedStrings: !0 }), ["cv", "py", "python"]);p(v({ keywords: "caller,delete,die,do,dump,elsif,eval,exit,foreach,for,goto,if,import,last,local,my,next,no,our,print,package,redo,require,sub,undef,unless,until,use,wantarray,while,BEGIN,END", hashComments: !0, multiLineStrings: !0, regexLiterals: 2 }), ["perl", "pl", "pm"]);p(v({ keywords: Q,
+      hashComments: !0, multiLineStrings: !0, regexLiterals: !0 }), ["rb", "ruby"]);p(v({ keywords: E, cStyleComments: !0, regexLiterals: !0 }), ["javascript", "js"]);p(v({ keywords: "all,and,by,catch,class,else,extends,false,finally,for,if,in,is,isnt,loop,new,no,not,null,of,off,on,or,return,super,then,throw,true,try,unless,until,when,while,yes", hashComments: 3, cStyleComments: !0, multilineStrings: !0, tripleQuotedStrings: !0, regexLiterals: !0 }), ["coffee"]);p(v({ keywords: W, cStyleComments: !0, multilineStrings: !0 }), ["rc", "rs", "rust"]);
+    p(C([], [["str", /^[\S\s]+/]]), ["regex"]);var Y = D.PR = { createSimpleLexer: C, registerLangHandler: p, sourceDecorator: v, PR_ATTRIB_NAME: "atn", PR_ATTRIB_VALUE: "atv", PR_COMMENT: "com", PR_DECLARATION: "dec", PR_KEYWORD: "kwd", PR_LITERAL: "lit", PR_NOCODE: "nocode", PR_PLAIN: "pln", PR_PUNCTUATION: "pun", PR_SOURCE: "src", PR_STRING: "str", PR_TAG: "tag", PR_TYPE: "typ", prettyPrintOne: D.prettyPrintOne = function (a, d, g) {
+        var b = document.createElement("div");b.innerHTML = "<pre>" + a + "</pre>";b = b.firstChild;g && J(b, g, !0);K({ h: d, j: g, c: b, i: 1 });
+        return b.innerHTML;
+      }, prettyPrint: D.prettyPrint = function (a, d) {
+        function g() {
+          for (var b = D.PR_SHOULD_USE_CONTINUATION ? c.now() + 250 : Infinity; i < p.length && c.now() < b; i++) {
+            for (var d = p[i], j = h, k = d; k = k.previousSibling;) {
+              var m = k.nodeType,
+                  o = (m === 7 || m === 8) && k.nodeValue;if (o ? !/^\??prettify\b/.test(o) : m !== 3 || /\S/.test(k.nodeValue)) break;if (o) {
+                j = {};o.replace(/\b(\w+)=([\w%+\-.:]+)/g, function (a, b, c) {
+                  j[b] = c;
+                });break;
+              }
+            }k = d.className;if ((j !== h || e.test(k)) && !v.test(k)) {
+              m = !1;for (o = d.parentNode; o; o = o.parentNode) {
+                if (f.test(o.tagName) && o.className && e.test(o.className)) {
+                  m = !0;break;
+                }
+              }if (!m) {
+                d.className += " prettyprinted";m = j.lang;if (!m) {
+                  var m = k.match(n),
+                      y;if (!m && (y = U(d)) && t.test(y.tagName)) m = y.className.match(n);m && (m = m[1]);
+                }if (w.test(d.tagName)) o = 1;else var o = d.currentStyle,
+                    u = s.defaultView,
+                    o = (o = o ? o.whiteSpace : u && u.getComputedStyle ? u.getComputedStyle(d, q).getPropertyValue("white-space") : 0) && "pre" === o.substring(0, 3);u = j.linenums;if (!(u = u === "true" || +u)) u = (u = k.match(/\blinenums\b(?::(\d+))?/)) ? u[1] && u[1].length ? +u[1] : !0 : !1;u && J(d, u, o);r = { h: m, c: d, j: u, i: o };K(r);
+              }
+            }
+          }i < p.length ? setTimeout(g, 250) : "function" === typeof a && a();
+        }for (var b = d || document.body, s = b.ownerDocument || document, b = [b.getElementsByTagName("pre"), b.getElementsByTagName("code"), b.getElementsByTagName("xmp")], p = [], m = 0; m < b.length; ++m) {
+          for (var j = 0, k = b[m].length; j < k; ++j) {
+            p.push(b[m][j]);
+          }
+        }var b = q,
+            c = Date;c.now || (c = { now: function now() {
+            return +new Date();
+          } });var i = 0,
+            r,
+            n = /\blang(?:uage)?-([\w.]+)(?!\S)/,
+            e = /\bprettyprint\b/,
+            v = /\bprettyprinted\b/,
+            w = /pre|xmp/i,
+            t = /^code$/i,
+            f = /^(?:pre|code|xmp)$/i,
+            h = {};g();
+      } };"function" === "function" && __webpack_require__("./node_modules/webpack/buildin/amd-options.js") && !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = (function () {
+      return Y;
+    }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+  })();
+}();
+
+/***/ }),
+
+/***/ "./public/plugins/progress-bar/progress.css":
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__("./node_modules/css-loader/index.js!./public/plugins/progress-bar/progress.css");
+if(typeof content === 'string') content = [[module.i, content, '']];
+// Prepare cssTransformation
+var transform;
+
+var options = {}
+options.transform = transform
+// add the styles to the DOM
+var update = __webpack_require__("./node_modules/style-loader/lib/addStyles.js")(content, options);
+if(content.locals) module.exports = content.locals;
+// Hot Module Replacement
+if(false) {
+	// When the styles change, update the <style> tags
+	if(!content.locals) {
+		module.hot.accept("!!../../../node_modules/css-loader/index.js!./progress.css", function() {
+			var newContent = require("!!../../../node_modules/css-loader/index.js!./progress.css");
+			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+			update(newContent);
+		});
+	}
+	// When the module is disposed, remove the <style> tags
+	module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+
+/***/ "./public/plugins/progress-bar/progress.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+/* Progress, (c) 2013, 2014 Rico Sta. Cruz - http://ricostacruz.com/Progress
+ * @license MIT */
+
+;(function (root, factory) {
+
+  if (true) {
+    !(__WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) :
+				__WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+  } else if ((typeof exports === 'undefined' ? 'undefined' : _typeof(exports)) === 'object') {
+    module.exports = factory();
+  } else {
+    root.Progress = factory();
+  }
+})(undefined, function () {
+  var Progress = {};
+
+  Progress.version = '0.2.0';
+
+  var Settings = Progress.settings = {
+    minimum: 0.08,
+    easing: 'linear',
+    positionUsing: '',
+    speed: 200,
+    trickle: true,
+    trickleSpeed: 200,
+    showSpinner: true,
+    barSelector: '[role="bar"]',
+    spinnerSelector: '[role="spinner"]',
+    parent: 'body',
+    template: '<div class="bar" role="bar"><div class="peg"></div></div><div class="spinner" role="spinner"><div class="spinner-icon"></div></div>'
+  };
+
+  /**
+   * Updates configuration.
+   *
+   *     Progress.configure({
+   *       minimum: 0.1
+   *     });
+   */
+  Progress.configure = function (options) {
+    var key, value;
+    for (key in options) {
+      value = options[key];
+      if (value !== undefined && options.hasOwnProperty(key)) Settings[key] = value;
+    }
+
+    return this;
+  };
+
+  /**
+   * Last number.
+   */
+
+  Progress.status = null;
+
+  /**
+   * Sets the progress bar status, where `n` is a number from `0.0` to `1.0`.
+   *
+   *     Progress.set(0.4);
+   *     Progress.set(1.0);
+   */
+
+  Progress.set = function (n) {
+    var started = Progress.isStarted();
+
+    n = clamp(n, Settings.minimum, 1);
+    Progress.status = n === 1 ? null : n;
+
+    var progress = Progress.render(!started),
+        bar = progress.querySelector(Settings.barSelector),
+        speed = Settings.speed,
+        ease = Settings.easing;
+
+    progress.offsetWidth; /* Repaint */
+
+    queue(function (next) {
+      // Set positionUsing if it hasn't already been set
+      if (Settings.positionUsing === '') Settings.positionUsing = Progress.getPositioningCSS();
+
+      // Add transition
+      css(bar, barPositionCSS(n, speed, ease));
+
+      if (n === 1) {
+        // Fade out
+        css(progress, {
+          transition: 'none',
+          opacity: 1
+        });
+        progress.offsetWidth; /* Repaint */
+
+        setTimeout(function () {
+          //  css(progress, {
+          //    transition: 'all ' + speed + 'ms linear',
+          //    opacity: 0
+          //  });
+          setTimeout(function () {
+            Progress.remove();
+            next();
+          }, speed);
+        }, speed);
+      } else {
+        setTimeout(next, speed);
+      }
+    });
+
+    return this;
+  };
+
+  Progress.isStarted = function () {
+    return typeof Progress.status === 'number';
+  };
+
+  /**
+   * Shows the progress bar.
+   * This is the same as setting the status to 0%, except that it doesn't go backwards.
+   *
+   *     Progress.start();
+   *
+   */
+  Progress.start = function () {
+    if (!Progress.status) Progress.set(0);
+
+    var work = function work() {
+      setTimeout(function () {
+        if (!Progress.status) return;
+        Progress.trickle();
+        work();
+      }, Settings.trickleSpeed);
+    };
+
+    if (Settings.trickle) work();
+
+    return this;
+  };
+
+  /**
+   * Hides the progress bar.
+   * This is the *sort of* the same as setting the status to 100%, with the
+   * difference being `done()` makes some placebo effect of some realistic motion.
+   *
+   *     Progress.done();
+   *
+   * If `true` is passed, it will show the progress bar even if its hidden.
+   *
+   *     Progress.done(true);
+   */
+
+  Progress.done = function (force) {
+    if (!force && !Progress.status) return this;
+    return Progress.inc(0.3 + 0.5 * Math.random()).set(1);
+  };
+
+  /**
+   * Increments by a random amount.
+   */
+
+  Progress.inc = function (amount) {
+    var n = Progress.status;
+
+    if (!n) {
+      return Progress.start();
+    } else if (n > 1) {
+      return;
+    } else {
+      if (typeof amount !== 'number') {
+        if (n >= 0 && n < 0.2) {
+          amount = 0.1;
+        } else if (n >= 0.2 && n < 0.5) {
+          amount = 0.04;
+        } else if (n >= 0.5 && n < 0.8) {
+          amount = 0.02;
+        } else if (n >= 0.8 && n < 0.99) {
+          amount = 0.005;
+        } else {
+          amount = 0;
+        }
+      }
+
+      n = clamp(n + amount, 0, 0.994);
+      return Progress.set(n);
+    }
+  };
+
+  Progress.trickle = function () {
+    return Progress.inc();
+  };
+
+  /**
+   * Waits for all supplied jQuery promises and
+   * increases the progress as the promises resolve.
+   *
+   * @param $promise jQUery Promise
+   */
+  (function () {
+    var initial = 0,
+        current = 0;
+
+    Progress.promise = function ($promise) {
+      if (!$promise || $promise.state() === "resolved") {
+        return this;
+      }
+
+      if (current === 0) {
+        Progress.start();
+      }
+
+      initial++;
+      current++;
+
+      $promise.always(function () {
+        current--;
+        if (current === 0) {
+          initial = 0;
+          Progress.done();
+        } else {
+          Progress.set((initial - current) / initial);
+        }
+      });
+
+      return this;
+    };
+  })();
+
+  /**
+   * (Internal) renders the progress bar markup based on the `template`
+   * setting.
+   */
+
+  Progress.render = function (fromStart) {
+    if (Progress.isRendered()) return document.getElementById('progress');
+
+    addClass(document.documentElement, 'progress-busy');
+
+    var progress = document.createElement('div');
+    progress.id = 'progress';
+    progress.innerHTML = Settings.template;
+
+    var bar = progress.querySelector(Settings.barSelector),
+        perc = fromStart ? '-100' : toBarPerc(Progress.status || 0),
+        parent = document.querySelector(Settings.parent),
+        spinner;
+
+    css(bar, {
+      transition: 'all 0 linear',
+      transform: 'translate3d(' + perc + '%,0,0)'
+    });
+
+    if (!Settings.showSpinner) {
+      spinner = progress.querySelector(Settings.spinnerSelector);
+      spinner && removeElement(spinner);
+    }
+
+    if (parent != document.body) {
+      addClass(parent, 'progress-custom-parent');
+    }
+
+    parent.appendChild(progress);
+    return progress;
+  };
+
+  /**
+   * Removes the element. Opposite of render().
+   */
+
+  Progress.remove = function () {
+    removeClass(document.documentElement, 'progress-busy');
+    removeClass(document.querySelector(Settings.parent), 'progress-custom-parent');
+    var progress = document.getElementById('progress');
+    progress && removeElement(progress);
+  };
+
+  /**
+   * Custom Done
+   */
+  Progress.custom_done = function () {
+    var progress = document.getElementById('progress');
+    $(progress).css('opacity', 1);
+    $(progress).find('.peg').remove();
+  };
+
+  /**
+   * Checks if the progress bar is rendered.
+   */
+
+  Progress.isRendered = function () {
+    return !!document.getElementById('progress');
+  };
+
+  /**
+   * Determine which positioning CSS rule to use.
+   */
+
+  Progress.getPositioningCSS = function () {
+    // Sniff on document.body.style
+    var bodyStyle = document.body.style;
+
+    // Sniff prefixes
+    var vendorPrefix = 'WebkitTransform' in bodyStyle ? 'Webkit' : 'MozTransform' in bodyStyle ? 'Moz' : 'msTransform' in bodyStyle ? 'ms' : 'OTransform' in bodyStyle ? 'O' : '';
+
+    if (vendorPrefix + 'Perspective' in bodyStyle) {
+      // Modern browsers with 3D support, e.g. Webkit, IE10
+      return 'translate3d';
+    } else if (vendorPrefix + 'Transform' in bodyStyle) {
+      // Browsers without 3D support, e.g. IE9
+      return 'translate';
+    } else {
+      // Browsers without translate() support, e.g. IE7-8
+      return 'margin';
+    }
+  };
+
+  /**
+   * Helpers
+   */
+
+  function clamp(n, min, max) {
+    if (n < min) return min;
+    if (n > max) return max;
+    return n;
+  }
+
+  /**
+   * (Internal) converts a percentage (`0..1`) to a bar translateX
+   * percentage (`-100%..0%`).
+   */
+
+  function toBarPerc(n) {
+    return (-1 + n) * 100;
+  }
+
+  /**
+   * (Internal) returns the correct CSS for changing the bar's
+   * position given an n percentage, and speed and ease from Settings
+   */
+
+  function barPositionCSS(n, speed, ease) {
+    var barCSS;
+
+    if (Settings.positionUsing === 'translate3d') {
+      barCSS = { transform: 'translate3d(' + toBarPerc(n) + '%,0,0)' };
+    } else if (Settings.positionUsing === 'translate') {
+      barCSS = { transform: 'translate(' + toBarPerc(n) + '%,0)' };
+    } else {
+      barCSS = { 'margin-left': toBarPerc(n) + '%' };
+    }
+
+    barCSS.transition = 'all ' + speed + 'ms ' + ease;
+
+    return barCSS;
+  }
+
+  /**
+   * (Internal) Queues a function to be executed.
+   */
+
+  var queue = function () {
+    var pending = [];
+
+    function next() {
+      var fn = pending.shift();
+      if (fn) {
+        fn(next);
+      }
+    }
+
+    return function (fn) {
+      pending.push(fn);
+      if (pending.length == 1) next();
+    };
+  }();
+
+  /**
+   * (Internal) Applies css properties to an element, similar to the jQuery
+   * css method.
+   *
+   * While this helper does assist with vendor prefixed property names, it
+   * does not perform any manipulation of values prior to setting styles.
+   */
+
+  var css = function () {
+    var cssPrefixes = ['Webkit', 'O', 'Moz', 'ms'],
+        cssProps = {};
+
+    function camelCase(string) {
+      return string.replace(/^-ms-/, 'ms-').replace(/-([\da-z])/gi, function (match, letter) {
+        return letter.toUpperCase();
+      });
+    }
+
+    function getVendorProp(name) {
+      var style = document.body.style;
+      if (name in style) return name;
+
+      var i = cssPrefixes.length,
+          capName = name.charAt(0).toUpperCase() + name.slice(1),
+          vendorName;
+      while (i--) {
+        vendorName = cssPrefixes[i] + capName;
+        if (vendorName in style) return vendorName;
+      }
+
+      return name;
+    }
+
+    function getStyleProp(name) {
+      name = camelCase(name);
+      return cssProps[name] || (cssProps[name] = getVendorProp(name));
+    }
+
+    function applyCss(element, prop, value) {
+      prop = getStyleProp(prop);
+      element.style[prop] = value;
+    }
+
+    return function (element, properties) {
+      var args = arguments,
+          prop,
+          value;
+
+      if (args.length == 2) {
+        for (prop in properties) {
+          value = properties[prop];
+          if (value !== undefined && properties.hasOwnProperty(prop)) applyCss(element, prop, value);
+        }
+      } else {
+        applyCss(element, args[1], args[2]);
+      }
+    };
+  }();
+
+  /**
+   * (Internal) Determines if an element or space separated list of class names contains a class name.
+   */
+
+  function hasClass(element, name) {
+    var list = typeof element == 'string' ? element : classList(element);
+    return list.indexOf(' ' + name + ' ') >= 0;
+  }
+
+  /**
+   * (Internal) Adds a class to an element.
+   */
+
+  function addClass(element, name) {
+    var oldList = classList(element),
+        newList = oldList + name;
+
+    if (hasClass(oldList, name)) return;
+
+    // Trim the opening space.
+    element.className = newList.substring(1);
+  }
+
+  /**
+   * (Internal) Removes a class from an element.
+   */
+
+  function removeClass(element, name) {
+    var oldList = classList(element),
+        newList;
+
+    if (!hasClass(element, name)) return;
+
+    // Replace the class name.
+    newList = oldList.replace(' ' + name + ' ', ' ');
+
+    // Trim the opening and closing spaces.
+    element.className = newList.substring(1, newList.length - 1);
+  }
+
+  /**
+   * (Internal) Gets a space separated list of the class names on the element.
+   * The list is wrapped with a single space on each end to facilitate finding
+   * matches within the list.
+   */
+
+  function classList(element) {
+    return (' ' + (element && element.className || '') + ' ').replace(/\s+/gi, ' ');
+  }
+
+  /**
+   * (Internal) Removes an element from the DOM.
+   */
+
+  function removeElement(element) {
+    element && element.parentNode && element.parentNode.removeChild(element);
+  }
+
+  return Progress;
+});
 
 /***/ }),
 
@@ -61788,6 +65747,774 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 /***/ }),
 
+/***/ "./public/plugins/scrollbar/jquery.scrollbar.css":
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__("./node_modules/css-loader/index.js!./public/plugins/scrollbar/jquery.scrollbar.css");
+if(typeof content === 'string') content = [[module.i, content, '']];
+// Prepare cssTransformation
+var transform;
+
+var options = {}
+options.transform = transform
+// add the styles to the DOM
+var update = __webpack_require__("./node_modules/style-loader/lib/addStyles.js")(content, options);
+if(content.locals) module.exports = content.locals;
+// Hot Module Replacement
+if(false) {
+	// When the styles change, update the <style> tags
+	if(!content.locals) {
+		module.hot.accept("!!../../../node_modules/css-loader/index.js!./jquery.scrollbar.css", function() {
+			var newContent = require("!!../../../node_modules/css-loader/index.js!./jquery.scrollbar.css");
+			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+			update(newContent);
+		});
+	}
+	// When the module is disposed, remove the <style> tags
+	module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+
+/***/ "./public/plugins/scrollbar/jquery.scrollbar.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
+
+/**
+ * jQuery CSS Customizable Scrollbar
+ *
+ * Copyright 2015, Yuriy Khabarov
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ *
+ * If you found bug, please contact me via email <13real008@gmail.com>
+ *
+ * @author Yuriy Khabarov aka Gromo
+ * @version 0.2.10
+ * @url https://github.com/gromo/jquery.scrollbar/
+ *
+ */
+;
+(function (root, factory) {
+    if (true) {
+        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__("./node_modules/jquery/dist/jquery.js")], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+    } else {
+        factory(root.jQuery);
+    }
+})(undefined, function ($) {
+    'use strict';
+
+    // init flags & variables
+
+    var debug = false;
+
+    var browser = {
+        data: {
+            index: 0,
+            name: 'scrollbar'
+        },
+        macosx: /mac/i.test(navigator.platform),
+        mobile: /android|webos|iphone|ipad|ipod|blackberry/i.test(navigator.userAgent),
+        overlay: null,
+        scroll: null,
+        scrolls: [],
+        webkit: /webkit/i.test(navigator.userAgent) && !/edge\/\d+/i.test(navigator.userAgent)
+    };
+
+    browser.scrolls.add = function (instance) {
+        this.remove(instance).push(instance);
+    };
+    browser.scrolls.remove = function (instance) {
+        while ($.inArray(instance, this) >= 0) {
+            this.splice($.inArray(instance, this), 1);
+        }
+        return this;
+    };
+
+    var defaults = {
+        "autoScrollSize": true, // automatically calculate scrollsize
+        "autoUpdate": true, // update scrollbar if content/container size changed
+        "debug": false, // debug mode
+        "disableBodyScroll": false, // disable body scroll if mouse over container
+        "duration": 200, // scroll animate duration in ms
+        "ignoreMobile": false, // ignore mobile devices
+        "ignoreOverlay": false, // ignore browsers with overlay scrollbars (mobile, MacOS)
+        "scrollStep": 30, // scroll step for scrollbar arrows
+        "showArrows": false, // add class to show arrows
+        "stepScrolling": true, // when scrolling to scrollbar mousedown position
+
+        "scrollx": null, // horizontal scroll element
+        "scrolly": null, // vertical scroll element
+
+        "onDestroy": null, // callback function on destroy,
+        "onInit": null, // callback function on first initialization
+        "onScroll": null, // callback function on content scrolling
+        "onUpdate": null // callback function on init/resize (before scrollbar size calculation)
+    };
+
+    var BaseScrollbar = function BaseScrollbar(container) {
+
+        if (!browser.scroll) {
+            browser.overlay = isScrollOverlaysContent();
+            browser.scroll = getBrowserScrollSize();
+            updateScrollbars();
+
+            $(window).resize(function () {
+                var forceUpdate = false;
+                if (browser.scroll && (browser.scroll.height || browser.scroll.width)) {
+                    var scroll = getBrowserScrollSize();
+                    if (scroll.height !== browser.scroll.height || scroll.width !== browser.scroll.width) {
+                        browser.scroll = scroll;
+                        forceUpdate = true; // handle page zoom
+                    }
+                }
+                updateScrollbars(forceUpdate);
+            });
+        }
+
+        this.container = container;
+        this.namespace = '.scrollbar_' + browser.data.index++;
+        this.options = $.extend({}, defaults, window.jQueryScrollbarOptions || {});
+        this.scrollTo = null;
+        this.scrollx = {};
+        this.scrolly = {};
+
+        container.data(browser.data.name, this);
+        browser.scrolls.add(this);
+    };
+
+    BaseScrollbar.prototype = {
+
+        destroy: function destroy() {
+
+            if (!this.wrapper) {
+                return;
+            }
+
+            this.container.removeData(browser.data.name);
+            browser.scrolls.remove(this);
+
+            // init variables
+            var scrollLeft = this.container.scrollLeft();
+            var scrollTop = this.container.scrollTop();
+
+            this.container.insertBefore(this.wrapper).css({
+                "height": "",
+                "margin": "",
+                "max-height": ""
+            }).removeClass('scroll-content scroll-scrollx_visible scroll-scrolly_visible').off(this.namespace).scrollLeft(scrollLeft).scrollTop(scrollTop);
+
+            this.scrollx.scroll.removeClass('scroll-scrollx_visible').find('div').andSelf().off(this.namespace);
+            this.scrolly.scroll.removeClass('scroll-scrolly_visible').find('div').andSelf().off(this.namespace);
+
+            this.wrapper.remove();
+
+            $(document).add('body').off(this.namespace);
+
+            if ($.isFunction(this.options.onDestroy)) {
+                this.options.onDestroy.apply(this, [this.container]);
+            }
+        },
+        init: function init(options) {
+
+            // init variables
+            var S = this,
+                c = this.container,
+                cw = this.containerWrapper || c,
+                namespace = this.namespace,
+                o = $.extend(this.options, options || {}),
+                s = { x: this.scrollx, y: this.scrolly },
+                w = this.wrapper;
+
+            var initScroll = {
+                "scrollLeft": c.scrollLeft(),
+                "scrollTop": c.scrollTop()
+            };
+
+            // do not init if in ignorable browser
+            if (browser.mobile && o.ignoreMobile || browser.overlay && o.ignoreOverlay || browser.macosx && !browser.webkit // still required to ignore nonWebKit browsers on Mac
+            ) {
+                    return false;
+                }
+
+            // init scroll container
+            if (!w) {
+                this.wrapper = w = $('<div>').addClass('scroll-wrapper').addClass(c.attr('class')).css('position', c.css('position') == 'absolute' ? 'absolute' : 'relative').insertBefore(c).append(c);
+
+                if (c.is('textarea')) {
+                    this.containerWrapper = cw = $('<div>').insertBefore(c).append(c);
+                    w.addClass('scroll-textarea');
+                }
+
+                cw.addClass('scroll-content').css({
+                    "height": "auto",
+                    "margin-bottom": browser.scroll.height * -1 + 'px',
+                    "margin-right": browser.scroll.width * -1 + 'px',
+                    "max-height": ""
+                });
+
+                c.on('scroll' + namespace, function (event) {
+                    if ($.isFunction(o.onScroll)) {
+                        o.onScroll.call(S, {
+                            "maxScroll": s.y.maxScrollOffset,
+                            "scroll": c.scrollTop(),
+                            "size": s.y.size,
+                            "visible": s.y.visible
+                        }, {
+                            "maxScroll": s.x.maxScrollOffset,
+                            "scroll": c.scrollLeft(),
+                            "size": s.x.size,
+                            "visible": s.x.visible
+                        });
+                    }
+                    s.x.isVisible && s.x.scroll.bar.css('left', c.scrollLeft() * s.x.kx + 'px');
+                    s.y.isVisible && s.y.scroll.bar.css('top', c.scrollTop() * s.y.kx + 'px');
+                });
+
+                /* prevent native scrollbars to be visible on #anchor click */
+                w.on('scroll' + namespace, function () {
+                    w.scrollTop(0).scrollLeft(0);
+                });
+
+                if (o.disableBodyScroll) {
+                    var handleMouseScroll = function handleMouseScroll(event) {
+                        isVerticalScroll(event) ? s.y.isVisible && s.y.mousewheel(event) : s.x.isVisible && s.x.mousewheel(event);
+                    };
+                    w.on('MozMousePixelScroll' + namespace, handleMouseScroll);
+                    w.on('mousewheel' + namespace, handleMouseScroll);
+
+                    if (browser.mobile) {
+                        w.on('touchstart' + namespace, function (event) {
+                            var touch = event.originalEvent.touches && event.originalEvent.touches[0] || event;
+                            var originalTouch = {
+                                "pageX": touch.pageX,
+                                "pageY": touch.pageY
+                            };
+                            var originalScroll = {
+                                "left": c.scrollLeft(),
+                                "top": c.scrollTop()
+                            };
+                            $(document).on('touchmove' + namespace, function (event) {
+                                var touch = event.originalEvent.targetTouches && event.originalEvent.targetTouches[0] || event;
+                                c.scrollLeft(originalScroll.left + originalTouch.pageX - touch.pageX);
+                                c.scrollTop(originalScroll.top + originalTouch.pageY - touch.pageY);
+                                event.preventDefault();
+                            });
+                            $(document).on('touchend' + namespace, function () {
+                                $(document).off(namespace);
+                            });
+                        });
+                    }
+                }
+                if ($.isFunction(o.onInit)) {
+                    o.onInit.apply(this, [c]);
+                }
+            } else {
+                cw.css({
+                    "height": "auto",
+                    "margin-bottom": browser.scroll.height * -1 + 'px',
+                    "margin-right": browser.scroll.width * -1 + 'px',
+                    "max-height": ""
+                });
+            }
+
+            // init scrollbars & recalculate sizes
+            $.each(s, function (d, scrollx) {
+
+                var scrollCallback = null;
+                var scrollForward = 1;
+                var scrollOffset = d === 'x' ? 'scrollLeft' : 'scrollTop';
+                var scrollStep = o.scrollStep;
+                var scrollTo = function scrollTo() {
+                    var currentOffset = c[scrollOffset]();
+                    c[scrollOffset](currentOffset + scrollStep);
+                    if (scrollForward == 1 && currentOffset + scrollStep >= scrollToValue) currentOffset = c[scrollOffset]();
+                    if (scrollForward == -1 && currentOffset + scrollStep <= scrollToValue) currentOffset = c[scrollOffset]();
+                    if (c[scrollOffset]() == currentOffset && scrollCallback) {
+                        scrollCallback();
+                    }
+                };
+                var scrollToValue = 0;
+
+                if (!scrollx.scroll) {
+
+                    scrollx.scroll = S._getScroll(o['scroll' + d]).addClass('scroll-' + d);
+
+                    if (o.showArrows) {
+                        scrollx.scroll.addClass('scroll-element_arrows_visible');
+                    }
+
+                    scrollx.mousewheel = function (event) {
+
+                        if (!scrollx.isVisible || d === 'x' && isVerticalScroll(event)) {
+                            return true;
+                        }
+                        if (d === 'y' && !isVerticalScroll(event)) {
+                            s.x.mousewheel(event);
+                            return true;
+                        }
+
+                        var delta = event.originalEvent.wheelDelta * -1 || event.originalEvent.detail;
+                        var maxScrollValue = scrollx.size - scrollx.visible - scrollx.offset;
+
+                        if (delta > 0 && scrollToValue < maxScrollValue || delta < 0 && scrollToValue > 0) {
+                            scrollToValue = scrollToValue + delta;
+                            if (scrollToValue < 0) scrollToValue = 0;
+                            if (scrollToValue > maxScrollValue) scrollToValue = maxScrollValue;
+
+                            S.scrollTo = S.scrollTo || {};
+                            S.scrollTo[scrollOffset] = scrollToValue;
+                            setTimeout(function () {
+                                if (S.scrollTo) {
+                                    c.stop().animate(S.scrollTo, 240, 'linear', function () {
+                                        scrollToValue = c[scrollOffset]();
+                                    });
+                                    S.scrollTo = null;
+                                }
+                            }, 1);
+                        }
+
+                        event.preventDefault();
+                        return false;
+                    };
+
+                    scrollx.scroll.on('MozMousePixelScroll' + namespace, scrollx.mousewheel).on('mousewheel' + namespace, scrollx.mousewheel).on('mouseenter' + namespace, function () {
+                        scrollToValue = c[scrollOffset]();
+                    });
+
+                    // handle arrows & scroll inner mousedown event
+                    scrollx.scroll.find('.scroll-arrow, .scroll-element_track').on('mousedown' + namespace, function (event) {
+
+                        if (event.which != 1) // lmb
+                            return true;
+
+                        scrollForward = 1;
+
+                        var data = {
+                            "eventOffset": event[d === 'x' ? 'pageX' : 'pageY'],
+                            "maxScrollValue": scrollx.size - scrollx.visible - scrollx.offset,
+                            "scrollbarOffset": scrollx.scroll.bar.offset()[d === 'x' ? 'left' : 'top'],
+                            "scrollbarSize": scrollx.scroll.bar[d === 'x' ? 'outerWidth' : 'outerHeight']()
+                        };
+                        var timeout = 0,
+                            timer = 0;
+
+                        if ($(this).hasClass('scroll-arrow')) {
+                            scrollForward = $(this).hasClass("scroll-arrow_more") ? 1 : -1;
+                            scrollStep = o.scrollStep * scrollForward;
+                            scrollToValue = scrollForward > 0 ? data.maxScrollValue : 0;
+                        } else {
+                            scrollForward = data.eventOffset > data.scrollbarOffset + data.scrollbarSize ? 1 : data.eventOffset < data.scrollbarOffset ? -1 : 0;
+                            scrollStep = Math.round(scrollx.visible * 0.75) * scrollForward;
+                            scrollToValue = data.eventOffset - data.scrollbarOffset - (o.stepScrolling ? scrollForward == 1 ? data.scrollbarSize : 0 : Math.round(data.scrollbarSize / 2));
+                            scrollToValue = c[scrollOffset]() + scrollToValue / scrollx.kx;
+                        }
+
+                        S.scrollTo = S.scrollTo || {};
+                        S.scrollTo[scrollOffset] = o.stepScrolling ? c[scrollOffset]() + scrollStep : scrollToValue;
+
+                        if (o.stepScrolling) {
+                            scrollCallback = function scrollCallback() {
+                                scrollToValue = c[scrollOffset]();
+                                clearInterval(timer);
+                                clearTimeout(timeout);
+                                timeout = 0;
+                                timer = 0;
+                            };
+                            timeout = setTimeout(function () {
+                                timer = setInterval(scrollTo, 40);
+                            }, o.duration + 100);
+                        }
+
+                        setTimeout(function () {
+                            if (S.scrollTo) {
+                                c.animate(S.scrollTo, o.duration);
+                                S.scrollTo = null;
+                            }
+                        }, 1);
+
+                        return S._handleMouseDown(scrollCallback, event);
+                    });
+
+                    // handle scrollbar drag'n'drop
+                    scrollx.scroll.bar.on('mousedown' + namespace, function (event) {
+
+                        if (event.which != 1) // lmb
+                            return true;
+
+                        var eventPosition = event[d === 'x' ? 'pageX' : 'pageY'];
+                        var initOffset = c[scrollOffset]();
+
+                        scrollx.scroll.addClass('scroll-draggable');
+
+                        $(document).on('mousemove' + namespace, function (event) {
+                            var diff = parseInt((event[d === 'x' ? 'pageX' : 'pageY'] - eventPosition) / scrollx.kx, 10);
+                            c[scrollOffset](initOffset + diff);
+                        });
+
+                        return S._handleMouseDown(function () {
+                            scrollx.scroll.removeClass('scroll-draggable');
+                            scrollToValue = c[scrollOffset]();
+                        }, event);
+                    });
+                }
+            });
+
+            // remove classes & reset applied styles
+            $.each(s, function (d, scrollx) {
+                var scrollClass = 'scroll-scroll' + d + '_visible';
+                var scrolly = d == "x" ? s.y : s.x;
+
+                scrollx.scroll.removeClass(scrollClass);
+                scrolly.scroll.removeClass(scrollClass);
+                cw.removeClass(scrollClass);
+            });
+
+            // calculate init sizes
+            $.each(s, function (d, scrollx) {
+                $.extend(scrollx, d == "x" ? {
+                    "offset": parseInt(c.css('left'), 10) || 0,
+                    "size": c.prop('scrollWidth'),
+                    "visible": w.width()
+                } : {
+                    "offset": parseInt(c.css('top'), 10) || 0,
+                    "size": c.prop('scrollHeight'),
+                    "visible": w.height()
+                });
+            });
+
+            // update scrollbar visibility/dimensions
+            this._updateScroll('x', this.scrollx);
+            this._updateScroll('y', this.scrolly);
+
+            if ($.isFunction(o.onUpdate)) {
+                o.onUpdate.apply(this, [c]);
+            }
+
+            // calculate scroll size
+            $.each(s, function (d, scrollx) {
+
+                var cssOffset = d === 'x' ? 'left' : 'top';
+                var cssFullSize = d === 'x' ? 'outerWidth' : 'outerHeight';
+                var cssSize = d === 'x' ? 'width' : 'height';
+                var offset = parseInt(c.css(cssOffset), 10) || 0;
+
+                var AreaSize = scrollx.size;
+                var AreaVisible = scrollx.visible + offset;
+
+                var scrollSize = scrollx.scroll.size[cssFullSize]() + (parseInt(scrollx.scroll.size.css(cssOffset), 10) || 0);
+
+                if (o.autoScrollSize) {
+                    scrollx.scrollbarSize = parseInt(scrollSize * AreaVisible / AreaSize, 10);
+                    scrollx.scroll.bar.css(cssSize, scrollx.scrollbarSize + 'px');
+                }
+
+                scrollx.scrollbarSize = scrollx.scroll.bar[cssFullSize]();
+                scrollx.kx = (scrollSize - scrollx.scrollbarSize) / (AreaSize - AreaVisible) || 1;
+                scrollx.maxScrollOffset = AreaSize - AreaVisible;
+            });
+
+            c.scrollLeft(initScroll.scrollLeft).scrollTop(initScroll.scrollTop).trigger('scroll');
+        },
+
+        /**
+         * Get scrollx/scrolly object
+         *
+         * @param {Mixed} scroll
+         * @returns {jQuery} scroll object
+         */
+        _getScroll: function _getScroll(scroll) {
+            var types = {
+                advanced: ['<div class="scroll-element">', '<div class="scroll-element_corner"></div>', '<div class="scroll-arrow scroll-arrow_less"></div>', '<div class="scroll-arrow scroll-arrow_more"></div>', '<div class="scroll-element_outer">', '<div class="scroll-element_size"></div>', // required! used for scrollbar size calculation !
+                '<div class="scroll-element_inner-wrapper">', '<div class="scroll-element_inner scroll-element_track">', // used for handling scrollbar click
+                '<div class="scroll-element_inner-bottom"></div>', '</div>', '</div>', '<div class="scroll-bar">', // required
+                '<div class="scroll-bar_body">', '<div class="scroll-bar_body-inner"></div>', '</div>', '<div class="scroll-bar_bottom"></div>', '<div class="scroll-bar_center"></div>', '</div>', '</div>', '</div>'].join(''),
+                simple: ['<div class="scroll-element">', '<div class="scroll-element_outer">', '<div class="scroll-element_size"></div>', // required! used for scrollbar size calculation !
+                '<div class="scroll-element_track"></div>', // used for handling scrollbar click
+                '<div class="scroll-bar"></div>', // required
+                '</div>', '</div>'].join('')
+            };
+            if (types[scroll]) {
+                scroll = types[scroll];
+            }
+            if (!scroll) {
+                scroll = types['simple'];
+            }
+            if (typeof scroll == 'string') {
+                scroll = $(scroll).appendTo(this.wrapper);
+            } else {
+                scroll = $(scroll);
+            }
+            $.extend(scroll, {
+                bar: scroll.find('.scroll-bar'),
+                size: scroll.find('.scroll-element_size'),
+                track: scroll.find('.scroll-element_track')
+            });
+            return scroll;
+        },
+
+        _handleMouseDown: function _handleMouseDown(callback, event) {
+
+            var namespace = this.namespace;
+
+            $(document).on('blur' + namespace, function () {
+                $(document).add('body').off(namespace);
+                callback && callback();
+            });
+            $(document).on('dragstart' + namespace, function (event) {
+                event.preventDefault();
+                return false;
+            });
+            $(document).on('mouseup' + namespace, function () {
+                $(document).add('body').off(namespace);
+                callback && callback();
+            });
+            $('body').on('selectstart' + namespace, function (event) {
+                event.preventDefault();
+                return false;
+            });
+
+            event && event.preventDefault();
+            return false;
+        },
+
+        _updateScroll: function _updateScroll(d, scrollx) {
+
+            var container = this.container,
+                containerWrapper = this.containerWrapper || container,
+                scrollClass = 'scroll-scroll' + d + '_visible',
+                scrolly = d === 'x' ? this.scrolly : this.scrollx,
+                offset = parseInt(this.container.css(d === 'x' ? 'left' : 'top'), 10) || 0,
+                wrapper = this.wrapper;
+
+            var AreaSize = scrollx.size;
+            var AreaVisible = scrollx.visible + offset;
+
+            scrollx.isVisible = AreaSize - AreaVisible > 1; // bug in IE9/11 with 1px diff
+            if (scrollx.isVisible) {
+                scrollx.scroll.addClass(scrollClass);
+                scrolly.scroll.addClass(scrollClass);
+                containerWrapper.addClass(scrollClass);
+            } else {
+                scrollx.scroll.removeClass(scrollClass);
+                scrolly.scroll.removeClass(scrollClass);
+                containerWrapper.removeClass(scrollClass);
+            }
+
+            if (d === 'y') {
+                if (container.is('textarea') || AreaSize < AreaVisible) {
+                    containerWrapper.css({
+                        "height": AreaVisible + browser.scroll.height + 'px',
+                        "max-height": "none"
+                    });
+                } else {
+                    containerWrapper.css({
+                        //"height": "auto", // do not reset height value: issue with height:100%!
+                        "max-height": AreaVisible + browser.scroll.height + 'px'
+                    });
+                }
+            }
+
+            if (scrollx.size != container.prop('scrollWidth') || scrolly.size != container.prop('scrollHeight') || scrollx.visible != wrapper.width() || scrolly.visible != wrapper.height() || scrollx.offset != (parseInt(container.css('left'), 10) || 0) || scrolly.offset != (parseInt(container.css('top'), 10) || 0)) {
+                $.extend(this.scrollx, {
+                    "offset": parseInt(container.css('left'), 10) || 0,
+                    "size": container.prop('scrollWidth'),
+                    "visible": wrapper.width()
+                });
+                $.extend(this.scrolly, {
+                    "offset": parseInt(container.css('top'), 10) || 0,
+                    "size": this.container.prop('scrollHeight'),
+                    "visible": wrapper.height()
+                });
+                this._updateScroll(d === 'x' ? 'y' : 'x', scrolly);
+            }
+        }
+    };
+
+    var CustomScrollbar = BaseScrollbar;
+
+    /*
+     * Extend jQuery as plugin
+     *
+     * @param {Mixed} command to execute
+     * @param {Mixed} arguments as Array
+     * @return {jQuery}
+     */
+    $.fn.scrollbar = function (command, args) {
+        if (typeof command !== 'string') {
+            args = command;
+            command = 'init';
+        }
+        if (typeof args === 'undefined') {
+            args = [];
+        }
+        if (!$.isArray(args)) {
+            args = [args];
+        }
+        this.not('body, .scroll-wrapper').each(function () {
+            var element = $(this),
+                instance = element.data(browser.data.name);
+            if (instance || command === 'init') {
+                if (!instance) {
+                    instance = new CustomScrollbar(element);
+                }
+                if (instance[command]) {
+                    instance[command].apply(instance, args);
+                }
+            }
+        });
+        return this;
+    };
+
+    /**
+     * Connect default options to global object
+     */
+    $.fn.scrollbar.options = defaults;
+
+    /**
+     * Check if scroll content/container size is changed
+     */
+
+    var updateScrollbars = function () {
+        var timer = 0,
+            timerCounter = 0;
+
+        return function (force) {
+            var i, container, options, scroll, wrapper, scrollx, scrolly;
+            for (i = 0; i < browser.scrolls.length; i++) {
+                scroll = browser.scrolls[i];
+                container = scroll.container;
+                options = scroll.options;
+                wrapper = scroll.wrapper;
+                scrollx = scroll.scrollx;
+                scrolly = scroll.scrolly;
+                if (force || options.autoUpdate && wrapper && wrapper.is(':visible') && (container.prop('scrollWidth') != scrollx.size || container.prop('scrollHeight') != scrolly.size || wrapper.width() != scrollx.visible || wrapper.height() != scrolly.visible)) {
+                    scroll.init();
+
+                    if (options.debug) {
+                        window.console && console.log({
+                            scrollHeight: container.prop('scrollHeight') + ':' + scroll.scrolly.size,
+                            scrollWidth: container.prop('scrollWidth') + ':' + scroll.scrollx.size,
+                            visibleHeight: wrapper.height() + ':' + scroll.scrolly.visible,
+                            visibleWidth: wrapper.width() + ':' + scroll.scrollx.visible
+                        }, true);
+                        timerCounter++;
+                    }
+                }
+            }
+            if (debug && timerCounter > 10) {
+                window.console && console.log('Scroll updates exceed 10');
+                updateScrollbars = function updateScrollbars() {};
+            } else {
+                clearTimeout(timer);
+                timer = setTimeout(updateScrollbars, 300);
+            }
+        };
+    }();
+
+    /* ADDITIONAL FUNCTIONS */
+    /**
+     * Get native browser scrollbar size (height/width)
+     *
+     * @param {Boolean} actual size or CSS size, default - CSS size
+     * @returns {Object} with height, width
+     */
+    function getBrowserScrollSize(actualSize) {
+
+        if (browser.webkit && !actualSize) {
+            return {
+                "height": 0,
+                "width": 0
+            };
+        }
+
+        if (!browser.data.outer) {
+            var css = {
+                "border": "none",
+                "box-sizing": "content-box",
+                "height": "200px",
+                "margin": "0",
+                "padding": "0",
+                "width": "200px"
+            };
+            browser.data.inner = $("<div>").css($.extend({}, css));
+            browser.data.outer = $("<div>").css($.extend({
+                "left": "-1000px",
+                "overflow": "scroll",
+                "position": "absolute",
+                "top": "-1000px"
+            }, css)).append(browser.data.inner).appendTo("body");
+        }
+
+        browser.data.outer.scrollLeft(1000).scrollTop(1000);
+
+        return {
+            "height": Math.ceil(browser.data.outer.offset().top - browser.data.inner.offset().top || 0),
+            "width": Math.ceil(browser.data.outer.offset().left - browser.data.inner.offset().left || 0)
+        };
+    }
+
+    /**
+     * Check if native browser scrollbars overlay content
+     *
+     * @returns {Boolean}
+     */
+    function isScrollOverlaysContent() {
+        var scrollSize = getBrowserScrollSize(true);
+        return !(scrollSize.height || scrollSize.width);
+    }
+
+    function isVerticalScroll(event) {
+        var e = event.originalEvent;
+        if (e.axis && e.axis === e.HORIZONTAL_AXIS) return false;
+        if (e.wheelDeltaX) return false;
+        return true;
+    }
+
+    /**
+     * Extend AngularJS as UI directive
+     * and expose a provider for override default config
+     *
+     */
+    if (window.angular) {
+        (function (angular) {
+            angular.module('jQueryScrollbar', []).provider('jQueryScrollbar', function () {
+                var defaultOptions = defaults;
+                return {
+                    setOptions: function setOptions(options) {
+                        angular.extend(defaultOptions, options);
+                    },
+                    $get: function $get() {
+                        return {
+                            options: angular.copy(defaultOptions)
+                        };
+                    }
+                };
+            }).directive('jqueryScrollbar', ['jQueryScrollbar', '$parse', function (jQueryScrollbar, $parse) {
+                return {
+                    "restrict": "AC",
+                    "link": function link(scope, element, attrs) {
+                        var model = $parse(attrs.jqueryScrollbar),
+                            options = model(scope);
+                        element.scrollbar(options || jQueryScrollbar.options).on('$destroy', function () {
+                            element.scrollbar('destroy');
+                        });
+                    }
+                };
+            }]);
+        })(window.angular);
+    }
+});
+
+/***/ }),
+
 /***/ "./public/plugins/vue2dropzone/vue2Dropzone.css":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -61867,6 +66594,10 @@ function get(url) {
 "use strict";
 
 
+var _progress = __webpack_require__("./public/plugins/progress-bar/progress.js");
+
+var _progress2 = _interopRequireDefault(_progress);
+
 var _vueTimeago = __webpack_require__("./node_modules/vue-timeago/dist/vue-timeago.js");
 
 var _vueTimeago2 = _interopRequireDefault(_vueTimeago);
@@ -61882,6 +66613,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  */
 
 __webpack_require__("./resources/assets/js/bootstrap.js");
+
+__webpack_require__("./public/plugins/progress-bar/progress.css");
 
 window.Vue = __webpack_require__("./node_modules/vue/dist/vue.common.js");
 
@@ -61909,15 +66642,72 @@ Vue.component('follow', __webpack_require__("./resources/assets/js/components/vi
 
 Vue.component('page-loading', __webpack_require__("./resources/assets/js/components/views/PageLoading.vue"));
 
+//Home
+Vue.component('index', __webpack_require__("./resources/assets/js/components/views/home/Index.vue"));
+
 //Notification
 Vue.component('unread-notification', __webpack_require__("./resources/assets/js/components/UnreadNotification.vue"));
 
 //Product components
 Vue.component('product-form', __webpack_require__("./resources/assets/js/components/views/products/ProductForm.vue"));
+Vue.component('product-show', __webpack_require__("./resources/assets/js/components/views/products/Show.vue"));
 
 var app = new Vue({
   el: '#app',
   store: _store.store
+});
+
+$(window).on('load', function () {
+  $("body").removeClass("preload");
+});
+
+// YouTube like progress-bar
+_progress2.default.configure({ showSpinner: false });
+_progress2.default.start();
+$(window).on('load', function () {
+  _progress2.default.done(true);
+});
+// YouTube like progress-bar
+
+var navbar_top = $('.navbar-bottom').offset().top;
+$(window).scroll(function () {
+  if ($(window).scrollTop() > navbar_top) {
+    $('.navbar-bottom').addClass('fixed');
+  } else {
+    $('.navbar-bottom').removeClass('fixed');
+  }
+
+  // if($(window).scrollTop() >= ($('#heading-position').position().top + $('#heading-position').height() + 110)){
+  //     $(".heading-fixed").addClass('is_active');
+  // }else{
+  //     $(".heading-fixed").removeClass('is_active');
+  // }
+
+  if ($(window).scrollTop() > 300) {
+    $('.cc-back-top').addClass('showing');
+  } else {
+    $('.cc-back-top').removeClass('showing');
+  }
+});
+
+$('.back-to-top').on('click', function () {
+  $("html, body").animate({ scrollTop: 0 }, 500);
+});
+
+$('#type-product').on('click', function () {
+  $('#search-type .btn-label').text('Sản phẩm');
+  $('#hidden-product-type').val('product');
+  $('#q').focus();
+});
+$('#type-member').on('click', function () {
+  $('#search-type .btn-label').text('Thành viên');
+  $('#hidden-product-type').val('member');
+  $('#q').focus();
+});
+$('#type-brand').on('click', function () {
+  $('#search-type .btn-label').text('Thương hiệu');
+  $('#hidden-product-type').val('brand');
+  $('#q').focus();
 });
 
 /***/ }),
@@ -62183,6 +66973,104 @@ module.exports = Component.exports
 
 /***/ }),
 
+/***/ "./resources/assets/js/components/views/home/Index.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+var normalizeComponent = __webpack_require__("./node_modules/vue-loader/lib/component-normalizer.js")
+/* script */
+var __vue_script__ = __webpack_require__("./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}],\"es2015\",\"es2017\"],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0&bustCache!./resources/assets/js/components/views/home/Index.vue")
+/* template */
+var __vue_template__ = __webpack_require__("./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-61069b4c\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0&bustCache!./resources/assets/js/components/views/home/Index.vue")
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = null
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/components/views/home/Index.vue"
+if (Component.esModule && Object.keys(Component.esModule).some(function (key) {  return key !== "default" && key.substr(0, 2) !== "__"})) {  console.error("named exports are not supported in *.vue files.")}
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-61069b4c", Component.options)
+  } else {
+    hotAPI.reload("data-v-61069b4c", Component.options)
+' + '  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+
+/***/ "./resources/assets/js/components/views/home/Pagination.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+var normalizeComponent = __webpack_require__("./node_modules/vue-loader/lib/component-normalizer.js")
+/* script */
+var __vue_script__ = __webpack_require__("./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}],\"es2015\",\"es2017\"],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0&bustCache!./resources/assets/js/components/views/home/Pagination.vue")
+/* template */
+var __vue_template__ = __webpack_require__("./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-1cb37342\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0&bustCache!./resources/assets/js/components/views/home/Pagination.vue")
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = null
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/components/views/home/Pagination.vue"
+if (Component.esModule && Object.keys(Component.esModule).some(function (key) {  return key !== "default" && key.substr(0, 2) !== "__"})) {  console.error("named exports are not supported in *.vue files.")}
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-1cb37342", Component.options)
+  } else {
+    hotAPI.reload("data-v-1cb37342", Component.options)
+' + '  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+
 /***/ "./resources/assets/js/components/views/products/Dropzone.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -62236,6 +67124,59 @@ module.exports = Component.exports
 
 /***/ }),
 
+/***/ "./resources/assets/js/components/views/products/ImageModal.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+function injectStyle (ssrContext) {
+  if (disposed) return
+  __webpack_require__("./node_modules/vue-style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-a60c6ad6\",\"scoped\":false,\"hasInlineConfig\":true}!./node_modules/vue-loader/lib/selector.js?type=styles&index=0&bustCache!./resources/assets/js/components/views/products/ImageModal.vue")
+}
+var normalizeComponent = __webpack_require__("./node_modules/vue-loader/lib/component-normalizer.js")
+/* script */
+var __vue_script__ = __webpack_require__("./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}],\"es2015\",\"es2017\"],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0&bustCache!./resources/assets/js/components/views/products/ImageModal.vue")
+/* template */
+var __vue_template__ = __webpack_require__("./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-a60c6ad6\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0&bustCache!./resources/assets/js/components/views/products/ImageModal.vue")
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = injectStyle
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/components/views/products/ImageModal.vue"
+if (Component.esModule && Object.keys(Component.esModule).some(function (key) {  return key !== "default" && key.substr(0, 2) !== "__"})) {  console.error("named exports are not supported in *.vue files.")}
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-a60c6ad6", Component.options)
+  } else {
+    hotAPI.reload("data-v-a60c6ad6", Component.options)
+' + '  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+
 /***/ "./resources/assets/js/components/views/products/ProductForm.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -62278,6 +67219,55 @@ if (false) {(function () {
     hotAPI.createRecord("data-v-873a0440", Component.options)
   } else {
     hotAPI.reload("data-v-873a0440", Component.options)
+' + '  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+
+/***/ "./resources/assets/js/components/views/products/Show.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+var normalizeComponent = __webpack_require__("./node_modules/vue-loader/lib/component-normalizer.js")
+/* script */
+var __vue_script__ = __webpack_require__("./node_modules/babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}],\"es2015\",\"es2017\"],\"plugins\":[\"transform-object-rest-spread\",[\"transform-runtime\",{\"polyfill\":false,\"helpers\":false}]]}!./node_modules/vue-loader/lib/selector.js?type=script&index=0&bustCache!./resources/assets/js/components/views/products/Show.vue")
+/* template */
+var __vue_template__ = __webpack_require__("./node_modules/vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-2082fb80\",\"hasScoped\":false,\"buble\":{\"transforms\":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0&bustCache!./resources/assets/js/components/views/products/Show.vue")
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = null
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/components/views/products/Show.vue"
+if (Component.esModule && Object.keys(Component.esModule).some(function (key) {  return key !== "default" && key.substr(0, 2) !== "__"})) {  console.error("named exports are not supported in *.vue files.")}
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-2082fb80", Component.options)
+  } else {
+    hotAPI.reload("data-v-2082fb80", Component.options)
 ' + '  }
   module.hot.dispose(function (data) {
     disposed = true
@@ -62599,6 +67589,20 @@ module.exports = Component.exports
 
 /***/ }),
 
+/***/ "./resources/assets/js/config/index.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+    api: {
+        version: 'api/v1'
+    }
+};
+
+/***/ }),
+
 /***/ "./resources/assets/js/store.js":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -62626,7 +67630,8 @@ var store = exports.store = new _vuex2.default.Store({
     state: {
         auth_user_data: [],
         profile_user_data: [],
-        notifications: []
+        notifications: [],
+        products: []
     },
     getters: {
         get_auth_user_data: function get_auth_user_data(state) {
@@ -62637,6 +67642,9 @@ var store = exports.store = new _vuex2.default.Store({
         },
         get_notifications: function get_notifications(state) {
             return state.notifications;
+        },
+        get_all_products: function get_all_products(state) {
+            return state.products;
         }
     },
     mutations: {
@@ -62669,6 +67677,12 @@ var store = exports.store = new _vuex2.default.Store({
         },
         add_unread_notification: function add_unread_notification(state, not) {
             state.notifications.push(not);
+        },
+        add_new_products: function add_new_products(state, product) {
+            state.products.push(product);
+        },
+        refresh_products: function refresh_products(state, data) {
+            state.products = [];
         }
     }
 });

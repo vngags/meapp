@@ -19,4 +19,5 @@ interface ProductRepositoryInterface
 
     public function findByUidAndSlug($uid, $slug);
 
+
 }

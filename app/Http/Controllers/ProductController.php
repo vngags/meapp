@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Repositories\Product\ProductRepositoryInterface;
 use App\Product;
+use Input;
 
 class ProductController extends Controller
 {
@@ -13,7 +14,7 @@ class ProductController extends Controller
     public function __construct(ProductRepositoryInterface $productRepository)
     {
         $this->product = $productRepository;
-        $this->middleware(['auth'])->except('index', 'show');
+        $this->middleware(['auth'])->except('index', 'show', 'search');
     }
     
 
@@ -35,7 +36,7 @@ class ProductController extends Controller
     {       
         $product = $this->product->findByUidAndSlug($user_slug, $slug);        
         if($product) {
-            return view ('products.show')->withProduct($product);
+            return view ('products.detail')->withProduct($product);
         }else{
             return redirect()->route('product.index', ['user_slug' => $user_slug]);
         }
@@ -75,4 +76,6 @@ class ProductController extends Controller
         $product->delete();
         return redirect()->route('product.index', ['user_slug' => $user_slug]);
     }
+
+    
 }

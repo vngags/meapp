@@ -19,6 +19,10 @@ class CreateProductsTable extends Migration
             $table->string('title');
             $table->string('slug');
             $table->text('body');
+            $table->decimal('price')->nullable();
+            $table->decimal('new_price')->nullable();
+            $table->decimal('price_start')->nullable();
+            $table->decimal('price_end')->nullable();
             $table->timestamps();
         });
     }

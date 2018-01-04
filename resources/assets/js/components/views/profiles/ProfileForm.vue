@@ -44,6 +44,7 @@
         post
     } from '../../../api'
     import UploadImage from './UploadImage'
+    var config = require('../../../config')
     export default {
         components: {
             UploadImage
@@ -59,17 +60,9 @@
             // this.get_user_data()
         },
         methods: {
-            // get_user_data() {
-            //     this.loading = true
-            //     get(`/api/v1/${this.slug}`)
-            //         .then(resp => {
-            //             this.profile_data = resp.data
-            //             this.loading = false
-            //         })
-            // },
             save() {
                 this.loading = true
-                post(`/api/v1/update_profile`, this.profile_data)
+                post(`/${config.api.version}/update_profile`, this.profile_data)
                     .then(resp => {
                         this.loading = false
                         window.location.href = `/${resp.data.slug}`

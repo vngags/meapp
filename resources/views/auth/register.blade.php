@@ -78,6 +78,11 @@
                                 </button>
                             </div>
                         </div>
+
+                        <div class="form-group">
+                            <p class="text-center">hoặc <a href="{{ route('login') }}">Đăng nhập</a></p>
+                        </div>
+
                     </form>
                 </div>
             </div>
